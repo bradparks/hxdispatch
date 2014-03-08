@@ -1,4 +1,3 @@
-import neko.vm.Thread;
 import maddinxx.hxdispatch.Args;
 import maddinxx.hxdispatch.Callback;
 import maddinxx.hxdispatch.Dispatcher;
