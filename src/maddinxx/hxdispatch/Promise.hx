@@ -25,24 +25,9 @@ class Promise
 
     public function new(?resolves:Int = 1):Void
     {
-        this.resolves   = resolves;
-        this.mutex      = new Mutex();
-        this.thread     = Thread.create(function():Void {
-            var state:State = State.WAITING;
-            var parent:Thread = Thread.readMessage(true);
-            while (state == State.WAITING) {
-                var remaining:Int = Thread.readMessage(true);
-                if (remaining == 0) {
-                    this.isResolved = true;
-                    state = State.DONE;
-                } else if (remaining == -1) {
-                    this.isRejected = true;
-                    state = State.DONE;
-                }
-            }
-            parent.sendMessage(state);
-        });
-        this.thread.sendMessage(Thread.current());
+        this.resolves = resolves;
+        this.mutex    = new Mutex();
+        this.thread   = Thread.current();
 
         this.isRejected = false;
         this.isResolved = false;
@@ -75,15 +60,24 @@ class Promise
      */
     public function wait():Void
     {
-        while (Thread.readMessage(true) != State.DONE) {
-            // || this.resolves < -1 -> error
+        var msg:Dynamic = Thread.readMessage(true);
+        while (msg != Signal.DONE) {
+            msg = cast(msg, Int);
+            if (msg == 0) {
+                this.isResolved = true;
+                msg = Signal.DONE;
+            } else if (msg == -1) {
+                this.isRejected = true;
+                msg = Signal.DONE;
+            } else {
+                msg = Thread.readMessage(true);
+            }
         }
     }
 }
 
 
-private enum State
+private enum Signal
 {
     DONE;
-    WAITING;
 }

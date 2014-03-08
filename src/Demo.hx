@@ -13,6 +13,8 @@ class Demo
 {
     public static function main():Int
     {
+        var start = haxe.Timer.stamp();
+
         var callback:Callback = function(args:Args):Void {
             trace("\t\tPosition not defined...");
             Sys.sleep(1);
@@ -41,6 +43,9 @@ class Demo
         if (feedback.status == Status.TRIGGERED) {
             feedback.promise.wait();
         }
+
+        var duration = haxe.Timer.stamp() - start;
+        trace(duration);
 
         return 0;
     }
