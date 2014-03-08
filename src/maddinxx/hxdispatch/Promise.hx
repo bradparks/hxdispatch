@@ -42,6 +42,43 @@ class Promise
     }
 
     /**
+     * Blocks the thread/execution until the promise was either
+     * resolved or rejected.
+     */
+    public function await():Void
+    {
+        #if (cpp || java || neko)
+        var msg:Dynamic = Thread.readMessage(true);
+        while (msg != Signal.DONE) {
+            msg = cast(msg, Int);
+            if (msg == 0) {
+                this.isResolved = true;
+                msg = Signal.DONE;
+            } else if (msg == -1) {
+                this.isRejected = true;
+                msg = Signal.DONE;
+            } else {
+                msg = Thread.readMessage(true);
+            }
+        }
+        #elseif js
+        // TODO
+        #end
+
+        if (this.thens.length != 0) {
+            this.executeThens();
+        }
+    }
+
+    /**
+     * @see Promise.await()
+     */
+    public inline function block():Void
+    {
+        this.await();
+    }
+
+    /**
      * Executes the registered callbacks after the Promise
      * has been resolved or rejected.
      */
@@ -102,35 +139,6 @@ class Promise
         // the recommended way is to define another ThreadedDispatcher and add callbacks,
         // then trigger the event after the Promise has been resolved...so after wait()
         this.thens.push(callback);
-    }
-
-    /**
-     * Blocks the thread/execution until the promise was either
-     * resolved or rejected.
-     */
-    public function await():Void
-    {
-        #if (cpp || java || neko)
-        var msg:Dynamic = Thread.readMessage(true);
-        while (msg != Signal.DONE) {
-            msg = cast(msg, Int);
-            if (msg == 0) {
-                this.isResolved = true;
-                msg = Signal.DONE;
-            } else if (msg == -1) {
-                this.isRejected = true;
-                msg = Signal.DONE;
-            } else {
-                msg = Thread.readMessage(true);
-            }
-        }
-        #elseif js
-        // TODO
-        #end
-
-        if (this.thens.length != 0) {
-            this.executeThens();
-        }
     }
 }
 
