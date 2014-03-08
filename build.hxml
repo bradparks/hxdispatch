@@ -6,3 +6,8 @@
 -cp src
 -main Demo.hx
 -cpp bin/cpp
+
+# --next
+# -cp src
+# -main Demo.hx
+# -java bin/java

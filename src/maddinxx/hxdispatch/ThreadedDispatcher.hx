@@ -3,6 +3,9 @@ package maddinxx.hxdispatch;
 #if cpp
     import cpp.vm.Mutex;
     import cpp.vm.Thread;
+#elseif java
+    import java.vm.Mutex;
+    import java.vm.Thread;
 #elseif neko
     import neko.vm.Mutex;
     import neko.vm.Thread;
@@ -46,7 +49,7 @@ class ThreadedDispatcher extends SyncedDispatcher
             if (event != "_eventTriggered") {
                 var feedback:Feedback = this.trigger("_eventTriggered", { event: event, args: args });
                 if (feedback.status == Status.TRIGGERED) {
-                    feedback.promise.wait();
+                    feedback.promise.await();
                 }
             }
 

@@ -44,7 +44,7 @@ class Demo
             feedback.promise.then(function():Void {
                 trace("Promise resolved");
             });
-            feedback.promise.wait();
+            feedback.promise.await();
         }
 
         var duration = haxe.Timer.stamp() - start;

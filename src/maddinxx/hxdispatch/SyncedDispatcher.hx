@@ -2,6 +2,8 @@ package maddinxx.hxdispatch;
 
 #if cpp
     import cpp.vm.Mutex;
+#elseif java
+    import java.vm.Mutex;
 #elseif neko
     import neko.vm.Mutex;
 #else

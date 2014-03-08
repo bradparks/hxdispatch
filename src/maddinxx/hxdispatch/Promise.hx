@@ -3,6 +3,9 @@ package maddinxx.hxdispatch;
 #if cpp
     import cpp.vm.Mutex;
     import cpp.vm.Thread;
+#elseif java
+    import java.vm.Mutex;
+    import java.vm.Thread;
 #elseif neko
     import neko.vm.Mutex;
     import neko.vm.Thread;
@@ -84,7 +87,7 @@ class Promise
      * Blocks the thread/execution until the promise was either
      * resolved or rejected.
      */
-    public function wait():Void
+    public function await():Void
     {
         var msg:Dynamic = Thread.readMessage(true);
         while (msg != Signal.DONE) {
