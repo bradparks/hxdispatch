@@ -45,13 +45,10 @@ class PooledDispatcher extends ThreadedDispatcher
         this.executors = new Deque<Thread>();
         this.queue     = new Deque<Job>();
         for (i in 0...workers) {
-            this.executors.push(Thread.create(function():Void {
+            this.executors.add(Thread.create(function():Void {
                 while (true) {
-                    var job:Job = this.queue.pop(false);
-                    if (job != null) {
-                        job.callback(job.args);
-                    }
-                    Sys.sleep(0.00075);
+                    var job:Job = this.queue.pop(true);
+                    job.callback(job.args);
                 }
             }));
         }
@@ -62,7 +59,7 @@ class PooledDispatcher extends ThreadedDispatcher
      */
     override private function runCallback(callback:Callback, args:Args):Void
     {
-        this.queue.push({ callback: callback, args: args });
+        this.queue.add({ callback: callback, args: args });
     }
 }
 
