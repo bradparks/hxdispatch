@@ -19,6 +19,7 @@ class Promise
     private var resolves:Int;
     private var mutex:Mutex;
     private var thread:Thread;
+    private var thens:Array<Void->Void>;
 
     public var isRejected(default, null):Bool;
     public var isResolved(default, null):Bool;
@@ -28,9 +29,22 @@ class Promise
         this.resolves = resolves;
         this.mutex    = new Mutex();
         this.thread   = Thread.current();
+        this.thens    = new Array<Void->Void>();
 
         this.isRejected = false;
         this.isResolved = false;
+    }
+
+    /**
+     * Executes the registered callbacks after the Promise
+     * has been resolved or rejected.
+     */
+    private function executeThens():Void
+    {
+        var callback:Void->Void;
+        for (callback in this.thens) {
+            callback();
+        }
     }
 
     /**
@@ -55,6 +69,18 @@ class Promise
     }
 
     /**
+     * Adds the callback function to the then event which is
+     * raised when the promise has been resolved or rejected.
+     */
+    public function then(callback:Void->Void):Void
+    {
+        // thens are called synchronized. if you want to have them async as well,
+        // the recommended way is to define another ThreadedDispatcher and add callbacks,
+        // then trigger the event after the Promise has been resolved...so after wait()
+        this.thens.push(callback);
+    }
+
+    /**
      * Blocks the thread/execution until the promise was either
      * resolved or rejected.
      */
@@ -72,6 +98,10 @@ class Promise
             } else {
                 msg = Thread.readMessage(true);
             }
+        }
+
+        if (this.thens.length != 0) {
+            this.executeThens();
         }
     }
 }

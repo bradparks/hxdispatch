@@ -41,6 +41,9 @@ class Demo
         trace("4. Main thread execution");
 
         if (feedback.status == Status.TRIGGERED) {
+            feedback.promise.then(function():Void {
+                trace("Promise resolved");
+            });
             feedback.promise.wait();
         }
 
