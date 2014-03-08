@@ -30,7 +30,7 @@ import maddinxx.hxdispatch.ThreadedDispatcher;
  */
 class PooledDispatcher extends ThreadedDispatcher
 {
-    private var executors:Deque<Thread>;
+    private var executors:Array<Thread>;
     private var queue:Deque<Job>;
 
     /**
@@ -42,13 +42,15 @@ class PooledDispatcher extends ThreadedDispatcher
     {
         super();
 
-        this.executors = new Deque<Thread>();
+        this.executors = new Array<Thread>();
         this.queue     = new Deque<Job>();
         for (i in 0...workers) {
-            this.executors.add(Thread.create(function():Void {
+            this.executors.push(Thread.create(function():Void {
                 while (true) {
                     var job:Job = this.queue.pop(true);
-                    job.callback(job.args);
+                    if (job != null) {
+                        job.callback(job.args);
+                    }
                 }
             }));
         }
@@ -57,9 +59,9 @@ class PooledDispatcher extends ThreadedDispatcher
     /**
      * @{inheritDoc}
      */
-    override private function runCallback(callback:Callback, args:Args):Void
+    override private function runCallback(callback:Callback, args:Null<Args>):Void
     {
-        this.queue.add({ callback: callback, args: args });
+        this.queue.push({ callback: callback, args: args });
     }
 }
 
@@ -67,5 +69,5 @@ class PooledDispatcher extends ThreadedDispatcher
 private typedef Job =
 {
     var callback:Callback;
-    var args:Args;
+    var args:Null<Args>;
 };

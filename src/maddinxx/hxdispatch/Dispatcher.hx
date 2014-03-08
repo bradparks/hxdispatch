@@ -116,12 +116,12 @@ class Dispatcher
     /**
      * Triggers the named event with the optional arguments.
      *
-     * @param String event the event's name
-     * @param Args   args  the optional arguments to pass to the callbacks
+     * @param String     event the event's name
+     * @param Null<Args> args  the optional arguments to pass to the callbacks
      *
      * @return Feedback
      */
-    public function trigger(event:String, ?args:Args):Feedback
+    public function trigger(event:String, ?args:Null<Args>):Feedback
     {
         if (this.hasEvent(event)) {
             var callbacks:Array<Callback> = this.eventMap.get(event);

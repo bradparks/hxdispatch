@@ -126,10 +126,10 @@ class SyncedDispatcher extends Dispatcher
      *
      * This step has been out-sourced for easier extending.
      *
-     * @param Callback callback the callback to execute
-     * @param Args     args     the arguments to pass to the callback
+     * @param Callback   callback the callback to execute
+     * @param Null<Args> args     the arguments to pass to the callback
      */
-    private function runCallback(callback:Callback, args:Args):Void
+    private function runCallback(callback:Callback, args:Null<Args>):Void
     {
         callback(args);
     }
@@ -137,7 +137,7 @@ class SyncedDispatcher extends Dispatcher
     /**
      * @{inheritDoc}
      */
-    override public function trigger(event:String, ?args:Args):Feedback
+    override public function trigger(event:String, ?args:Null<Args>):Feedback
     {
         if (this.hasEvent(event)) {
             #if (cpp || java || neko)

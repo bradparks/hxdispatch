@@ -30,7 +30,7 @@ class ThreadedDispatcher extends SyncedDispatcher
     /**
      * @{inheritDoc}
      */
-    override private function runCallback(callback:Callback, args:Args):Void
+    override private function runCallback(callback:Callback, args:Null<Args>):Void
     {
         #if (cpp || java || neko)
         Thread.create(function():Void {
@@ -46,7 +46,7 @@ class ThreadedDispatcher extends SyncedDispatcher
     /**
      * @{inheritDoc}
      */
-    override public function trigger(event:String, ?args:Args):Feedback
+    override public function trigger(event:String, ?args:Null<Args>):Feedback
     {
         if (this.hasEvent(event)) {
             #if (cpp || java || neko)
@@ -57,10 +57,10 @@ class ThreadedDispatcher extends SyncedDispatcher
             this.mutex.release();
             #end
 
-            var promise = new Promise(callbacks.length);
+            var promise:Promise = new Promise(callbacks.length);
             var callback:Callback;
             for (callback in callbacks) {
-                this.runCallback(function(args:Args):Void {
+                this.runCallback(function(args:Null<Args>):Void {
                     callback(args);
                     promise.resolve();
                 }, args);
