@@ -1,3 +1,4 @@
+import neko.vm.Thread;
 import maddinxx.hxdispatch.Args;
 import maddinxx.hxdispatch.Callback;
 import maddinxx.hxdispatch.Dispatcher;
@@ -28,7 +29,7 @@ class Demo
             trace("6. Callback thread executed");
         };
 
-        var dispatcher = new Dispatcher();
+        var dispatcher:Dispatcher = new Dispatcher();
         dispatcher.onEvent("_eventTriggered", function(args:Args):Void {
             trace("\t\tInternal event triggered");
         });
@@ -39,7 +40,7 @@ class Demo
         dispatcher.onEvent("demo", function(args:Args):Void {
             trace("\t\tPosition not defined...");
             #if (cpp || cs || java || neko)
-            Sys.sleep(0.2);
+            Sys.sleep(0.8);
             #end
             trace("5. Callback thread executed");
         });
@@ -49,12 +50,12 @@ class Demo
         var feedback:Feedback = dispatcher.trigger("demo", { name: "John" });
         trace("4. Main thread execution");
 
+        var duration = haxe.Timer.stamp() - start;
+        trace(duration);
+
         if (feedback.status == Status.TRIGGERED  && !feedback.promise.isDone) {
             feedback.promise.await();
         }
-
-        var duration = haxe.Timer.stamp() - start;
-        trace(duration);
 
         return 0;
     }

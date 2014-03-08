@@ -48,17 +48,15 @@ class Promise
     public function await():Void
     {
         #if (cpp || java || neko)
-        var msg:Dynamic = Thread.readMessage(true);
-        while (msg != Signal.DONE && !this.isDone) {
-            msg = cast(msg, Int);
-            if (msg == 0) {
+        var remaining:Int;
+        while (!this.isDone) {
+            remaining = Thread.readMessage(true);
+            if (remaining == 0) {
                 this.isResolved = true;
-                msg = Signal.DONE;
-            } else if (msg == -1) {
+                break;
+            } else if (remaining == -1) {
                 this.isRejected = true;
-                msg = Signal.DONE;
-            } else {
-                msg = Thread.readMessage(true);
+                break;
             }
         }
         #elseif js
@@ -147,12 +145,6 @@ class Promise
         // then trigger the event after the Promise has been resolved...so after wait()
         this.thens.push(callback);
     }
-}
-
-
-private enum Signal
-{
-    DONE;
 }
 
 

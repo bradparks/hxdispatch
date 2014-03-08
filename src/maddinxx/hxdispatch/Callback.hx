@@ -2,4 +2,4 @@ package maddinxx.hxdispatch;
 
 import maddinxx.hxdispatch.Args;
 
-typedef Callback = Args->Void;
+typedef Callback = Null<Args>->Void;
