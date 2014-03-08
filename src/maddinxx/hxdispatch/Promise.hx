@@ -97,7 +97,7 @@ class Promise
      */
     public function get_isDone():Bool
     {
-        return this.resolves <= 0 && this.isResolved != this.isRejected;
+        return this.resolves <= 0 || this.isResolved != this.isRejected;
     }
 
     /**
