@@ -119,7 +119,7 @@ class EventDispatcher
      *
      * @return Bool true if triggered
      */
-    public function trigger(event:String, ?args:EventArgs):Bool
+    public function trigger(event:String, ?args:EventArgs):Null<EventPromise>
     {
         if (this.hasEvent(event)) {
             var callbacks:Array<EventCallback> = this.eventMap.get(event);
@@ -132,10 +132,10 @@ class EventDispatcher
                 this.trigger("_eventTriggered", { event: event, args: args });
             }
 
-            return true;
+            return null; // true
         }
 
-        return false;
+        return null; // false
     }
 
     /**

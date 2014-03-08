@@ -11,6 +11,7 @@ package maddinxx.hxdispatch;
 #end
 import maddinxx.hxdispatch.EventArgs;
 import maddinxx.hxdispatch.EventCallback;
+import maddinxx.hxdispatch.EventPromise;
 import maddinxx.hxdispatch.SynchronizedEventDispatcher;
 
 /**
@@ -22,7 +23,7 @@ class ThreadedEventDispatcher extends SynchronizedEventDispatcher
     /**
      * @{inheritDoc}
      */
-    override public function trigger(event:String, ?args:EventArgs):Bool
+    override public function trigger(event:String, ?args:EventArgs):Null<EventPromise>
     {
         if (this.hasEvent(event)) {
             this.mutex.acquire();
@@ -30,28 +31,21 @@ class ThreadedEventDispatcher extends SynchronizedEventDispatcher
             this.mutex.release();
 
             var thread:Thread;
-            var promise:Thread = Thread.create(function():Void {
-                var dispatcher = Thread.readMessage(true);
-                for (i in 0...callbacks.length) {
-                    Thread.readMessage(true);
-                }
-                //Sys.sleep(0.05); // Magic number so main thread is at waiting position
-                //dispatcher.sendMessage(null);
-            });
-            promise.sendMessage(Thread.current()); // activate promise
+            var promise = new EventPromise(callbacks.length);
 
             var callback:EventCallback;
             for (callback in callbacks) {
                 thread = Thread.create(function():Void {
-                    var promise:Thread = Thread.readMessage(true);
                     callback(args);
-                    promise.sendMessage(null);
+                    promise.resolve();
                 });
-                thread.sendMessage(promise); // activate callback thread
             }
 
             if (event != "_eventTriggered") {
-                this.trigger("_eventTriggered", { event: event, args: args });
+                var subpromis:EventPromise = this.trigger("_eventTriggered", { event: event, args: args });
+                if (subpromis != null) {
+                    subpromis.wait();
+                }
             }
 
             // Alternative way with one thread calling all callbacks
@@ -64,11 +58,9 @@ class ThreadedEventDispatcher extends SynchronizedEventDispatcher
             // });
             // worker.sendMessage(Thread.current());
 
-            //Thread.readMessage(true); // PROBLEM: when promise writes before we get here we will never receive the signal
-
-            return true;
+            return promise;
         }
 
-        return false;
+        return null;
     }
 }

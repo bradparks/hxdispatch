@@ -1,6 +1,7 @@
 import maddinxx.hxdispatch.EventArgs;
 import maddinxx.hxdispatch.EventCallback;
 import maddinxx.hxdispatch.EventDispatcher;
+import maddinxx.hxdispatch.EventPromise;
 import maddinxx.hxdispatch.SynchronizedEventDispatcher;
 import maddinxx.hxdispatch.ThreadedEventDispatcher;
 
@@ -32,12 +33,12 @@ class Demo
         trace("2. Added another callback");
 
         trace("3. Triggering events");
-        dispatcher.trigger("demo", { name: "John" });
+        var promise:EventPromise = dispatcher.trigger("demo", { name: "John" });
         trace("4. Main thread execution");
 
-        // Wait for the threads
-        // Better and a TODO: return a promise from the trigger method so we can wait for promise.resolve()
-        Sys.sleep(3);
+        if (promise != null) {
+            promise.wait();
+        }
 
         return 0;
     }

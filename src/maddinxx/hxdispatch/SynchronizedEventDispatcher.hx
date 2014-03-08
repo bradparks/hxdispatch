@@ -99,7 +99,7 @@ class SynchronizedEventDispatcher extends EventDispatcher
     /**
      * @{inheritDoc}
      */
-    override public function trigger(event:String, ?args:EventArgs):Bool
+    override public function trigger(event:String, ?args:EventArgs):Null<EventPromise>
     {
         if (this.hasEvent(event)) {
             this.mutex.acquire();
@@ -114,10 +114,10 @@ class SynchronizedEventDispatcher extends EventDispatcher
                 this.trigger("_eventTriggered", { event: event, args: args });
             }
 
-            return true;
+            return null; // true
         }
 
-        return false;
+        return null; // false
     }
 
     /**
