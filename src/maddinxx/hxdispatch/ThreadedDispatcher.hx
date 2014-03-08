@@ -68,7 +68,7 @@ class ThreadedDispatcher extends SyncedDispatcher
 
             if (event != "_eventTriggered") {
                 var feedback:Feedback = this.trigger("_eventTriggered", { event: event, args: args });
-                if (feedback.status == Status.TRIGGERED) {
+                if (feedback.status == Status.TRIGGERED && !feedback.promise.isDone) {
                     feedback.promise.await();
                 }
             }
