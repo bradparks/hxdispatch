@@ -97,7 +97,14 @@ class Promise
      */
     public function get_isDone():Bool
     {
-        return this.resolves <= 0 || this.isResolved != this.isRejected;
+        #if (cpp || java || neko)
+        this.mutex.acquire();
+        #end
+        var noRemaining:Bool = this.resolves <= 0;
+        #if (cpp || java || neko)
+        this.mutex.release();
+        #end
+        return noRemaining || this.isResolved != this.isRejected;
     }
 
     /**
