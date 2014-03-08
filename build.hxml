@@ -1,0 +1,8 @@
+-cp src
+-main Demo.hx
+-neko bin/Demo.n
+
+--next
+-cp src
+-main Demo.hx
+-cpp bin/cpp
