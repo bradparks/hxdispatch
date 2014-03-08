@@ -6,6 +6,8 @@ import cpp.vm.Thread;
 #elseif java
 import java.vm.Mutex;
 import java.vm.Thread;
+#elseif js
+import haxe.Timer;
 #elseif neko
 import neko.vm.Mutex;
 import neko.vm.Thread;
@@ -51,15 +53,10 @@ class ThreadedDispatcher extends SyncedDispatcher
             }
             #elseif js
             for (callback in callbacks) {
-                if (Reflect.isFunction(callback)) {
-                    var js_callback:Callback = callback;
-                    var js_args:Args         = args;
-                    untyped __js__("setTimeout(function ()
-                    {
-                        js_callback(js_args);
-                        promise.resolve();
-                    }, 0)");
-                }
+                Timer.delay(function():Void {
+                    callback(args);
+                    promise.resolve();
+                }, 0);
             }
             #end
 
