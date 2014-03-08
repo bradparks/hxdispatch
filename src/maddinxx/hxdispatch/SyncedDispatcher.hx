@@ -1,13 +1,13 @@
 package maddinxx.hxdispatch;
 
 #if cpp
-    import cpp.vm.Mutex;
+import cpp.vm.Mutex;
 #elseif java
-    import java.vm.Mutex;
+import java.vm.Mutex;
 #elseif neko
-    import neko.vm.Mutex;
+import neko.vm.Mutex;
 #else
-    #error "SyncedDispatcher not supported on target platform due to missing Mutex support. Please use Dispatcher instead."
+#error "SyncedDispatcher not supported on target platform due to missing Mutex support. Please use Dispatcher instead."
 #end
 import maddinxx.hxdispatch.Args;
 import maddinxx.hxdispatch.Callback;

@@ -1,16 +1,16 @@
 package maddinxx.hxdispatch;
 
 #if cpp
-    import cpp.vm.Mutex;
-    import cpp.vm.Thread;
+import cpp.vm.Mutex;
+import cpp.vm.Thread;
 #elseif java
-    import java.vm.Mutex;
-    import java.vm.Thread;
+import java.vm.Mutex;
+import java.vm.Thread;
 #elseif neko
-    import neko.vm.Mutex;
-    import neko.vm.Thread;
+import neko.vm.Mutex;
+import neko.vm.Thread;
 #else
-    #error "ThreadedDispatcher not supported on target platform due to missing Mutex/Thread support. Please use Dispatcher instead."
+#error "ThreadedDispatcher not supported on target platform due to missing Mutex/Thread support. Please use Dispatcher instead."
 #end
 import maddinxx.hxdispatch.Args;
 import maddinxx.hxdispatch.Callback;

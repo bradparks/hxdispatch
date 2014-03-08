@@ -3,11 +3,13 @@ import maddinxx.hxdispatch.Callback;
 import maddinxx.hxdispatch.Dispatcher;
 import maddinxx.hxdispatch.Feedback;
 import maddinxx.hxdispatch.Feedback.Status;
-import maddinxx.hxdispatch.Promise;
-import maddinxx.hxdispatch.SyncedDispatcher;
+#if (cpp || java || neko)
 import maddinxx.hxdispatch.ThreadedDispatcher;
+#end
 
+#if (cpp || java || neko)
 typedef Dispatcher = ThreadedDispatcher;
+#end
 
 class Demo
 {
@@ -17,7 +19,9 @@ class Demo
 
         var callback:Callback = function(args:Args):Void {
             trace("\t\tPosition not defined...");
+            #if (cpp || cs || java || neko)
             Sys.sleep(1);
+            #end
             trace("6. Callback thread executed");
         };
 
@@ -31,7 +35,9 @@ class Demo
 
         dispatcher.onEvent("demo", function(args:Args):Void {
             trace("\t\tPosition not defined...");
+            #if (cpp || cs || java || neko)
             Sys.sleep(0.2);
+            #end
             trace("5. Callback thread executed");
         });
         trace("2. Added another callback");
@@ -41,10 +47,7 @@ class Demo
         trace("4. Main thread execution");
 
         if (feedback.status == Status.TRIGGERED) {
-            feedback.promise.then(function():Void {
-                trace("Promise resolved");
-            });
-            feedback.promise.await();
+
         }
 
         var duration = haxe.Timer.stamp() - start;

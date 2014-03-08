@@ -1,16 +1,14 @@
 package maddinxx.hxdispatch;
 
 #if cpp
-    import cpp.vm.Mutex;
-    import cpp.vm.Thread;
+import cpp.vm.Mutex;
+import cpp.vm.Thread;
 #elseif java
-    import java.vm.Mutex;
-    import java.vm.Thread;
+import java.vm.Mutex;
+import java.vm.Thread;
 #elseif neko
-    import neko.vm.Mutex;
-    import neko.vm.Thread;
-#else
-    #error "Promise not supported on target platform due to missing Mutex/Thread support."
+import neko.vm.Mutex;
+import neko.vm.Thread;
 #end
 
 /**
@@ -20,8 +18,10 @@ package maddinxx.hxdispatch;
 class Promise
 {
     private var resolves:Int;
+    #if (cpp || java || neko)
     private var mutex:Mutex;
     private var thread:Thread;
+    #end
     private var thens:Array<Then>;
 
     public var isRejected(default, null):Bool;
@@ -30,8 +30,10 @@ class Promise
     public function new(?resolves:Int = 1):Void
     {
         this.resolves = resolves;
+        #if (cpp || java || neko)
         this.mutex    = new Mutex();
         this.thread   = Thread.current();
+        #end
         this.thens    = new Array<Then>();
 
         this.isRejected = false;
@@ -55,9 +57,11 @@ class Promise
      */
     public function reject():Void
     {
+        #if (cpp || java || neko)
         this.mutex.acquire();
         this.thread.sendMessage(this.resolves = -1);
         this.mutex.release();
+        #end
     }
 
     /**
@@ -66,9 +70,11 @@ class Promise
      */
     public function resolve():Void
     {
+        #if (cpp || java || neko)
         this.mutex.acquire();
         this.thread.sendMessage(--this.resolves);
         this.mutex.release();
+        #end
     }
 
     /**
@@ -89,6 +95,7 @@ class Promise
      */
     public function await():Void
     {
+        #if (cpp || java || neko)
         var msg:Dynamic = Thread.readMessage(true);
         while (msg != Signal.DONE) {
             msg = cast(msg, Int);
@@ -102,6 +109,7 @@ class Promise
                 msg = Thread.readMessage(true);
             }
         }
+        #end
 
         if (this.thens.length != 0) {
             this.executeThens();
