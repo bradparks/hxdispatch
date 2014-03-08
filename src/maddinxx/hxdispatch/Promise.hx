@@ -7,14 +7,14 @@ package maddinxx.hxdispatch;
     import neko.vm.Mutex;
     import neko.vm.Thread;
 #else
-    #error "EventPromise not supported on target platform due to missing Mutex/Thread support."
+    #error "Promise not supported on target platform due to missing Mutex/Thread support."
 #end
 
 /**
- * The EventPromise is returns by triggered Events and allows
+ * The Promise is returns by triggered Events and allows
  * waiting for the callbacks.
  */
-class EventPromise
+class Promise
 {
     private var resolves:Int;
     private var mutex:Mutex;

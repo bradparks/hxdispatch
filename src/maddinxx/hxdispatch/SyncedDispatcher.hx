@@ -5,16 +5,16 @@ package maddinxx.hxdispatch;
 #elseif neko
     import neko.vm.Mutex;
 #else
-    #error "SynchronizedEventDispatcher not supported on target platform due to missing Mutex support. Please use EventDispatcher instead."
+    #error "SyncedDispatcher not supported on target platform due to missing Mutex support. Please use Dispatcher instead."
 #end
-import maddinxx.hxdispatch.EventArgs;
-import maddinxx.hxdispatch.EventCallback;
-import maddinxx.hxdispatch.EventDispatcher;
+import maddinxx.hxdispatch.Args;
+import maddinxx.hxdispatch.Callback;
+import maddinxx.hxdispatch.Dispatcher;
 
 /**
  * The synchronized Event dispatcher adds thread safety to the normal implementation.
  */
-class SynchronizedEventDispatcher extends EventDispatcher
+class SyncedDispatcher extends Dispatcher
 {
     private var mutex:Mutex;
 
@@ -56,12 +56,12 @@ class SynchronizedEventDispatcher extends EventDispatcher
     /**
      * @{inheritDoc}
      */
-    override public function listenEvent(event:String, callback:EventCallback):Bool
+    override public function listenEvent(event:String, callback:Callback):Bool
     {
         if (this.hasEvent(event)) {
             this.mutex.acquire();
-            var callbacks:Array<EventCallback> = this.eventMap.get(event);
-            if (!Lambda.exists(callbacks, function(fn:EventCallback):Bool {
+            var callbacks:Array<Callback> = this.eventMap.get(event);
+            if (!Lambda.exists(callbacks, function(fn:Callback):Bool {
                 return Reflect.compareMethods(callback, fn);
             })) {
                 callbacks.push(callback);
@@ -78,10 +78,10 @@ class SynchronizedEventDispatcher extends EventDispatcher
     /**
      * @{inheritDoc}
      */
-    override public function registerEvent(event:String, ?callback:EventCallback):Bool
+    override public function registerEvent(event:String, ?callback:Callback):Bool
     {
         if (!this.hasEvent(event)) {
-            var callbacks:Array<EventCallback> = new Array<EventCallback>();
+            var callbacks:Array<Callback> = new Array<Callback>();
             if (callback != null) {
                 callbacks.push(callback);
             }
@@ -99,13 +99,13 @@ class SynchronizedEventDispatcher extends EventDispatcher
     /**
      * @{inheritDoc}
      */
-    override public function trigger(event:String, ?args:EventArgs):Null<EventPromise>
+    override public function trigger(event:String, ?args:Args):Null<Promise>
     {
         if (this.hasEvent(event)) {
             this.mutex.acquire();
-            var callbacks:Array<EventCallback> = this.eventMap.get(event).copy();
+            var callbacks:Array<Callback> = this.eventMap.get(event).copy();
             this.mutex.release();
-            var callback:EventCallback;
+            var callback:Callback;
             for (callback in callbacks) {
                 callback(args);
             }
@@ -123,7 +123,7 @@ class SynchronizedEventDispatcher extends EventDispatcher
     /**
      * @{inheritDoc}
      */
-    override public function unlistenEvent(event:String, callback:EventCallback):Bool
+    override public function unlistenEvent(event:String, callback:Callback):Bool
     {
         if (this.hasEvent(event)) {
             this.mutex.acquire();

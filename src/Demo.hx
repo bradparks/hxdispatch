@@ -1,31 +1,31 @@
-import maddinxx.hxdispatch.EventArgs;
-import maddinxx.hxdispatch.EventCallback;
-import maddinxx.hxdispatch.EventDispatcher;
-import maddinxx.hxdispatch.EventPromise;
-import maddinxx.hxdispatch.SynchronizedEventDispatcher;
-import maddinxx.hxdispatch.ThreadedEventDispatcher;
+import maddinxx.hxdispatch.Args;
+import maddinxx.hxdispatch.Callback;
+import maddinxx.hxdispatch.Dispatcher;
+import maddinxx.hxdispatch.Promise;
+import maddinxx.hxdispatch.SyncedDispatcher;
+import maddinxx.hxdispatch.ThreadedDispatcher;
 
-typedef Dispatcher = ThreadedEventDispatcher;
+typedef Dispatcher = ThreadedDispatcher;
 
 class Demo
 {
     public static function main():Int
     {
-        var callback:EventCallback = function(args:EventArgs):Void {
+        var callback:Callback = function(args:Args):Void {
             trace("\t\tPosition not defined...");
             Sys.sleep(1);
             trace("6. Callback thread executed");
         };
 
         var dispatcher = new Dispatcher();
-        dispatcher.onEvent("_eventTriggered", function(args:EventArgs):Void {
+        dispatcher.onEvent("_eventTriggered", function(args:Args):Void {
             trace("\t\tInternal event triggered");
         });
 
         dispatcher.registerEvent("demo", callback);
         trace("1. registered event");
 
-        dispatcher.onEvent("demo", function(args:EventArgs):Void {
+        dispatcher.onEvent("demo", function(args:Args):Void {
             trace("\t\tPosition not defined...");
             Sys.sleep(0.2);
             trace("5. Callback thread executed");
@@ -33,7 +33,7 @@ class Demo
         trace("2. Added another callback");
 
         trace("3. Triggering events");
-        var promise:EventPromise = dispatcher.trigger("demo", { name: "John" });
+        var promise:Promise = dispatcher.trigger("demo", { name: "John" });
         trace("4. Main thread execution");
 
         if (promise != null) {

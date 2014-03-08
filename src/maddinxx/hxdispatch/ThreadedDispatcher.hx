@@ -7,33 +7,33 @@ package maddinxx.hxdispatch;
     import neko.vm.Mutex;
     import neko.vm.Thread;
 #else
-    #error "ThreadedEventDispatcher not supported on target platform due to missing Mutex/Thread support. Please use EventDispatcher instead."
+    #error "ThreadedDispatcher not supported on target platform due to missing Mutex/Thread support. Please use Dispatcher instead."
 #end
-import maddinxx.hxdispatch.EventArgs;
-import maddinxx.hxdispatch.EventCallback;
-import maddinxx.hxdispatch.EventPromise;
-import maddinxx.hxdispatch.SynchronizedEventDispatcher;
+import maddinxx.hxdispatch.Args;
+import maddinxx.hxdispatch.Callback;
+import maddinxx.hxdispatch.Promise;
+import maddinxx.hxdispatch.SyncedDispatcher;
 
 /**
  * The threaded event dispatcher starts one thread per callback and does not wait
  * for them before it returns a result, thus is async.
  */
-class ThreadedEventDispatcher extends SynchronizedEventDispatcher
+class ThreadedDispatcher extends SyncedDispatcher
 {
     /**
      * @{inheritDoc}
      */
-    override public function trigger(event:String, ?args:EventArgs):Null<EventPromise>
+    override public function trigger(event:String, ?args:Args):Null<Promise>
     {
         if (this.hasEvent(event)) {
             this.mutex.acquire();
-            var callbacks:Array<EventCallback> = this.eventMap.get(event).copy();
+            var callbacks:Array<Callback> = this.eventMap.get(event).copy();
             this.mutex.release();
 
             var thread:Thread;
-            var promise = new EventPromise(callbacks.length);
+            var promise = new Promise(callbacks.length);
 
-            var callback:EventCallback;
+            var callback:Callback;
             for (callback in callbacks) {
                 thread = Thread.create(function():Void {
                     callback(args);
@@ -42,7 +42,7 @@ class ThreadedEventDispatcher extends SynchronizedEventDispatcher
             }
 
             if (event != "_eventTriggered") {
-                var subpromis:EventPromise = this.trigger("_eventTriggered", { event: event, args: args });
+                var subpromis:Promise = this.trigger("_eventTriggered", { event: event, args: args });
                 if (subpromis != null) {
                     subpromis.wait();
                 }

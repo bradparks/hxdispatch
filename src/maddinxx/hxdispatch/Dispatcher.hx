@@ -1,31 +1,31 @@
 package maddinxx.hxdispatch;
 
 import Map;
-import maddinxx.hxdispatch.EventArgs;
-import maddinxx.hxdispatch.EventCallback;
+import maddinxx.hxdispatch.Args;
+import maddinxx.hxdispatch.Callback;
 
 /**
  * A simple Event dispatcher for the Haxe language
  * and its C++/NekoVM targets.
  */
-class EventDispatcher
+class Dispatcher
 {
     public var events(get, never):Array<String>;
-    private var eventMap:Map<String, Array<EventCallback>>;
+    private var eventMap:Map<String, Array<Callback>>;
 
     /**
      * Constructor to initialize a new EventDispatcher.
      */
     public function new():Void
     {
-        this.eventMap = new Map<String, Array<EventCallback>>();
+        this.eventMap = new Map<String, Array<Callback>>();
 
         // internal events
-        this.eventMap.set("_eventRegistered",   new Array<EventCallback>());
-        this.eventMap.set("_eventUnregistered", new Array<EventCallback>());
-        this.eventMap.set("_eventTriggered",    new Array<EventCallback>());
-        this.eventMap.set("_eventListened",     new Array<EventCallback>());
-        this.eventMap.set("_eventUnlistened",   new Array<EventCallback>());
+        this.eventMap.set("_eventRegistered",   new Array<Callback>());
+        this.eventMap.set("_eventUnregistered", new Array<Callback>());
+        this.eventMap.set("_eventTriggered",    new Array<Callback>());
+        this.eventMap.set("_eventListened",     new Array<Callback>());
+        this.eventMap.set("_eventUnlistened",   new Array<Callback>());
     }
 
     /**
@@ -57,16 +57,16 @@ class EventDispatcher
     /**
      * Adds the callback function as a listener to the named event.
      *
-     * @param String        event    the event's name
-     * @param EventCallback callback the callback to add
+     * @param String   event    the event's name
+     * @param Callback callback the callback to add
      *
      * @return Bool true if added to the list
      */
-    public function listenEvent(event:String, callback:EventCallback):Bool
+    public function listenEvent(event:String, callback:Callback):Bool
     {
         if (this.hasEvent(event)) {
-            var callbacks:Array<EventCallback> = this.eventMap.get(event);
-            if (!Lambda.exists(callbacks, function(fn:EventCallback):Bool {
+            var callbacks:Array<Callback> = this.eventMap.get(event);
+            if (!Lambda.exists(callbacks, function(fn:Callback):Bool {
                 return Reflect.compareMethods(callback, fn);
             })) {
                 callbacks.push(callback);
@@ -82,7 +82,7 @@ class EventDispatcher
     /**
      * @see EventDispatcher.listenEvent()
      */
-    public function onEvent(event:String, callback:EventCallback):Bool
+    public function onEvent(event:String, callback:Callback):Bool
     {
         return this.listenEvent(event, callback);
     }
@@ -90,15 +90,15 @@ class EventDispatcher
     /**
      * Registers a new event with an optional callback.
      *
-     * @param String        event    the event's name
-     * @param EventCallback callback the initial callback to set
+     * @param String   event    the event's name
+     * @param Callback callback the initial callback to set
      *
      * @return Bool true if registered successfully
      */
-    public function registerEvent(event:String, ?callback:EventCallback):Bool
+    public function registerEvent(event:String, ?callback:Callback):Bool
     {
         if (!this.hasEvent(event)) {
-            var callbacks:Array<EventCallback> = new Array<EventCallback>();
+            var callbacks:Array<Callback> = new Array<Callback>();
             if (callback != null) {
                 callbacks.push(callback);
             }
@@ -114,16 +114,16 @@ class EventDispatcher
     /**
      * Triggers the named event with the optional arguments.
      *
-     * @param String        event the event's name
-     * @param Null<Dynamic> args  the optional arguments to pass to the callbacks
+     * @param String event the event's name
+     * @param Args   args  the optional arguments to pass to the callbacks
      *
-     * @return Bool true if triggered
+     * @return Promise
      */
-    public function trigger(event:String, ?args:EventArgs):Null<EventPromise>
+    public function trigger(event:String, ?args:Args):Null<Promise>
     {
         if (this.hasEvent(event)) {
-            var callbacks:Array<EventCallback> = this.eventMap.get(event);
-            var callback:EventCallback;
+            var callbacks:Array<Callback> = this.eventMap.get(event);
+            var callback:Callback;
             for (callback in callbacks) {
                 callback(args);
             }
@@ -141,12 +141,12 @@ class EventDispatcher
     /**
      * Unlistens/removes the callback from the event listeners.
      *
-     * @param String        event    the event's name
-     * @param EventCallback callback the callback to remove
+     * @param String   event    the event's name
+     * @param Callback callback the callback to remove
      *
      * @return Bool true if removed successfully
      */
-    public function unlistenEvent(event:String, callback:EventCallback):Bool
+    public function unlistenEvent(event:String, callback:Callback):Bool
     {
         if (this.hasEvent(event)) {
             if (this.eventMap.get(event).remove(callback)) {
