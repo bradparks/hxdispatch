@@ -6,9 +6,12 @@ import maddinxx.hxdispatch.Feedback.Status;
 #if (cpp || java || js || neko)
 import maddinxx.hxdispatch.ThreadedDispatcher;
 #end
+#if (cpp || java || neko)
+import maddinxx.hxdispatch.PooledDispatcher;
+#end
 
-#if (cpp || java || js || neko)
-typedef Dispatcher = ThreadedDispatcher;
+#if (cpp || java || neko)
+typedef Dispatcher = PooledDispatcher;
 #end
 
 class Demo

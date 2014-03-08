@@ -30,6 +30,22 @@ class ThreadedDispatcher extends SyncedDispatcher
     /**
      * @{inheritDoc}
      */
+    override private function runCallback(callback:Callback, args:Args):Void
+    {
+        #if (cpp || java || neko)
+        Thread.create(function():Void {
+            callback(args);
+        });
+        #elseif js
+        Timer.delay(function():Void {
+            callback(args);
+        }, 0);
+        #end
+    }
+
+    /**
+     * @{inheritDoc}
+     */
     override public function trigger(event:String, ?args:Args):Feedback
     {
         if (this.hasEvent(event)) {
@@ -43,26 +59,16 @@ class ThreadedDispatcher extends SyncedDispatcher
 
             var promise = new Promise(callbacks.length);
             var callback:Callback;
-            #if (cpp || java || neko)
-            var thread:Thread;
             for (callback in callbacks) {
-                thread = Thread.create(function():Void {
+                this.runCallback(function(args:Args):Void {
                     callback(args);
                     promise.resolve();
-                });
+                }, args);
             }
-            #elseif js
-            for (callback in callbacks) {
-                Timer.delay(function():Void {
-                    callback(args);
-                    promise.resolve();
-                }, 0);
-            }
-            #end
 
             if (event != "_eventTriggered") {
                 var feedback:Feedback = this.trigger("_eventTriggered", { event: event, args: args });
-                if (feedback.status == Status.TRIGGERED && !feedback.promise.isDone) {
+                if (feedback.status == Status.TRIGGERED) {
                     feedback.promise.await();
                 }
             }

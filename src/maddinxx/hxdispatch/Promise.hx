@@ -49,7 +49,7 @@ class Promise
     {
         #if (cpp || java || neko)
         var msg:Dynamic = Thread.readMessage(true);
-        while (msg != Signal.DONE) {
+        while (msg != Signal.DONE && !this.isDone) {
             msg = cast(msg, Int);
             if (msg == 0) {
                 this.isResolved = true;

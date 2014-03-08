@@ -122,6 +122,19 @@ class SyncedDispatcher extends Dispatcher
     }
 
     /**
+     * Runs the given callback with the provided arguments.
+     *
+     * This step has been out-sourced for easier extending.
+     *
+     * @param Callback callback the callback to execute
+     * @param Args     args     the arguments to pass to the callback
+     */
+    private function runCallback(callback:Callback, args:Args):Void
+    {
+        callback(args);
+    }
+
+    /**
      * @{inheritDoc}
      */
     override public function trigger(event:String, ?args:Args):Feedback
@@ -136,7 +149,7 @@ class SyncedDispatcher extends Dispatcher
             #end
             var callback:Callback;
             for (callback in callbacks) {
-                callback(args);
+                this.runCallback(callback, args);
             }
 
             if (event != "_eventTriggered") {
