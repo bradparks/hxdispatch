@@ -84,7 +84,7 @@ class Dispatcher
     /**
      * @see EventDispatcher.listenEvent()
      */
-    public function onEvent(event:String, callback:Callback):Bool
+    public inline function onEvent(event:String, callback:Callback):Bool
     {
         return this.listenEvent(event, callback);
     }
