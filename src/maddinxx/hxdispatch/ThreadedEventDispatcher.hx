@@ -7,7 +7,7 @@ package maddinxx.hxdispatch;
     import neko.vm.Mutex;
     import neko.vm.Thread;
 #else
-    #error "SynchronizedEventDispatcher not supported on target platform due to missing Mutex/Thread support. Please use EventDispatcher instead."
+    #error "ThreadedEventDispatcher not supported on target platform due to missing Mutex/Thread support. Please use EventDispatcher instead."
 #end
 import maddinxx.hxdispatch.EventArgs;
 import maddinxx.hxdispatch.EventCallback;
