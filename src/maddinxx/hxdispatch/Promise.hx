@@ -24,6 +24,7 @@ class Promise
     #end
     private var thens:Array<Then>;
 
+    public var isDone(get, never):Bool;
     public var isRejected(default, null):Bool;
     public var isResolved(default, null):Bool;
 
@@ -53,6 +54,16 @@ class Promise
     }
 
     /**
+     * Returns either the Promise is done (e.g. no more await required) or not.
+     *
+     * @return Bool
+     */
+    public function get_isDone():Bool
+    {
+        return this.resolves <= 0 && this.isResolved != this.isRejected;
+    }
+
+    /**
      * Rejects the promise.
      */
     public function reject():Void
@@ -61,6 +72,8 @@ class Promise
         this.mutex.acquire();
         this.thread.sendMessage(this.resolves = -1);
         this.mutex.release();
+        #elseif js
+        this.resolves = -1;
         #end
     }
 
@@ -74,6 +87,8 @@ class Promise
         this.mutex.acquire();
         this.thread.sendMessage(--this.resolves);
         this.mutex.release();
+        #elseif js
+        --this.resolves;
         #end
     }
 
@@ -109,6 +124,8 @@ class Promise
                 msg = Thread.readMessage(true);
             }
         }
+        #elseif js
+        // TODO
         #end
 
         if (this.thens.length != 0) {

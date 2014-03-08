@@ -66,7 +66,7 @@ class Dispatcher
      */
     public function listenEvent(event:String, callback:Callback):Bool
     {
-        if (this.hasEvent(event)) {
+        if (this.hasEvent(event) && callback != null) {
             var callbacks:Array<Callback> = this.eventMap.get(event);
             if (!Lambda.exists(callbacks, function(fn:Callback):Bool {
                 return Reflect.compareMethods(callback, fn);
@@ -150,7 +150,7 @@ class Dispatcher
      */
     public function unlistenEvent(event:String, callback:Callback):Bool
     {
-        if (this.hasEvent(event)) {
+        if (this.hasEvent(event) && callback != null) {
             if (this.eventMap.get(event).remove(callback)) {
                 this.trigger("_eventUnlistened", { event: event, callback: callback });
                 return true;

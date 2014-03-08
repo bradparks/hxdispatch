@@ -6,7 +6,7 @@ import cpp.vm.Mutex;
 import java.vm.Mutex;
 #elseif neko
 import neko.vm.Mutex;
-#else
+#elseif !js
 #error "SyncedDispatcher not supported on target platform due to missing Mutex support. Please use Dispatcher instead."
 #end
 import maddinxx.hxdispatch.Args;
@@ -20,7 +20,9 @@ import maddinxx.hxdispatch.Feedback.Status;
  */
 class SyncedDispatcher extends Dispatcher
 {
+    #if (cpp || java || neko)
     private var mutex:Mutex;
+    #end
 
     /**
      * @{inheritDoc}
@@ -28,7 +30,10 @@ class SyncedDispatcher extends Dispatcher
     public function new():Void
     {
         super();
+
+        #if (cpp || java || neko)
         this.mutex = new Mutex();
+        #end
     }
 
     /**
@@ -37,9 +42,13 @@ class SyncedDispatcher extends Dispatcher
     override public function get_events():Array<String>
     {
         var events:Array<String> = new Array<String>();
+        #if (cpp || java || neko)
         this.mutex.acquire();
+        #end
         var keys:Iterator<String> = this.eventMap.keys();
+        #if (cpp || java || neko)
         this.mutex.release();
+        #end
         for (key in keys) {
             events.push(key);
         }
@@ -51,9 +60,13 @@ class SyncedDispatcher extends Dispatcher
      */
     override private function hasEvent(event:String):Bool
     {
+        #if (cpp || java || neko)
         this.mutex.acquire();
+        #end
         var has:Bool = this.eventMap.exists(event);
+        #if (cpp || java || neko)
         this.mutex.release();
+        #end
         return has;
     }
 
@@ -62,14 +75,18 @@ class SyncedDispatcher extends Dispatcher
      */
     override public function listenEvent(event:String, callback:Callback):Bool
     {
-        if (this.hasEvent(event)) {
+        if (this.hasEvent(event) && callback != null) {
+            #if (cpp || java || neko)
             this.mutex.acquire();
+            #end
             var callbacks:Array<Callback> = this.eventMap.get(event);
             if (!Lambda.exists(callbacks, function(fn:Callback):Bool {
                 return Reflect.compareMethods(callback, fn);
             })) {
                 callbacks.push(callback);
+                #if (cpp || java || neko)
                 this.mutex.release();
+                #end
                 this.trigger("_eventListened", { event: event, callback: callback });
 
                 return true;
@@ -89,9 +106,13 @@ class SyncedDispatcher extends Dispatcher
             if (callback != null) {
                 callbacks.push(callback);
             }
+            #if (cpp || java || neko)
             this.mutex.acquire();
+            #end
             this.eventMap.set(event, callbacks);
+            #if (cpp || java || neko)
             this.mutex.release();
+            #end
             this.trigger("_eventRegistered", { event: event, callback: callback });
 
             return true;
@@ -106,9 +127,13 @@ class SyncedDispatcher extends Dispatcher
     override public function trigger(event:String, ?args:Args):Feedback
     {
         if (this.hasEvent(event)) {
+            #if (cpp || java || neko)
             this.mutex.acquire();
+            #end
             var callbacks:Array<Callback> = this.eventMap.get(event).copy();
+            #if (cpp || java || neko)
             this.mutex.release();
+            #end
             var callback:Callback;
             for (callback in callbacks) {
                 callback(args);
@@ -129,10 +154,14 @@ class SyncedDispatcher extends Dispatcher
      */
     override public function unlistenEvent(event:String, callback:Callback):Bool
     {
-        if (this.hasEvent(event)) {
+        if (this.hasEvent(event) && callback != null) {
+            #if (cpp || java || neko)
             this.mutex.acquire();
+            #end
             var removed:Bool = this.eventMap.get(event).remove(callback);
+            #if (cpp || java || neko)
             this.mutex.release();
+            #end
             if (removed) {
                 this.trigger("_eventUnlistened", { event: event, callback: callback });
                 return true;
@@ -148,9 +177,13 @@ class SyncedDispatcher extends Dispatcher
     override public function unregisterEvent(event:String):Bool
     {
         if (this.hasEvent(event)) {
+            #if (cpp || java || neko)
             this.mutex.acquire();
+            #end
             this.eventMap.remove(event);
+            #if (cpp || java || neko)
             this.mutex.release();
+            #end
 
             this.trigger("_eventUnregistered", { event: event });
 

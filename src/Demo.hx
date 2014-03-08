@@ -3,11 +3,11 @@ import maddinxx.hxdispatch.Callback;
 import maddinxx.hxdispatch.Dispatcher;
 import maddinxx.hxdispatch.Feedback;
 import maddinxx.hxdispatch.Feedback.Status;
-#if (cpp || java || neko)
+#if (cpp || java || js || neko)
 import maddinxx.hxdispatch.ThreadedDispatcher;
 #end
 
-#if (cpp || java || neko)
+#if (cpp || java || js || neko)
 typedef Dispatcher = ThreadedDispatcher;
 #end
 
@@ -46,8 +46,8 @@ class Demo
         var feedback:Feedback = dispatcher.trigger("demo", { name: "John" });
         trace("4. Main thread execution");
 
-        if (feedback.status == Status.TRIGGERED) {
-
+        if (feedback.status == Status.TRIGGERED  && !feedback.promise.isDone) {
+            feedback.promise.await();
         }
 
         var duration = haxe.Timer.stamp() - start;

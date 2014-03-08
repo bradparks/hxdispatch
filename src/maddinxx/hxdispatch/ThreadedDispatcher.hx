@@ -9,7 +9,7 @@ import java.vm.Thread;
 #elseif neko
 import neko.vm.Mutex;
 import neko.vm.Thread;
-#else
+#elseif !js
 #error "ThreadedDispatcher not supported on target platform due to missing Mutex/Thread support. Please use Dispatcher instead."
 #end
 import maddinxx.hxdispatch.Args;
@@ -31,24 +31,41 @@ class ThreadedDispatcher extends SyncedDispatcher
     override public function trigger(event:String, ?args:Args):Feedback
     {
         if (this.hasEvent(event)) {
+            #if (cpp || java || neko)
             this.mutex.acquire();
+            #end
             var callbacks:Array<Callback> = this.eventMap.get(event).copy();
+            #if (cpp || java || neko)
             this.mutex.release();
+            #end
 
-            var thread:Thread;
             var promise = new Promise(callbacks.length);
-
             var callback:Callback;
+            #if (cpp || java || neko)
+            var thread:Thread;
             for (callback in callbacks) {
                 thread = Thread.create(function():Void {
                     callback(args);
                     promise.resolve();
                 });
             }
+            #elseif js
+            for (callback in callbacks) {
+                if (Reflect.isFunction(callback)) {
+                    var js_callback:Callback = callback;
+                    var js_args:Args         = args;
+                    untyped __js__("setTimeout(function ()
+                    {
+                        js_callback(js_args);
+                        promise.resolve();
+                    }, 0)");
+                }
+            }
+            #end
 
             if (event != "_eventTriggered") {
                 var feedback:Feedback = this.trigger("_eventTriggered", { event: event, args: args });
-                if (feedback.status == Status.TRIGGERED) {
+                if (feedback.status == Status.TRIGGERED && !feedback.promise.isDone) {
                     feedback.promise.await();
                 }
             }
