@@ -10,6 +10,8 @@ package maddinxx.hxdispatch;
 import maddinxx.hxdispatch.Args;
 import maddinxx.hxdispatch.Callback;
 import maddinxx.hxdispatch.Dispatcher;
+import maddinxx.hxdispatch.Feedback;
+import maddinxx.hxdispatch.Feedback.Status;
 
 /**
  * The synchronized Event dispatcher adds thread safety to the normal implementation.
@@ -99,7 +101,7 @@ class SyncedDispatcher extends Dispatcher
     /**
      * @{inheritDoc}
      */
-    override public function trigger(event:String, ?args:Args):Null<Promise>
+    override public function trigger(event:String, ?args:Args):Feedback
     {
         if (this.hasEvent(event)) {
             this.mutex.acquire();
@@ -114,10 +116,10 @@ class SyncedDispatcher extends Dispatcher
                 this.trigger("_eventTriggered", { event: event, args: args });
             }
 
-            return null; // true
+            return { status: Status.OK }; // true
         }
 
-        return null; // false
+        return { status: Status.NO_SUCH_EVENT };
     }
 
     /**

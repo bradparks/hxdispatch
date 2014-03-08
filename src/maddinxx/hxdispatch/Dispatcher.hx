@@ -3,6 +3,8 @@ package maddinxx.hxdispatch;
 import Map;
 import maddinxx.hxdispatch.Args;
 import maddinxx.hxdispatch.Callback;
+import maddinxx.hxdispatch.Feedback;
+import maddinxx.hxdispatch.Feedback.Status;
 
 /**
  * A simple Event dispatcher for the Haxe language
@@ -117,9 +119,9 @@ class Dispatcher
      * @param String event the event's name
      * @param Args   args  the optional arguments to pass to the callbacks
      *
-     * @return Promise
+     * @return Feedback
      */
-    public function trigger(event:String, ?args:Args):Null<Promise>
+    public function trigger(event:String, ?args:Args):Feedback
     {
         if (this.hasEvent(event)) {
             var callbacks:Array<Callback> = this.eventMap.get(event);
@@ -132,10 +134,10 @@ class Dispatcher
                 this.trigger("_eventTriggered", { event: event, args: args });
             }
 
-            return null; // true
+            return { status: Status.OK }; // true
         }
 
-        return null; // false
+        return { status: Status.NO_SUCH_EVENT };
     }
 
     /**

@@ -1,6 +1,8 @@
 import maddinxx.hxdispatch.Args;
 import maddinxx.hxdispatch.Callback;
 import maddinxx.hxdispatch.Dispatcher;
+import maddinxx.hxdispatch.Feedback;
+import maddinxx.hxdispatch.Feedback.Status;
 import maddinxx.hxdispatch.Promise;
 import maddinxx.hxdispatch.SyncedDispatcher;
 import maddinxx.hxdispatch.ThreadedDispatcher;
@@ -33,11 +35,11 @@ class Demo
         trace("2. Added another callback");
 
         trace("3. Triggering events");
-        var promise:Promise = dispatcher.trigger("demo", { name: "John" });
+        var feedback:Feedback = dispatcher.trigger("demo", { name: "John" });
         trace("4. Main thread execution");
 
-        if (promise != null) {
-            promise.wait();
+        if (feedback.status == Status.TRIGGERED) {
+            feedback.promise.wait();
         }
 
         return 0;

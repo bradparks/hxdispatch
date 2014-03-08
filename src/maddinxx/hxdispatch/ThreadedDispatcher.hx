@@ -11,6 +11,8 @@ package maddinxx.hxdispatch;
 #end
 import maddinxx.hxdispatch.Args;
 import maddinxx.hxdispatch.Callback;
+import maddinxx.hxdispatch.Feedback;
+import maddinxx.hxdispatch.Feedback.Status;
 import maddinxx.hxdispatch.Promise;
 import maddinxx.hxdispatch.SyncedDispatcher;
 
@@ -23,7 +25,7 @@ class ThreadedDispatcher extends SyncedDispatcher
     /**
      * @{inheritDoc}
      */
-    override public function trigger(event:String, ?args:Args):Null<Promise>
+    override public function trigger(event:String, ?args:Args):Feedback
     {
         if (this.hasEvent(event)) {
             this.mutex.acquire();
@@ -42,9 +44,9 @@ class ThreadedDispatcher extends SyncedDispatcher
             }
 
             if (event != "_eventTriggered") {
-                var subpromis:Promise = this.trigger("_eventTriggered", { event: event, args: args });
-                if (subpromis != null) {
-                    subpromis.wait();
+                var feedback:Feedback = this.trigger("_eventTriggered", { event: event, args: args });
+                if (feedback.status == Status.TRIGGERED) {
+                    feedback.promise.wait();
                 }
             }
 
@@ -58,9 +60,9 @@ class ThreadedDispatcher extends SyncedDispatcher
             // });
             // worker.sendMessage(Thread.current());
 
-            return promise;
+            return { status: Status.TRIGGERED, promise: promise };
         }
 
-        return null;
+        return { status: Status.NO_SUCH_EVENT };
     }
 }
