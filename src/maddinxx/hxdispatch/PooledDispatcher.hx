@@ -17,6 +17,7 @@ import neko.vm.Thread;
 #else
 #error "PooledDispatcher not supported on target platform due to missing Deque/Mutex/Thread support. Please use ThreadedDispatcher instead."
 #end
+import haxe.ds.Vector;
 import maddinxx.hxdispatch.Args;
 import maddinxx.hxdispatch.Callback;
 import maddinxx.hxdispatch.Feedback;
@@ -30,7 +31,7 @@ import maddinxx.hxdispatch.ThreadedDispatcher;
  */
 class PooledDispatcher extends ThreadedDispatcher
 {
-    private var executors:Array<Thread>;
+    private var executors:Vector<Thread>;
     private var queue:Deque<Job>;
 
     /**
@@ -42,10 +43,10 @@ class PooledDispatcher extends ThreadedDispatcher
     {
         super();
 
-        this.executors = new Array<Thread>();
+        this.executors = new Vector<Thread>(workers);
         this.queue     = new Deque<Job>();
         for (i in 0...workers) {
-            this.executors.push(Thread.create(function():Void {
+            this.executors.set(i, Thread.create(function():Void {
                 var job:Job;
                 while (true) {
                     job = this.queue.pop(true);
