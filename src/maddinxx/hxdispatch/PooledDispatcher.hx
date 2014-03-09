@@ -8,8 +8,6 @@ import cpp.vm.Thread;
 import java.vm.Deque;
 import java.vm.Mutex;
 import java.vm.Thread;
-#elseif js
-import haxe.Timer;
 #elseif neko
 import neko.vm.Deque;
 import neko.vm.Mutex;
