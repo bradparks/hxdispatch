@@ -46,8 +46,9 @@ class PooledDispatcher extends ThreadedDispatcher
         this.queue     = new Deque<Job>();
         for (i in 0...workers) {
             this.executors.push(Thread.create(function():Void {
+                var job:Job;
                 while (true) {
-                    var job:Job = this.queue.pop(true);
+                    job = this.queue.pop(true);
                     if (job != null) {
                         job.callback(job.args);
                     }
