@@ -102,7 +102,7 @@ class Promise
         #if (cpp || java || neko)
         this.mutex.release();
         #end
-        return noRemaining || this.isResolved != this.isRejected;
+        return noRemaining && (this.isResolved || this.isRejected);
     }
 
     /**
