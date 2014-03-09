@@ -11,6 +11,8 @@ import maddinxx.hxdispatch.PooledDispatcher;
 #end
 
 #if (cpp || java || neko)
+typedef Dispatcher = PooledDispatcher;
+#elseif js
 typedef Dispatcher = ThreadedDispatcher;
 #end
 
