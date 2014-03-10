@@ -29,7 +29,7 @@ class Promise<T>
     /**
      *
      */
-    public function await(?block:Bool = true):Void
+    public function await():Void
     {
         throw "await() not supported in non-threaded Promise";
     }

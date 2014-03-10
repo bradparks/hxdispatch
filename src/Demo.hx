@@ -3,11 +3,10 @@
 #elseif neko
     import neko.vm.Thread;
 #end
-import hxdispatch.Dispatcher;
-import hxdispatch.Dispatcher.Status;
-import hxdispatch.Dispatcher.Feedback;
 import hxdispatch.Event;
 import hxdispatch.Event.Args;
+import hxdispatch.threaded.Dispatcher;
+import hxdispatch.threaded.Dispatcher.Feedback;
 import hxdispatch.threaded.Future;
 import hxdispatch.threaded.Promise;
 
@@ -49,8 +48,11 @@ class Demo
         dispatcher.registerEvent("click", function(name:Args):Void {
             trace("Event's value is " + name);
         });
-        var feedback:Feedback = dispatcher.trigger("click", { name: "Max" });
-        trace(feedback);
+        Thread.create(function():Void {
+            var feedback:Feedback = dispatcher.trigger("click", { name: "Max" });
+        });
+
+        Sys.sleep(0.5); // wait for other thread triggering
 
         return 0;
     }

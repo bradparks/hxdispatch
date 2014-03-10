@@ -68,6 +68,7 @@ class Future<T> extends hxdispatch.Future<T>
         this.mutex.acquire();
         var ready:Bool = this.isRejected || this.isResolved;
         this.mutex.release();
+
         return ready;
     }
 

@@ -4,7 +4,6 @@ import Map;
 import hxdispatch.Callback;
 import hxdispatch.Event;
 import hxdispatch.Event.Args;
-import hxdispatch.Promise;
 
 /**
  *
@@ -28,6 +27,17 @@ class Dispatcher<T>
         this.map.set("_eventTriggered",    new Array<Callback<Null<T>>>());
         this.map.set("_eventListened",     new Array<Callback<Null<T>>>());
         this.map.set("_eventUnlistened",   new Array<Callback<Null<T>>>());
+    }
+
+    /**
+     * Executes the callback with the provided arguments.
+     *
+     * @param Callback<Null<T>> callback the callback to execute
+     * @param Null<T>           args     the arguments to pass to the callback
+     */
+    private function executeCallback(callback:Callback<Null<T>>, args:Null<T>):Void
+    {
+        callback(args);
     }
 
     /**
@@ -72,7 +82,6 @@ class Dispatcher<T>
                 return Reflect.compareMethods(callback, fn);
             })) {
                 callbacks.push(callback);
-                // this.trigger("_eventListened", { event: event, callback: callback });
                 this.trigger("_eventListened");
 
                 return true;
@@ -106,7 +115,6 @@ class Dispatcher<T>
                 callbacks.push(callback);
             }
             this.map.set(event, callbacks);
-            // this.trigger("_eventRegistered", { event: event, callback: callback });
             this.trigger("_eventRegistered");
 
             return true;
@@ -126,18 +134,17 @@ class Dispatcher<T>
     public function trigger(event:Event, ?args:Null<T>):Feedback
     {
         if (this.hasEvent(event)) {
+            var callbacks:Array<Callback<Null<T>>> = this.map.get(event).copy();
+            var callback:Callback<Null<T>>;
+            for (callback in callbacks) {
+                this.executeCallback(callback, args);
+            }
+
             if (event != "_eventTriggered") {
-                // this.trigger("_eventTriggered", { event: event, args: args });
                 this.trigger("_eventTriggered");
             }
 
-            var callbacks:Array<Callback<Null<T>>> = this.map.get(event);
-            var callback:Callback<Null<T>>;
-            for (callback in callbacks) {
-                callback(args);
-            }
-
-            return { status: Status.OK }; // true
+            return { status: Status.OK };
         }
 
         return { status: Status.NO_SUCH_EVENT };
@@ -155,7 +162,6 @@ class Dispatcher<T>
     {
         if (this.hasEvent(event) && callback != null) {
             if (this.map.get(event).remove(callback)) {
-                // this.trigger("_eventUnlistened", { event: event, callback: callback });
                 this.trigger("_eventUnlistened");
                 return true;
             }
@@ -174,7 +180,6 @@ class Dispatcher<T>
     public function unregisterEvent(event:Event):Bool
     {
         if (this.hasEvent(event)) {
-            // this.trigger("_eventUnregistered", { event: event });
             this.trigger("_eventUnregistered");
             this.map.remove(event);
 
@@ -202,5 +207,6 @@ enum Status
 {
     OK;
     NO_SUCH_EVENT;
+    NOT_DEFINED;
     TRIGGERED;
 }

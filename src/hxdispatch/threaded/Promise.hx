@@ -43,9 +43,9 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      *
      */
-    override public function await(?block:Bool = true):Void
+    override public function await():Void
     {
-        if (!this.isReady && block) {
+        if (!this.isReady) {
             if (Thread.current() == this.thread) { // TODO: never entered
                 var msg:Dynamic = Thread.readMessage(true);
                 while (msg != Signal.READY) {
@@ -62,19 +62,12 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      *
      */
-    public function block():Void
-    {
-        return this.await(true);
-    }
-
-    /**
-     *
-     */
     override public function get_isReady():Bool
     {
         this.mutex.acquire();
         var ready:Bool = this.resolves == 0 && (this.isRejected || this.isResolved);
         this.mutex.release();
+
         return ready;
     }
 
