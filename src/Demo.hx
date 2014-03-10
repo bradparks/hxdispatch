@@ -12,7 +12,6 @@ import hxdispatch.threaded.Dispatcher.Feedback;
 import hxdispatch.threaded.Future;
 import hxdispatch.threaded.Promise;
 import hxdispatch.threaded.PoolDispatcher;
-import hxdispatch.threaded.ThreadDispatcher;
 
 class Demo
 {
