@@ -1,5 +1,7 @@
 #if cpp
     import cpp.vm.Thread;
+#elseif java
+    import java.vm.Thread;
 #elseif neko
     import neko.vm.Thread;
 #end
@@ -11,8 +13,6 @@ import hxdispatch.threaded.Future;
 import hxdispatch.threaded.Promise;
 import hxdispatch.threaded.PoolDispatcher;
 import hxdispatch.threaded.ThreadDispatcher;
-
-typedef D<T> = PoolDispatcher<T>;
 
 class Demo
 {
@@ -48,7 +48,7 @@ class Demo
         promise.await();
         Sys.sleep(0.5); // wait for other thread awaiting
 
-        var dispatcher:D<Args> = new D<Args>();
+        var dispatcher:PoolDispatcher<Args> = new PoolDispatcher<Args>();
         dispatcher.registerEvent("click", function(name:Args):Void {
             Sys.sleep(1);
             trace("Event's value is " + name);

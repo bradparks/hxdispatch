@@ -17,7 +17,7 @@ class Future<T>
      */
     public function new():Void
     {
-        #if !cpp
+        #if (!cpp && !java)
             this.value  = null;
         #end
         this.isRejected = false;
