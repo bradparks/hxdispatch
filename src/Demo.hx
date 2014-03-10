@@ -9,6 +9,10 @@ import hxdispatch.threaded.Dispatcher;
 import hxdispatch.threaded.Dispatcher.Feedback;
 import hxdispatch.threaded.Future;
 import hxdispatch.threaded.Promise;
+import hxdispatch.threaded.PoolDispatcher;
+import hxdispatch.threaded.ThreadDispatcher;
+
+typedef D<T> = PoolDispatcher<T>;
 
 class Demo
 {
@@ -44,15 +48,27 @@ class Demo
         promise.await();
         Sys.sleep(0.5); // wait for other thread awaiting
 
-        var dispatcher:Dispatcher<Args> = new Dispatcher<Args>();
+        var dispatcher:D<Args> = new D<Args>();
         dispatcher.registerEvent("click", function(name:Args):Void {
+            Sys.sleep(1);
             trace("Event's value is " + name);
         });
+        var feedback:Feedback = dispatcher.trigger("click", { name: "Max" });
         Thread.create(function():Void {
-            var feedback:Feedback = dispatcher.trigger("click", { name: "Max" });
+            trace("Before promise resolved");
+            feedback.promise.await();
+            trace("Promise resolved");
+        });
+        Thread.create(function():Void {
+            trace("Before promise resolved");
+            feedback.promise.await();
+            trace("Promise resolved");
         });
 
-        Sys.sleep(0.5); // wait for other thread triggering
+        for (i in 0...30) {
+            Sys.sleep(0.1);
+            trace(i);
+        }
 
         return 0;
     }

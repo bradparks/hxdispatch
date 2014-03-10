@@ -3,4 +3,4 @@ package hxdispatch;
 /**
  *
  */
-typedef Callback<T> = T->Void;
+typedef Callback<T> = Null<T>->Void;

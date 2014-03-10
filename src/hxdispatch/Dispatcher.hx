@@ -11,7 +11,7 @@ import hxdispatch.Event.Args;
 @:generic
 class Dispatcher<T>
 {
-    private var map:Map<Event, Array<Callback<Null<T>>>>;
+    private var map:Map<Event, Array<Callback<T>>>;
     public var events(get, never):Array<Event>;
 
     /**
@@ -19,23 +19,23 @@ class Dispatcher<T>
      */
     public function new():Void
     {
-        this.map = new Map<Event, Array<Callback<Null<T>>>>();
+        this.map = new Map<Event, Array<Callback<T>>>();
 
         // internal events
-        this.map.set("_eventRegistered",   new Array<Callback<Null<T>>>());
-        this.map.set("_eventUnregistered", new Array<Callback<Null<T>>>());
-        this.map.set("_eventTriggered",    new Array<Callback<Null<T>>>());
-        this.map.set("_eventListened",     new Array<Callback<Null<T>>>());
-        this.map.set("_eventUnlistened",   new Array<Callback<Null<T>>>());
+        this.map.set("_eventRegistered",   new Array<Callback<T>>());
+        this.map.set("_eventUnregistered", new Array<Callback<T>>());
+        this.map.set("_eventTriggered",    new Array<Callback<T>>());
+        this.map.set("_eventListened",     new Array<Callback<T>>());
+        this.map.set("_eventUnlistened",   new Array<Callback<T>>());
     }
 
     /**
      * Executes the callback with the provided arguments.
      *
-     * @param Callback<Null<T>> callback the callback to execute
-     * @param Null<T>           args     the arguments to pass to the callback
+     * @param Callback<T> callback the callback to execute
+     * @param Null<T>     args     the arguments to pass to the callback
      */
-    private function executeCallback(callback:Callback<Null<T>>, args:Null<T>):Void
+    private function executeCallback(callback:Callback<T>, args:Null<T>):Void
     {
         callback(args);
     }
@@ -69,16 +69,16 @@ class Dispatcher<T>
     /**
      * Adds the callback function as a listener to the named event.
      *
-     * @param Event             event    the event's name
-     * @param Callback<Null<T>> callback the callback to add
+     * @param Event       event    the event's name
+     * @param Callback<T> callback the callback to add
      *
      * @return Bool true if added to the list
      */
-    public function listenEvent(event:Event, callback:Callback<Null<T>>):Bool
+    public function listenEvent(event:Event, callback:Callback<T>):Bool
     {
         if (this.hasEvent(event) && callback != null) {
-            var callbacks:Array<Callback<Null<T>>> = this.map.get(event);
-            if (!Lambda.exists(callbacks, function(fn:Callback<Null<T>>):Bool {
+            var callbacks:Array<Callback<T>> = this.map.get(event);
+            if (!Lambda.exists(callbacks, function(fn:Callback<T>):Bool {
                 return Reflect.compareMethods(callback, fn);
             })) {
                 callbacks.push(callback);
@@ -94,7 +94,7 @@ class Dispatcher<T>
     /**
      * @see EventDispatcher.listenEvent()
      */
-    public inline function onEvent(event:Event, callback:Callback<Null<T>>):Bool
+    public inline function onEvent(event:Event, callback:Callback<T>):Bool
     {
         return this.listenEvent(event, callback);
     }
@@ -102,15 +102,15 @@ class Dispatcher<T>
     /**
      * Registers a new event with an optional callback.
      *
-     * @param   Event             event    the event's name
-     * @param   Callback<Null<T>> callback the initial callback to set
+     * @param   Event       event    the event's name
+     * @param   Callback<T> callback the initial callback to set
      *
      * @return Bool true if registered successfully
      */
-    public function registerEvent(event:Event, ?callback:Callback<Null<T>>):Bool
+    public function registerEvent(event:Event, ?callback:Callback<T>):Bool
     {
         if (!this.hasEvent(event)) {
-            var callbacks:Array<Callback<Null<T>>> = new Array<Callback<Null<T>>>();
+            var callbacks:Array<Callback<T>> = new Array<Callback<T>>();
             if (callback != null) {
                 callbacks.push(callback);
             }
@@ -134,8 +134,8 @@ class Dispatcher<T>
     public function trigger(event:Event, ?args:Null<T>):Feedback
     {
         if (this.hasEvent(event)) {
-            var callbacks:Array<Callback<Null<T>>> = this.map.get(event).copy();
-            var callback:Callback<Null<T>>;
+            var callbacks:Array<Callback<T>> = this.map.get(event).copy();
+            var callback:Callback<T>;
             for (callback in callbacks) {
                 this.executeCallback(callback, args);
             }
@@ -153,12 +153,12 @@ class Dispatcher<T>
     /**
      * Unlistens/removes the callback from the event listeners.
      *
-     * @param Event             event    the event's name
-     * @param Callback<Null<T>> callback the callback to remove
+     * @param Event       event    the event's name
+     * @param Callback<T> callback the callback to remove
      *
      * @return Bool true if removed successfully
      */
-    public function unlistenEvent(event:Event, callback:Callback<Null<T>>):Bool
+    public function unlistenEvent(event:Event, callback:Callback<T>):Bool
     {
         if (this.hasEvent(event) && callback != null) {
             if (this.map.get(event).remove(callback)) {
