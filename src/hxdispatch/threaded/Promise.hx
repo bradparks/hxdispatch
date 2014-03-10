@@ -31,9 +31,9 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      *
      */
-    public function new():Void
+    public function new(?resolves:Int = 1):Void
     {
-        super();
+        super(resolves);
 
         this.thens  = new Deque<Callback<T>>();
         this.thread = Thread.current();
@@ -70,19 +70,10 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      *
      */
-    // override private function executeCallbacks(args:T):Void
-    // {
-    //     var callback:Callback<T>;
-    //     var iterator:Iterator<Callback<T>> = DequeTools.iterator<Callback<T>>(this.thens);
-    // }
-
-    /**
-     *
-     */
     override public function get_isReady():Bool
     {
         this.mutex.acquire();
-        var ready:Bool = this.isRejected || this.isResolved;
+        var ready:Bool = this.resolves == 0 && (this.isRejected || this.isResolved);
         this.mutex.release();
         return ready;
     }
@@ -93,7 +84,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function reject():Void
     {
         this.mutex.acquire();
-        var ready:Bool = this.isRejected || this.isResolved;
+        var ready:Bool = this.resolves == 0 && (this.isRejected || this.isResolved);
         if (!ready) {
             this.isRejected = true;
             this.thread.sendMessage(Signal.READY); // stop blocking
@@ -111,11 +102,13 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function resolve(args:T):Void
     {
         this.mutex.acquire();
-        var ready:Bool = this.isRejected || this.isResolved;
+        var ready:Bool = this.resolves == 0 && (this.isRejected || this.isResolved);
         if (!ready) {
-            this.executeCallbacks(args);
-            this.isResolved = true;
-            this.thread.sendMessage(Signal.READY); // stop blocking
+            if (--this.resolves == 0) {
+                this.executeCallbacks(args);
+                this.isResolved = true;
+                this.thread.sendMessage(Signal.READY); // stop blocking
+            }
         }
         this.mutex.release();
 
@@ -123,18 +116,6 @@ class Promise<T> extends hxdispatch.Promise<T>
             throw "Promise has already been rejected or resolved";
         }
     }
-
-    /**
-     *
-     */
-    // override public function then(callback:Callback<T>):Void
-    // {
-    //     if (!this.isReady) {
-    //         this.thens.add(callback);
-    //     } else {
-    //         throw "Promise has already been rejected or resolved";
-    //     }
-    // }
 
     /**
      * Allows setting the receiving thread of the READY signal.

@@ -9,6 +9,7 @@ import hxdispatch.Callback;
 class Promise<T>
 {
     private var callbacks:Array<Callback<T>>;
+    private var resolves:Int;
 
     public var isReady(get, never):Bool;
     public var isRejected(default, null):Bool;
@@ -17,9 +18,10 @@ class Promise<T>
     /**
      *
      */
-    public function new():Void
+    public function new(?resolves:Int = 1):Void
     {
         this.callbacks  = new Array<Callback<T>>();
+        this.resolves   = resolves;
         this.isRejected = false;
         this.isResolved = false;
     }
@@ -69,8 +71,10 @@ class Promise<T>
     public function resolve(args:T):Void
     {
         if (!this.isReady) {
-            this.isResolved = true;
-            this.executeCallbacks(args);
+            if (--this.resolves == 0) {
+                this.executeCallbacks(args);
+                this.isResolved = true;
+            }
         } else {
             throw "Promise has already been rejected or resolved";
         }

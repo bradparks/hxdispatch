@@ -3,6 +3,11 @@
 #elseif neko
     import neko.vm.Thread;
 #end
+import hxdispatch.Dispatcher;
+import hxdispatch.Dispatcher.Status;
+import hxdispatch.Dispatcher.Feedback;
+import hxdispatch.Event;
+import hxdispatch.Event.Args;
 import hxdispatch.threaded.Future;
 import hxdispatch.threaded.Promise;
 
@@ -39,6 +44,13 @@ class Demo
 
         promise.await();
         Sys.sleep(0.5); // wait for other thread awaiting
+
+        var dispatcher:Dispatcher<Args> = new Dispatcher<Args>();
+        dispatcher.registerEvent("click", function(name:Args):Void {
+            trace("Event's value is " + name);
+        });
+        var feedback:Feedback = dispatcher.trigger("click", { name: "Max" });
+        trace(feedback);
 
         return 0;
     }
