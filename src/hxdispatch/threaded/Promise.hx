@@ -25,7 +25,7 @@ import hxdispatch.threaded.Signal;
 class Promise<T> extends hxdispatch.Promise<T>
 {
     private var thens:Deque<Callback<T>>;
-    private var thread:Thread;
+    private var waiters:Deque<Thread>;
     private var mutex:Mutex;
 
     /**
@@ -35,9 +35,9 @@ class Promise<T> extends hxdispatch.Promise<T>
     {
         super(resolves);
 
-        this.thens  = new Deque<Callback<T>>();
-        this.thread = Thread.current();
-        this.mutex  = new Mutex();
+        this.thens   = new Deque<Callback<T>>();
+        this.waiters = new Deque<Thread>();
+        this.mutex   = new Mutex();
     }
 
     /**
@@ -46,15 +46,10 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function await():Void
     {
         if (!this.isReady) {
-            if (Thread.current() == this.thread) { // TODO: never entered
-                var msg:Dynamic = Thread.readMessage(true);
-                while (msg != Signal.READY) {
-                    msg = Thread.readMessage(true);
-                }
-            } else {
-                while (!this.isReady) {
-                    Sys.sleep(0.005); // TODO: magic number
-                }
+            this.waiters.add(Thread.current());
+            var msg:Dynamic = Thread.readMessage(true);
+            while (msg != Signal.READY) {
+                msg = Thread.readMessage(true);
             }
         }
     }
@@ -74,13 +69,24 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      *
      */
+    private function notifyWaiters(signal:Signal):Void
+    {
+        var waiter:Thread;
+        while ((waiter = this.waiters.pop(false)) != null) {
+            waiter.sendMessage(signal);
+        }
+    }
+
+    /**
+     *
+     */
     override public function reject():Void
     {
         this.mutex.acquire();
         var ready:Bool = this.resolves == 0 && (this.isRejected || this.isResolved);
         if (!ready) {
             this.isRejected = true;
-            this.thread.sendMessage(Signal.READY); // stop blocking
+            this.notifyWaiters(Signal.READY); // stop blocking
         }
         this.mutex.release();
 
@@ -100,31 +106,12 @@ class Promise<T> extends hxdispatch.Promise<T>
             if (--this.resolves == 0) {
                 this.executeCallbacks(args);
                 this.isResolved = true;
-                this.thread.sendMessage(Signal.READY); // stop blocking
+                this.notifyWaiters(Signal.READY); // stop blocking
             }
         }
         this.mutex.release();
 
         if (ready) {
-            throw "Promise has already been rejected or resolved";
-        }
-    }
-
-    /**
-     * Allows setting the receiving thread of the READY signal.
-     *
-     * Since we can't assume the main thread is waiting for the reject/resolve (await())
-     * we have to frequently pull the isReady property so we don't miss the READY
-     * signal.
-     * As this is done with a Sys.sleep() in between, setting the receiver will bypass the delay.
-     *
-     * @param Thread thread the receiving thread
-     */
-    public function toNotify(thread:Thread):Void
-    {
-        if (!this.isReady) {
-            this.thread = thread;
-        } else {
             throw "Promise has already been rejected or resolved";
         }
     }
