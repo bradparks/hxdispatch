@@ -1,5 +1,7 @@
 package hxdispatch;
 
+import hxdispatch.Callback;
+
 /**
  *
  */
@@ -20,6 +22,14 @@ class Promise<T>
         this.callbacks  = new Array<Callback<T>>();
         this.isRejected = false;
         this.isResolved = false;
+    }
+
+    /**
+     *
+     */
+    public function await(?block:Bool = true):Void
+    {
+        throw "await() not supported in non-threaded Promise";
     }
 
     /**
@@ -78,9 +88,3 @@ class Promise<T>
         }
     }
 }
-
-
-/**
- *
- */
-private typedef Callback<T> = T->Void;

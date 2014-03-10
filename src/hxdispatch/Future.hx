@@ -27,6 +27,18 @@ class Future<T>
     /**
      *
      */
+    public function get(?block:Bool = true):T
+    {
+        if (this.isReady) {
+            return this.value;
+        }
+
+        throw "Future has not been resolved yet";
+    }
+
+    /**
+     *
+     */
     public function get_isReady():Bool
     {
         return this.isRejected || this.isResolved;
@@ -55,17 +67,5 @@ class Future<T>
         } else {
             throw "Future has already been resolved";
         }
-    }
-
-    /**
-     *
-     */
-    public function get(?block:Bool = false):T
-    {
-        if (this.isReady) {
-            return this.value;
-        }
-
-        throw "Future has not been resolved yet";
     }
 }

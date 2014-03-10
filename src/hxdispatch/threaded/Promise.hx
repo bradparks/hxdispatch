@@ -1,25 +1,30 @@
 package hxdispatch.threaded;
 
 #if cpp
+    import cpp.vm.Deque;
     import cpp.vm.Mutex;
     import cpp.vm.Thread;
 #elseif java
+    import java.vm.Deque;
     import java.vm.Mutex;
     import java.vm.Thread;
 #elseif neko
+    import neko.vm.Deque;
     import neko.vm.Mutex;
     import neko.vm.Thread;
 #else
-    #error "Threaded Future is not supported on target platform due to the lack of Mutex/Thread feature."
+    #error "Threaded Promise is not supported on target platform due to the lack of Deque/Mutex/Thread feature."
 #end
+import hxdispatch.Callback;
 import hxdispatch.threaded.Signal;
 
 /**
  *
  */
 @:generic
-class Future<T> extends hxdispatch.Future<T>
+class Promise<T> extends hxdispatch.Promise<T>
 {
+    private var thens:Deque<Callback<T>>;
     private var thread:Thread;
     private var mutex:Mutex;
 
@@ -30,6 +35,7 @@ class Future<T> extends hxdispatch.Future<T>
     {
         super();
 
+        this.thens  = new Deque<Callback<T>>();
         this.thread = Thread.current();
         this.mutex  = new Mutex();
     }
@@ -37,28 +43,38 @@ class Future<T> extends hxdispatch.Future<T>
     /**
      *
      */
-    override public function get(?block:Bool = true):T
+    override public function await(?block:Bool = true):Void
     {
-        if (!this.isReady) {
-            if (block) {
-                if (Thread.current() == this.thread) { // TODO: never entered
-                    var msg:Dynamic = Thread.readMessage(true);
-                    while (msg != Signal.READY) {
-                        msg = Thread.readMessage(true);
-                    }
-                } else {
-                    while (!this.isReady) {
-                        Sys.sleep(0.005); // TODO: magic number
-                    }
+        if (!this.isReady && block) {
+            if (Thread.current() == this.thread) { // TODO: never entered
+                var msg:Dynamic = Thread.readMessage(true);
+                while (msg != Signal.READY) {
+                    msg = Thread.readMessage(true);
                 }
-                return this.value;
             } else {
-                throw "Future has not been resolved yet";
+                while (!this.isReady) {
+                    Sys.sleep(0.005); // TODO: magic number
+                }
             }
         }
-
-        return this.value;
     }
+
+    /**
+     *
+     */
+    public function block():Void
+    {
+        return this.await(true);
+    }
+
+    /**
+     *
+     */
+    // override private function executeCallbacks(args:T):Void
+    // {
+    //     var callback:Callback<T>;
+    //     var iterator:Iterator<Callback<T>> = DequeTools.iterator<Callback<T>>(this.thens);
+    // }
 
     /**
      *
@@ -85,33 +101,45 @@ class Future<T> extends hxdispatch.Future<T>
         this.mutex.release();
 
         if (ready) {
-            throw "Future has already been rejected or resolved";
+            throw "Promise has already been rejected or resolved";
         }
     }
 
     /**
      *
      */
-    override public function resolve(value:T):Void
+    override public function resolve(args:T):Void
     {
         this.mutex.acquire();
         var ready:Bool = this.isRejected || this.isResolved;
         if (!ready) {
-            this.value      = value;
+            this.executeCallbacks(args);
             this.isResolved = true;
             this.thread.sendMessage(Signal.READY); // stop blocking
         }
         this.mutex.release();
 
         if (ready) {
-            throw "Future has already been rejected or resolved";
+            throw "Promise has already been rejected or resolved";
         }
     }
 
     /**
+     *
+     */
+    // override public function then(callback:Callback<T>):Void
+    // {
+    //     if (!this.isReady) {
+    //         this.thens.add(callback);
+    //     } else {
+    //         throw "Promise has already been rejected or resolved";
+    //     }
+    // }
+
+    /**
      * Allows setting the receiving thread of the READY signal.
      *
-     * Since we can't assume the main thread is waiting for the value (get())
+     * Since we can't assume the main thread is waiting for the reject/resolve (await())
      * we have to frequently pull the isReady property so we don't miss the READY
      * signal.
      * As this is done with a Sys.sleep() in between, setting the receiver will bypass the delay.
@@ -123,7 +151,7 @@ class Future<T> extends hxdispatch.Future<T>
         if (!this.isReady) {
             this.thread = thread;
         } else {
-            throw "Future has already been rejected or resolved";
+            throw "Promise has already been rejected or resolved";
         }
     }
 }
