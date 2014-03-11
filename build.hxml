@@ -12,22 +12,22 @@
 # -main Demo.hx
 # -java bin/java
 
---next
--cp src
--main Demo.hx
--js bin/Demo.js
+# --next
+# -cp src
+# -main Demo.hx
+# -js bin/Demo.js
 
---next
--cp src
--main Demo.hx
--php bin/php
+# --next
+# -cp src
+# -main Demo.hx
+# -php bin/php
 
---next
--cp src
--main Demo.hx
--cs bin/cs
+# --next
+# -cp src
+# -main Demo.hx
+# -cs bin/cs
 
---next
--cp src
--main Demo.hx
--swf bin/Demo.swf
+# --next
+# -cp src
+# -main Demo.hx
+# -swf bin/Demo.swf

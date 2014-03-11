@@ -1,61 +1,72 @@
-import maddinxx.hxdispatch.Args;
-import maddinxx.hxdispatch.Callback;
-import maddinxx.hxdispatch.Dispatcher;
-import maddinxx.hxdispatch.Feedback;
-import maddinxx.hxdispatch.Feedback.Status;
-#if (cpp || java || js || neko)
-import maddinxx.hxdispatch.ThreadedDispatcher;
+#if cpp
+    import cpp.vm.Thread;
+#elseif java
+    import java.vm.Thread;
+#elseif neko
+    import neko.vm.Thread;
 #end
-#if (cpp || java || neko)
-import maddinxx.hxdispatch.PooledDispatcher;
-#end
-
-#if (cpp || java || neko)
-typedef Dispatcher = PooledDispatcher;
-#elseif js
-typedef Dispatcher = ThreadedDispatcher;
-#end
+import hxdispatch.Event;
+import hxdispatch.Event.Args;
+import hxdispatch.threaded.Dispatcher;
+import hxdispatch.threaded.Dispatcher.Feedback;
+import hxdispatch.threaded.Future;
+import hxdispatch.threaded.Promise;
+import hxdispatch.threaded.PoolDispatcher;
 
 class Demo
 {
     public static function main():Int
     {
-        var start = haxe.Timer.stamp();
+        var future:Future<Int> = new Future<Int>();
+        Thread.create(function():Void {
+            trace(future.get(true));
+        });
+        Thread.create(function():Void {
+            future.reject();
+        });
 
-        var callback:Callback = function(args:Args):Void {
-            trace("\t\tPosition not defined...");
-            #if (cpp || cs || java || neko)
+        trace(future.get(true));
+        Sys.sleep(0.5); // wait for other thread getting
+
+        var promise:Promise<String> = new Promise<String>();
+        promise.then(function(name:String):Void {
+            trace("My name is " + name);
+        });
+        Thread.create(function():Void {
+            promise.then(function(name:String):Void {
+                trace("His name is " + name);
+            });
+            trace("Thread awaiting");
+            promise.await();
+            trace("Thread got promise too");
+        });
+        Thread.create(function():Void {
+            promise.resolve("Michel");
+        });
+
+        promise.await();
+        Sys.sleep(0.5); // wait for other thread awaiting
+
+        var dispatcher:PoolDispatcher<Args> = new PoolDispatcher<Args>();
+        dispatcher.registerEvent("click", function(name:Args):Void {
             Sys.sleep(1);
-            #end
-            trace("6. Callback thread executed");
-        };
-
-        var dispatcher:Dispatcher = new Dispatcher();
-        dispatcher.onEvent("_eventTriggered", function(args:Args):Void {
-            trace("\t\tInternal event triggered");
+            trace("Event's value is " + name);
         });
-
-        dispatcher.registerEvent("demo", callback);
-        trace("1. registered event");
-
-        dispatcher.onEvent("demo", function(args:Args):Void {
-            trace("\t\tPosition not defined...");
-            #if (cpp || cs || java || neko)
-            Sys.sleep(0.8);
-            #end
-            trace("5. Callback thread executed");
-        });
-        trace("2. Added another callback");
-
-        trace("3. Triggering events");
-        var feedback:Feedback = dispatcher.trigger("demo", { name: "John" });
-        trace("4. Main thread execution");
-
-        var duration = haxe.Timer.stamp() - start;
-        trace(duration);
-
-        if (feedback.status == Status.TRIGGERED  && !feedback.promise.isDone) {
+        var feedback:Feedback = dispatcher.trigger("click", { name: "Max" });
+        Thread.create(function():Void {
+            trace("Before promise resolved");
             feedback.promise.await();
+            trace("Promise resolved");
+        });
+        Thread.create(function():Void {
+            trace("Before promise resolved");
+            feedback.promise.await();
+            trace("Promise resolved");
+        });
+
+        for (i in 0...30) {
+            Sys.sleep(0.1);
+            trace(i);
         }
 
         return 0;
