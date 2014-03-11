@@ -1,0 +1,13 @@
+{
+    "name": "hxdispatch",
+    "url" : "https://git.rackster.ch/MaddinXx/hxdispatch",
+    "license": "MIT",
+    "tags": ["dispatch", "promise", "future", "async", "threaded", "event", "signal"],
+    "description": "An optionally asynchronous dispatch library.",
+    "classPath": "src",
+    "version": "1.0.0",
+    "releasenote": "Initial release",
+    "contributors": [
+	   "MaddinXx"
+    ]
+}
