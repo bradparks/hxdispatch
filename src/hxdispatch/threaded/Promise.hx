@@ -103,7 +103,7 @@ class Promise<T> extends hxdispatch.Promise<T>
         this.mutex.acquire();
         var ready:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
         if (!ready) {
-            if (--this.resolves == 0) {
+            if (--this.resolves <= 0) {
                 this.executeCallbacks(args);
                 this.isResolved = true;
                 this.notifyWaiters(Signal.READY); // stop blocking

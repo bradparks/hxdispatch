@@ -71,7 +71,7 @@ class Promise<T>
     public function resolve(args:T):Void
     {
         if (!this.isReady) {
-            if (--this.resolves == 0) {
+            if (--this.resolves <= 0) {
                 this.executeCallbacks(args);
                 this.isResolved = true;
             }
