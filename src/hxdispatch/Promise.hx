@@ -39,7 +39,7 @@ class Promise<T>
      */
     public function get_isReady():Bool
     {
-        return this.isRejected || this.isResolved;
+        return this.resolves <= 0 && (this.isRejected || this.isResolved);
     }
 
     /**

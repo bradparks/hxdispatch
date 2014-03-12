@@ -60,7 +60,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function get_isReady():Bool
     {
         this.mutex.acquire();
-        var ready:Bool = this.resolves == 0 && (this.isRejected || this.isResolved);
+        var ready:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
         this.mutex.release();
 
         return ready;
@@ -83,7 +83,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function reject():Void
     {
         this.mutex.acquire();
-        var ready:Bool = this.resolves == 0 && (this.isRejected || this.isResolved);
+        var ready:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
         if (!ready) {
             this.isRejected = true;
             this.notifyWaiters(Signal.READY); // stop blocking
@@ -101,7 +101,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function resolve(args:T):Void
     {
         this.mutex.acquire();
-        var ready:Bool = this.resolves == 0 && (this.isRejected || this.isResolved);
+        var ready:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
         if (!ready) {
             if (--this.resolves == 0) {
                 this.executeCallbacks(args);
