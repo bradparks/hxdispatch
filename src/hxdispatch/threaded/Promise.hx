@@ -121,13 +121,17 @@ class Promise<T> extends hxdispatch.Promise<T>
     public static function when<T>(promises:Array<Promise<T>>):Promise<T>
     {
         var promise:Promise<T> = new Promise<T>(0);
+        var ready:Bool;
         for (p in promises) {
-            if (!p.isReady) {
+            p.mutex.acquire();
+            ready = p.resolves <= 0 && (p.isRejected || p.isResolved);
+            if (!ready) {
                 promise.resolves += 1;
                 p.then(function(args:T):Void {
                     promise.resolve(args);
                 });
             }
+            p.mutex.release();
         }
 
         return promise;
