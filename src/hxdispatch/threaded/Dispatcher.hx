@@ -22,7 +22,6 @@ import hxdispatch.utils.Nil;
 /**
  *
  */
-@:generic
 class Dispatcher<T> extends hxdispatch.Dispatcher<T>
 {
     #if !js

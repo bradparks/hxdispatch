@@ -8,7 +8,6 @@ import hxdispatch.Event.Args;
 /**
  *
  */
-@:generic
 class Dispatcher<T>
 {
     private var map:Map<Event, Array<Callback<T>>>;

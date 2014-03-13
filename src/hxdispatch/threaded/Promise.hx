@@ -21,7 +21,6 @@ import hxdispatch.threaded.Signal;
 /**
  *
  */
-@:generic
 class Promise<T> extends hxdispatch.Promise<T>
 {
     private var thens:Deque<Callback<T>>;
@@ -103,7 +102,7 @@ class Promise<T> extends hxdispatch.Promise<T>
         this.mutex.acquire();
         var ready:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
         if (!ready) {
-            if (--this.resolves == 0) {
+            if (--this.resolves <= 0) {
                 this.executeCallbacks(args);
                 this.isResolved = true;
                 this.notifyWaiters(Signal.READY); // stop blocking
@@ -114,5 +113,23 @@ class Promise<T> extends hxdispatch.Promise<T>
         if (ready) {
             throw "Promise has already been rejected or resolved";
         }
+    }
+
+    /**
+     * @see https://github.com/jdonaldson/promhx where I have stolen the idea
+     */
+    public static function when<T>(promises:Array<Promise<T>>):Promise<T>
+    {
+        var promise:Promise<T> = new Promise<T>(0);
+        for (p in promises) {
+            if (!p.isReady) {
+                promise.resolves += 1;
+                p.then(function(args:T):Void {
+                    promise.resolve(args);
+                });
+            }
+        }
+
+        return promise;
     }
 }
