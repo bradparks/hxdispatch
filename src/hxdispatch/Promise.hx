@@ -96,14 +96,20 @@ class Promise<T>
      */
     public static function when<T>(promises:Array<Promise<T>>):Promise<T>
     {
+        var hasUnresolved:Bool = false;
         var promise:Promise<T> = new Promise<T>(0);
         for (p in promises) {
             if (!p.isReady) {
+                hasUnresolved = true;
                 promise.resolves += 1;
                 p.then(function(args:T):Void {
                     promise.resolve(args);
                 });
             }
+        }
+
+        if (hasUnresolved) {
+            throw "Promises have already been rejected or resolved";
         }
 
         return promise;

@@ -120,18 +120,24 @@ class Promise<T> extends hxdispatch.Promise<T>
      */
     public static function when<T>(promises:Array<Promise<T>>):Promise<T>
     {
+        var hasUnresolved:Bool = false;
         var promise:Promise<T> = new Promise<T>(0);
         var ready:Bool;
         for (p in promises) {
             p.mutex.acquire();
             ready = p.resolves <= 0 && (p.isRejected || p.isResolved);
             if (!ready) {
+                hasUnresolved = true;
                 promise.resolves += 1;
                 p.then(function(args:T):Void {
                     promise.resolve(args);
                 });
             }
             p.mutex.release();
+        }
+
+        if (hasUnresolved) {
+            throw "Promises have already been rejected or resolved";
         }
 
         return promise;
