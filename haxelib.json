@@ -5,8 +5,8 @@
     "tags": ["dispatch", "promise", "future", "async", "threaded", "event", "signal"],
     "description": "An optionally asynchronous dispatch library.",
     "classPath": "src",
-    "version": "1.0.1",
-    "releasenote": "Public release",
+    "version": "1.0.2",
+    "releasenote": "Removed @:generic, added when() to Promise",
     "contributors": [
 	   "MaddinXx"
     ]
