@@ -114,4 +114,22 @@ class Promise<T> extends hxdispatch.Promise<T>
             throw "Promise has already been rejected or resolved";
         }
     }
+
+    /**
+     * @see https://github.com/jdonaldson/promhx where I have stolen the idea
+     */
+    public static function when<T>(promises:Array<Promise<T>>):Promise<T>
+    {
+        var promise:Promise<T> = new Promise<T>(0);
+        for (p in promises) {
+            if (!p.isReady) {
+                promise.resolves += 1;
+                p.then(function(args:T):Void {
+                    promise.resolve(args);
+                });
+            }
+        }
+
+        return promise;
+    }
 }

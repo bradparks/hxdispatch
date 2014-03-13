@@ -96,21 +96,16 @@ class Promise<T>
      */
     public static function when<T>(promises:Array<Promise<T>>):Promise<T>
     {
-        var unresolved:Int = 0;
+        var promise:Promise<T> = new Promise<T>(0);
         for (p in promises) {
             if (!p.isReady) {
-                ++unresolved;
-            }
-        }
-
-        var promise:Promise<T> = new Promise<T>(unresolved);
-        for (p in promises) {
-            if (!p.isReady) {
+                promise.resolves += 1;
                 p.then(function(args:T):Void {
                     promise.resolve(args);
                 });
             }
         }
+
         return promise;
     }
 }
