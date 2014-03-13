@@ -20,7 +20,6 @@ import hxdispatch.threaded.Signal;
 /**
  *
  */
-//@:generic
 class Future<T> extends hxdispatch.Future<T>
 {
     private var waiters:Deque<Thread>;

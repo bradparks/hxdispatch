@@ -19,7 +19,6 @@ import hxdispatch.Event.Args;
 /**
  *
  */
-//@:generic
 class PoolDispatcher<T> extends hxdispatch.threaded.Dispatcher<T>
 {
     private var executors:Vector<Executor>;
