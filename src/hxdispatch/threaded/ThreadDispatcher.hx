@@ -16,7 +16,7 @@ import hxdispatch.Callback;
 /**
  *
  */
-@:generic
+//@:generic
 class ThreadDispatcher<T> extends hxdispatch.threaded.Dispatcher<T>
 {
     /**

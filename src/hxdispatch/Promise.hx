@@ -5,7 +5,7 @@ import hxdispatch.Callback;
 /**
  *
  */
- @:generic
+//@:generic
 class Promise<T>
 {
     private var callbacks:Array<Callback<T>>;
@@ -90,5 +90,41 @@ class Promise<T>
         } else {
             throw "Promise has already been rejected or resolved";
         }
+    }
+}
+
+
+/**
+ *
+ */
+class Utils
+{
+    /**
+     *
+     */
+    private function new():Void {}
+
+    /**
+     * @see https://github.com/jdonaldson/promhx where I have stolen the idea
+     */
+    @:generic
+    public static function when<T>(promises:Array<Promise<T>>):Promise<T>
+    {
+        var unresolved:Int = 0;
+        for (p in promises) {
+            if (!p.isReady) {
+                ++unresolved;
+            }
+        }
+
+        var promise:Promise<T> = new Promise<T>(unresolved);
+        for (p in promises) {
+            if (!p.isReady) {
+                p.then(function(args:T):Void {
+                    promise.resolve(args);
+                });
+            }
+        }
+        return promise;
     }
 }

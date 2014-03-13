@@ -3,7 +3,7 @@ package hxdispatch;
 /**
  *
  */
-@:generic
+//@:generic
 class Future<T>
 {
     private var value:T;
