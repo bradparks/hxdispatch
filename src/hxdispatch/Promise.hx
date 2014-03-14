@@ -10,7 +10,7 @@ class Promise<T>
     private var callbacks:Array<Callback<T>>;
     private var resolves:Int;
 
-    public var isReady(get, never):Bool;
+    public var isDone(get, never):Bool;
     public var isRejected(default, null):Bool;
     public var isResolved(default, null):Bool;
 
@@ -36,7 +36,7 @@ class Promise<T>
     /**
      *
      */
-    public function get_isReady():Bool
+    public function get_isDone():Bool
     {
         return this.resolves <= 0 && (this.isRejected || this.isResolved);
     }
@@ -57,7 +57,7 @@ class Promise<T>
      */
     public function reject():Void
     {
-        if (!this.isReady) {
+        if (!this.isDone) {
             this.isRejected = true;
         } else {
             throw "Promise has already been rejected or resolved";
@@ -69,7 +69,7 @@ class Promise<T>
      */
     public function resolve(args:T):Void
     {
-        if (!this.isReady) {
+        if (!this.isDone) {
             if (--this.resolves <= 0) {
                 this.executeCallbacks(args);
                 this.isResolved = true;
@@ -84,7 +84,7 @@ class Promise<T>
      */
     public function then(callback:Callback<T>):Void
     {
-        if (!this.isReady) {
+        if (!this.isDone) {
             this.callbacks.push(callback);
         } else {
             throw "Promise has already been rejected or resolved";
@@ -99,7 +99,7 @@ class Promise<T>
         var hasUnresolved:Bool = false;
         var promise:Promise<T> = new Promise<T>(0);
         for (p in promises) {
-            if (!p.isReady) {
+            if (!p.isDone) {
                 hasUnresolved = true;
                 promise.resolves += 1;
                 p.then(function(args:T):Void {

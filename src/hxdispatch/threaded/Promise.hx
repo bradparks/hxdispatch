@@ -44,7 +44,7 @@ class Promise<T> extends hxdispatch.Promise<T>
      */
     override public function await():Void
     {
-        if (!this.isReady) {
+        if (!this.isDone) {
             this.waiters.add(Thread.current());
             var msg:Dynamic = Thread.readMessage(true);
             while (msg != Signal.READY) {
@@ -56,13 +56,13 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      *
      */
-    override public function get_isReady():Bool
+    override public function get_isDone():Bool
     {
         this.mutex.acquire();
-        var ready:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
+        var done:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
         this.mutex.release();
 
-        return ready;
+        return done;
     }
 
     /**
@@ -82,14 +82,14 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function reject():Void
     {
         this.mutex.acquire();
-        var ready:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
-        if (!ready) {
+        var done:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
+        if (!done) {
             this.isRejected = true;
             this.notifyWaiters(Signal.READY); // stop blocking
         }
         this.mutex.release();
 
-        if (ready) {
+        if (done) {
             throw "Promise has already been rejected or resolved";
         }
     }
@@ -100,8 +100,8 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function resolve(args:T):Void
     {
         this.mutex.acquire();
-        var ready:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
-        if (!ready) {
+        var done:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
+        if (!done) {
             if (--this.resolves <= 0) {
                 this.executeCallbacks(args);
                 this.isResolved = true;
@@ -110,7 +110,7 @@ class Promise<T> extends hxdispatch.Promise<T>
         }
         this.mutex.release();
 
-        if (ready) {
+        if (done) {
             throw "Promise has already been rejected or resolved";
         }
     }
@@ -122,14 +122,14 @@ class Promise<T> extends hxdispatch.Promise<T>
     {
         var hasUnresolved:Bool = false;
         var promise:Promise<T> = new Promise<T>(0);
-        var ready:Bool;
+        var done:Bool;
         for (p in promises) {
             p.mutex.acquire();
-            ready = p.resolves <= 0 && (p.isRejected || p.isResolved);
-            if (!ready) {
+            done = p.resolves <= 0 && (p.isRejected || p.isResolved);
+            if (!done) {
                 hasUnresolved = true;
                 promise.resolves += 1;
-                p.then(function(args:T):Void {
+                p.callbacks.push(function(args:T):Void {
                     promise.resolve(args);
                 });
             }
