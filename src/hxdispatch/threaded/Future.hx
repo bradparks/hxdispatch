@@ -60,7 +60,7 @@ class Future<T> extends hxdispatch.Future<T>
     /**
      *
      */
-    override public function get_isReady():Bool
+    override private function get_isReady():Bool
     {
         this.mutex.acquire();
         var ready:Bool = this.isRejected || this.isResolved;

@@ -44,7 +44,7 @@ class Dispatcher<T>
      *
      * @return Array<Event> the registered events
      */
-    public function get_events():Array<Event>
+    private function get_events():Array<Event>
     {
         var events:Array<Event> = new Array<Event>();
         for (key in this.map.keys()) {

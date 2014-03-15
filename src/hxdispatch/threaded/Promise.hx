@@ -56,7 +56,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      *
      */
-    override public function get_isDone():Bool
+    override private function get_isDone():Bool
     {
         this.mutex.acquire();
         var done:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);

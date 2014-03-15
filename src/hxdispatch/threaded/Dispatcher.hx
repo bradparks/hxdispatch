@@ -42,7 +42,7 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
     /**
      * @{inherit}
      */
-    override public function get_events():Array<Event>
+    override private function get_events():Array<Event>
     {
         var events:Array<Event> = new Array<Event>();
         #if !js

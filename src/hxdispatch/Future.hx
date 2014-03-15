@@ -38,7 +38,7 @@ class Future<T>
     /**
      *
      */
-    public function get_isReady():Bool
+    private function get_isReady():Bool
     {
         return this.isRejected || this.isResolved;
     }

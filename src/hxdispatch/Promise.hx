@@ -36,7 +36,7 @@ class Promise<T>
     /**
      *
      */
-    public function get_isDone():Bool
+    private function get_isDone():Bool
     {
         return this.resolves <= 0 && (this.isRejected || this.isResolved);
     }
