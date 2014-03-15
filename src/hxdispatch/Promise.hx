@@ -101,7 +101,7 @@ class Promise<T>
         for (p in promises) {
             if (!p.isDone) {
                 hasUnresolved = true;
-                promise.resolves += 1;
+                ++promise.resolves;
                 p.then(function(args:T):Void {
                     promise.resolve(args);
                 });
