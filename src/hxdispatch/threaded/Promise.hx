@@ -128,7 +128,7 @@ class Promise<T> extends hxdispatch.Promise<T>
             done = p.resolves <= 0 && (p.isRejected || p.isResolved);
             if (!done) {
                 hasUnresolved = true;
-                promise.resolves += 1;
+                ++promise.resolves;
                 p.callbacks.push(function(args:T):Void {
                     promise.resolve(args);
                 });
