@@ -19,7 +19,12 @@ import hxdispatch.Callback;
 import hxdispatch.threaded.Signal;
 
 /**
+ * Thread-safe Promise implementation.
  *
+ * This version can be rejected/resolved by other threads and been awaited by them
+ * as well (even by multiple threads).
+ *
+ * @{inherit}
  */
 class Promise<T> extends hxdispatch.Promise<T>
 {
@@ -28,7 +33,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     private var mutex:Mutex;
 
     /**
-     *
+     * @{inherit}
      */
     public function new(?resolves:Int = 1):Void
     {
@@ -40,7 +45,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     }
 
     /**
-     *
+     * @{inherit}
      */
     override public function await():Void
     {
@@ -54,7 +59,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     }
 
     /**
-     *
+     * @{inherit}
      */
     override private function get_isDone():Bool
     {
@@ -66,7 +71,9 @@ class Promise<T> extends hxdispatch.Promise<T>
     }
 
     /**
+     * Notifies all waiting threads that the Promise has been marked as done.
      *
+     * @param Signal signal the signal to send to the waiting threads
      */
     private function notifyWaiters(signal:Signal):Void
     {
@@ -77,7 +84,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     }
 
     /**
-     *
+     * @{inherit}
      */
     override public function reject():Void
     {
@@ -95,7 +102,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     }
 
     /**
-     *
+     * @{inherit}
      */
     override public function resolve(args:T):Void
     {
@@ -116,7 +123,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     }
 
     /**
-     * @see https://github.com/jdonaldson/promhx where I have stolen the idea
+     * @{inherit}
      */
     public static function when<T>(promises:Array<Promise<T>>):Promise<T>
     {

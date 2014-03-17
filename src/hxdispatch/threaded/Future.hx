@@ -18,7 +18,12 @@ package hxdispatch.threaded;
 import hxdispatch.threaded.Signal;
 
 /**
+ * Thread-safe Future implementation.
  *
+ * This version can be rejected/resolved by other threads and been awaited by them
+ * as well (even by multiple threads).
+ *
+ * @{inherit}
  */
 class Future<T> extends hxdispatch.Future<T>
 {
@@ -26,7 +31,7 @@ class Future<T> extends hxdispatch.Future<T>
     private var mutex:Mutex;
 
     /**
-     *
+     * @{inherit}
      */
     public function new():Void
     {
@@ -37,7 +42,7 @@ class Future<T> extends hxdispatch.Future<T>
     }
 
     /**
-     *
+     * @{inherit}
      */
     override public function get(?block:Bool = true):T
     {
@@ -58,7 +63,7 @@ class Future<T> extends hxdispatch.Future<T>
     }
 
     /**
-     *
+     * @{inherit}
      */
     override private function get_isReady():Bool
     {
@@ -70,7 +75,7 @@ class Future<T> extends hxdispatch.Future<T>
     }
 
     /**
-     *
+     * @{inherit}
      */
     private function notifyWaiters(signal:Signal):Void
     {
@@ -81,7 +86,7 @@ class Future<T> extends hxdispatch.Future<T>
     }
 
     /**
-     *
+     * @{inherit}
      */
     override public function reject():Void
     {
@@ -99,7 +104,7 @@ class Future<T> extends hxdispatch.Future<T>
     }
 
     /**
-     *
+     * @{inherit}
      */
     override public function resolve(value:T):Void
     {

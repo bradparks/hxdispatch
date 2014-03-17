@@ -1,13 +1,14 @@
 package hxdispatch;
 
 /**
- *
+ * More meaningful typedef for Dispatcher Events.
  */
 typedef Event = String;
 
 
 /**
- *
+ * The Args abstract can be used as a Dispatcher type parameter to signalize
+ * that the Events triggered accept various parameter types.
  */
 abstract Args(Dynamic)
 {

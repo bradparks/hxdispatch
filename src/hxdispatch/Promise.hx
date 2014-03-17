@@ -3,7 +3,13 @@ package hxdispatch;
 import hxdispatch.Callback;
 
 /**
+ * A Promise can be used to execute registered callbacks as soon as
+ * the Promise has been rejected or resolved.
  *
+ * This version is not thread safe and therefor not of much use, as it will execute
+ * the callbacks in sync (when the last resolve/reject has been called).
+ *
+ * @generic T the type of the arguments being passed to the callbacks
  */
 class Promise<T>
 {
@@ -15,7 +21,9 @@ class Promise<T>
     public var isResolved(default, null):Bool;
 
     /**
+     * Constructor to initialize a new Promise.
      *
+     * @param Int resolves the number of required resolves
      */
     public function new(?resolves:Int = 1):Void
     {
@@ -26,7 +34,10 @@ class Promise<T>
     }
 
     /**
+     * Blocks the calling execution thread until the Promise has
+     * been marked as rejected or resolved.
      *
+     * @throws String always as this method is not implemented in non-threaded version
      */
     public function await():Void
     {
@@ -34,7 +45,9 @@ class Promise<T>
     }
 
     /**
+     * Internal getter method for the isDone property.
      *
+     * @return Bool true if the Promise has been rejected or resolved
      */
     private function get_isDone():Bool
     {
@@ -42,7 +55,9 @@ class Promise<T>
     }
 
     /**
+     * Executes the registered callbacks with the provided arguments.
      *
+     * @param T args the arguments to pass to the callbacks
      */
     private function executeCallbacks(args:T):Void
     {
@@ -53,7 +68,11 @@ class Promise<T>
     }
 
     /**
+     * Rejects the Promise.
      *
+     * A rejected Promise is marked as "done" immediately.
+     *
+     * @throws String if the Promise has already been marked as done
      */
     public function reject():Void
     {
@@ -65,7 +84,14 @@ class Promise<T>
     }
 
     /**
+     * Resolves the Promise with the provided arguments.
      *
+     * The arguments are passed to the registered callbacks when this is the last
+     * required resolve() call, ignored otherwise.
+     *
+     * @param T args the arguments to pass to the callbacks
+     *
+     * @throws String if the Promise has already been marked as done
      */
     public function resolve(args:T):Void
     {
@@ -80,7 +106,12 @@ class Promise<T>
     }
 
     /**
+     * Method allowing to register callbacks to be executed when the Promise
+     * has been marked as "done".
      *
+     * @param Callback<T> callback the callback to register
+     *
+     * @throws String if the Promise has already been marked as done
      */
     public function then(callback:Callback<T>):Void
     {
@@ -92,7 +123,15 @@ class Promise<T>
     }
 
     /**
+     * Ad-hook function that allows waiting for multiple Promises at once.
+     *
      * @see https://github.com/jdonaldson/promhx where I have stolen the idea
+     *
+     * @param Array<Promise<T>> promises the Promises to wait for
+     *
+     * @return Promise<T> a new Promise summarizing the other ones
+     *
+     * @throws String if all Promises have already been done
      */
     public static function when<T>(promises:Array<Promise<T>>):Promise<T>
     {
