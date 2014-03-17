@@ -17,7 +17,14 @@ import hxdispatch.Callback;
 import hxdispatch.Event.Args;
 
 /**
+ * The PoolDispatcher implementation is a thread-safe, asynchronous implementation
+ * of a Dispatcher.
  *
+ * Each callback is executed by one of the defined callback executors.
+ *
+ * It's recommended to use this implementation for trigger intensive applications.
+ *
+ * @{inherit}
  */
 class PoolDispatcher<T> extends hxdispatch.threaded.Dispatcher<T>
 {
@@ -25,7 +32,9 @@ class PoolDispatcher<T> extends hxdispatch.threaded.Dispatcher<T>
     private var jobs:Deque<Job>;
 
     /**
+     * @param Int pool the number of callback executors
      *
+     * @{inherit}
      */
     public function new(?pool:Int = 1):Void
     {
@@ -37,7 +46,7 @@ class PoolDispatcher<T> extends hxdispatch.threaded.Dispatcher<T>
     }
 
     /**
-     *
+     * Initializes the pool of Event callback executors.
      */
     private function initialize():Void
     {
@@ -68,7 +77,7 @@ class PoolDispatcher<T> extends hxdispatch.threaded.Dispatcher<T>
 private typedef Executor = Thread;
 
 /**
- *
+ * A Job combines a Callback with the arguments it should be called with.
  */
 private typedef Job =
 {

@@ -6,7 +6,14 @@ import hxdispatch.Event;
 import hxdispatch.Event.Args;
 
 /**
+ * The Dispatcher class can be used to have a central Event dispatching service/instance.
  *
+ * Objects can register new events, listen for triggers and much more.
+ *
+ * Since this is a non-threaded version all callbacks are executed in sync and the benefit of
+ * using the class is not as large as when used in multi-threaded/async environments.
+ *
+ * @generic T the type of arguments the callbacks/events accept (use Args for a generic version)
  */
 class Dispatcher<T>
 {
@@ -14,7 +21,7 @@ class Dispatcher<T>
     public var events(get, never):Array<Event>;
 
     /**
-     *
+     * Constructor to initialize a new Dispatcher.
      */
     public function new():Void
     {
@@ -44,7 +51,7 @@ class Dispatcher<T>
      *
      * @return Array<Event> the registered events
      */
-    public function get_events():Array<Event>
+    private function get_events():Array<Event>
     {
         var events:Array<Event> = new Array<Event>();
         for (key in this.map.keys()) {
@@ -191,7 +198,8 @@ class Dispatcher<T>
 
 
 /**
- *
+ * Type returned by a trigger() call summarizing the execution
+ * progress of the registered callbacks for the given Event.
  */
 typedef Feedback =
 {
@@ -200,7 +208,10 @@ typedef Feedback =
 
 
 /**
- *
+ * Status marker used in Feedback typedef to tell the caller
+ * if the trigger has been successful (and been executed),
+ * the execution of the callbacks has been dispatched to another
+ * service or the Event does not exist.
  */
 enum Status
 {

@@ -19,7 +19,12 @@ import hxdispatch.Callback;
 import hxdispatch.threaded.Signal;
 
 /**
+ * Thread-safe Promise implementation.
  *
+ * This version can be rejected/resolved by other threads and been awaited by them
+ * as well (even by multiple threads).
+ *
+ * @{inherit}
  */
 class Promise<T> extends hxdispatch.Promise<T>
 {
@@ -28,7 +33,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     private var mutex:Mutex;
 
     /**
-     *
+     * @{inherit}
      */
     public function new(?resolves:Int = 1):Void
     {
@@ -40,11 +45,11 @@ class Promise<T> extends hxdispatch.Promise<T>
     }
 
     /**
-     *
+     * @{inherit}
      */
     override public function await():Void
     {
-        if (!this.isReady) {
+        if (!this.isDone) {
             this.waiters.add(Thread.current());
             var msg:Dynamic = Thread.readMessage(true);
             while (msg != Signal.READY) {
@@ -54,19 +59,21 @@ class Promise<T> extends hxdispatch.Promise<T>
     }
 
     /**
-     *
+     * @{inherit}
      */
-    override public function get_isReady():Bool
+    override private function get_isDone():Bool
     {
         this.mutex.acquire();
-        var ready:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
+        var done:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
         this.mutex.release();
 
-        return ready;
+        return done;
     }
 
     /**
+     * Notifies all waiting threads that the Promise has been marked as done.
      *
+     * @param Signal signal the signal to send to the waiting threads
      */
     private function notifyWaiters(signal:Signal):Void
     {
@@ -77,31 +84,31 @@ class Promise<T> extends hxdispatch.Promise<T>
     }
 
     /**
-     *
+     * @{inherit}
      */
     override public function reject():Void
     {
         this.mutex.acquire();
-        var ready:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
-        if (!ready) {
+        var done:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
+        if (!done) {
             this.isRejected = true;
             this.notifyWaiters(Signal.READY); // stop blocking
         }
         this.mutex.release();
 
-        if (ready) {
+        if (done) {
             throw "Promise has already been rejected or resolved";
         }
     }
 
     /**
-     *
+     * @{inherit}
      */
     override public function resolve(args:T):Void
     {
         this.mutex.acquire();
-        var ready:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
-        if (!ready) {
+        var done:Bool = this.resolves <= 0 && (this.isRejected || this.isResolved);
+        if (!done) {
             if (--this.resolves <= 0) {
                 this.executeCallbacks(args);
                 this.isResolved = true;
@@ -110,24 +117,34 @@ class Promise<T> extends hxdispatch.Promise<T>
         }
         this.mutex.release();
 
-        if (ready) {
+        if (done) {
             throw "Promise has already been rejected or resolved";
         }
     }
 
     /**
-     * @see https://github.com/jdonaldson/promhx where I have stolen the idea
+     * @{inherit}
      */
     public static function when<T>(promises:Array<Promise<T>>):Promise<T>
     {
+        var hasUnresolved:Bool = false;
         var promise:Promise<T> = new Promise<T>(0);
+        var done:Bool;
         for (p in promises) {
-            if (!p.isReady) {
-                promise.resolves += 1;
-                p.then(function(args:T):Void {
+            p.mutex.acquire();
+            done = p.resolves <= 0 && (p.isRejected || p.isResolved);
+            if (!done) {
+                hasUnresolved = true;
+                ++promise.resolves;
+                p.callbacks.push(function(args:T):Void {
                     promise.resolve(args);
                 });
             }
+            p.mutex.release();
+        }
+
+        if (hasUnresolved) {
+            throw "Promises have already been rejected or resolved";
         }
 
         return promise;

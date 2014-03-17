@@ -14,7 +14,15 @@ package hxdispatch.threaded;
 import hxdispatch.Callback;
 
 /**
+ * The ThreadDispatcher implementation is a thread-safe, asynchronous implementation
+ * of a Dispatcher.
  *
+ * Each callback is executed within its own thread and therefor fully non-blocking.
+ *
+ * It's recommended to use this implementation for long-running callbacks that are not triggered
+ * to often (as this would spawn a lot threads).
+ *
+ * @{inherit}
  */
 class ThreadDispatcher<T> extends hxdispatch.threaded.Dispatcher<T>
 {

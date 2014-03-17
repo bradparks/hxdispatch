@@ -20,7 +20,10 @@ import hxdispatch.Dispatcher.Status;
 import hxdispatch.utils.Nil;
 
 /**
+ * Threads-safe Dispatcher implementation preventing register, listen and trigger
+ * faults when multiple threads access the same data.
  *
+ * @{inherit}
  */
 class Dispatcher<T> extends hxdispatch.Dispatcher<T>
 {
@@ -29,7 +32,7 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
     #end
 
     /**
-     *
+     * @{inherit}
      */
     public function new():Void
     {
@@ -42,7 +45,7 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
     /**
      * @{inherit}
      */
-    override public function get_events():Array<Event>
+    override private function get_events():Array<Event>
     {
         var events:Array<Event> = new Array<Event>();
         #if !js
@@ -203,7 +206,7 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
 
 
 /**
- *
+ * @{inherit}
  */
 typedef Feedback =
 {> hxdispatch.Feedback,
