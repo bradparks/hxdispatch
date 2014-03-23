@@ -19,6 +19,7 @@ class HxDispatch
         });
 
         Thread.create(function():Void {
+            Sys.sleep(2);
             p.resolve(5);
         });
 

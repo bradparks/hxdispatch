@@ -5,9 +5,12 @@
     "tags": ["dispatch", "promise", "future", "async", "threaded", "event", "signal"],
     "description": "An optionally asynchronous dispatch library.",
     "classPath": "src",
-    "version": "1.0.3",
-    "releasenote": "More thread-safe, documentation",
+    "dependencies": {
+        "hxstd": "",
+    }
+    "version": "1.1.0",
+    "releasenote": "hxstd dependency, fix synchronization in Promise",
     "contributors": [
-	   "MaddinXx"
+        "MaddinXx"
     ]
 }
