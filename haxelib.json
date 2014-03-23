@@ -7,7 +7,7 @@
     "classPath": "src",
     "dependencies": {
         "hxstd": "",
-    }
+    },
     "version": "1.1.0",
     "releasenote": "hxstd dependency, fix synchronization in Promise",
     "contributors": [
