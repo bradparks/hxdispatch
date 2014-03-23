@@ -1,5 +1,7 @@
 package hxdispatch;
 
+import hxdispatch.WorkflowException;
+
 /**
  * A Future can be understood as a pledge that it will contain a
  * valid value at some time (that is not right now).
@@ -47,7 +49,7 @@ class Future<T>
             return this.value;
         }
 
-        throw "Future has not been resolved yet";
+        throw new WorkflowException("Future has not been resolved yet");
     }
 
     /**
@@ -71,7 +73,7 @@ class Future<T>
         if (!this.isReady) {
             this.isRejected = true;
         } else {
-            throw "Future has already been rejected or resolved";
+            throw new WorkflowException("Future has already been rejected or resolved");
         }
     }
 
@@ -88,7 +90,7 @@ class Future<T>
             this.value      = value;
             this.isResolved = true;
         } else {
-            throw "Future has already been resolved";
+            throw new WorkflowException("Future has already been resolved");
         }
     }
 }

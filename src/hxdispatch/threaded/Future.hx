@@ -15,6 +15,7 @@ package hxdispatch.threaded;
 #else
     #error "Threaded Future is not supported on target platform due to the lack of Deque/Mutex/Thread feature."
 #end
+import hxdispatch.WorkflowException;
 import hxdispatch.threaded.Signal;
 
 /**
@@ -55,7 +56,7 @@ class Future<T> extends hxdispatch.Future<T>
                 }
                 return this.value;
             } else {
-                throw "Future has not been resolved yet";
+                throw new WorkflowException("Future has not been resolved yet");
             }
         }
 
@@ -99,7 +100,7 @@ class Future<T> extends hxdispatch.Future<T>
         this.mutex.release();
 
         if (ready) {
-            throw "Future has already been rejected or resolved";
+            throw new WorkflowException("Future has already been rejected or resolved");
         }
     }
 
@@ -118,7 +119,7 @@ class Future<T> extends hxdispatch.Future<T>
         this.mutex.release();
 
         if (ready) {
-            throw "Future has already been rejected or resolved";
+            throw new WorkflowException("Future has already been rejected or resolved");
         }
     }
 }

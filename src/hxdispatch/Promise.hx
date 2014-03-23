@@ -1,6 +1,8 @@
 package hxdispatch;
 
 import hxdispatch.Callback;
+import hxdispatch.WorkflowException;
+import hxstd.Exception;
 
 /**
  * A Promise can be used to execute registered callbacks as soon as
@@ -41,7 +43,7 @@ class Promise<T>
      */
     public function await():Void
     {
-        throw "await() not supported in non-threaded Promise";
+        throw new Exception("await() not supported in non-threaded Promise");
     }
 
     /**
@@ -79,7 +81,7 @@ class Promise<T>
         if (!this.isDone) {
             this.isRejected = true;
         } else {
-            throw "Promise has already been rejected or resolved";
+            throw new WorkflowException("Promise has already been rejected or resolved");
         }
     }
 
@@ -101,7 +103,7 @@ class Promise<T>
                 this.isResolved = true;
             }
         } else {
-            throw "Promise has already been rejected or resolved";
+            throw new WorkflowException("Promise has already been rejected or resolved");
         }
     }
 
@@ -118,7 +120,7 @@ class Promise<T>
         if (!this.isDone) {
             this.callbacks.push(callback);
         } else {
-            throw "Promise has already been rejected or resolved";
+            throw new WorkflowException("Promise has already been rejected or resolved");
         }
     }
 
@@ -148,7 +150,7 @@ class Promise<T>
         }
 
         if (hasUnresolved) {
-            throw "Promises have already been rejected or resolved";
+            throw new WorkflowException("Promises have already been rejected or resolved");
         }
 
         return promise;

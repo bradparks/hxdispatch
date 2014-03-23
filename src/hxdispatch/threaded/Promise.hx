@@ -16,6 +16,7 @@ package hxdispatch.threaded;
     #error "Threaded Promise is not supported on target platform due to the lack of Deque/Mutex/Thread feature."
 #end
 import hxdispatch.Callback;
+import hxdispatch.WorkflowException;
 import hxdispatch.threaded.Signal;
 
 /**
@@ -61,6 +62,17 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      * @{inherit}
      */
+    override private function executeCallbacks(args:T):Void
+    {
+        var callback:Callback<T>;
+        while ((callback = this.thens.pop(false)) != null) {
+            callback(args);
+        }
+    }
+
+    /**
+     * @{inherit}
+     */
     override private function get_isDone():Bool
     {
         this.mutex.acquire();
@@ -97,7 +109,7 @@ class Promise<T> extends hxdispatch.Promise<T>
         this.mutex.release();
 
         if (done) {
-            throw "Promise has already been rejected or resolved";
+            throw new WorkflowException("Promise has already been rejected or resolved");
         }
     }
 
@@ -118,7 +130,19 @@ class Promise<T> extends hxdispatch.Promise<T>
         this.mutex.release();
 
         if (done) {
-            throw "Promise has already been rejected or resolved";
+            throw new WorkflowException("Promise has already been rejected or resolved");
+        }
+    }
+
+    /**
+     * @{inherit}
+     */
+    override public function then(callback:Callback<T>):Void
+    {
+        if (!this.isDone) {
+            this.thens.push(callback);
+        } else {
+            throw new WorkflowException("Promise has already been rejected or resolved");
         }
     }
 
@@ -136,7 +160,7 @@ class Promise<T> extends hxdispatch.Promise<T>
             if (!done) {
                 hasUnresolved = true;
                 ++promise.resolves;
-                p.callbacks.push(function(args:T):Void {
+                p.thens.push(function(args:T):Void {
                     promise.resolve(args);
                 });
             }
@@ -144,7 +168,7 @@ class Promise<T> extends hxdispatch.Promise<T>
         }
 
         if (hasUnresolved) {
-            throw "Promises have already been rejected or resolved";
+            throw new WorkflowException("Promises have already been rejected or resolved");
         }
 
         return promise;

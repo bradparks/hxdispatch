@@ -17,7 +17,7 @@ import hxdispatch.Dispatcher.Status;
 #else
     import hxdispatch.Promise;
 #end
-import hxdispatch.utils.Nil;
+import hxstd.Nil;
 
 /**
  * Threads-safe Dispatcher implementation preventing register, listen and trigger
