@@ -33,11 +33,19 @@ class ThreadDispatcher<T> extends hxdispatch.threaded.Dispatcher<T>
     {
         #if !js
         Thread.create(function():Void {
-            callback(args);
+            try {
+                callback(args);
+            } catch (ex:Dynamic) {
+                // CallbackException
+            }
         });
         #else
         Timer.delay(function():Void {
-            callback(args);
+            try {
+                callback(args);
+            } catch (ex:Dynamic) {
+                // CallbackException
+            }
         }, 0);
         #end
     }

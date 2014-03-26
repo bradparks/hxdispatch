@@ -55,7 +55,11 @@ class PoolDispatcher<T> extends hxdispatch.threaded.Dispatcher<T>
                 var job:Job;
                 while (true) {
                     job = this.jobs.pop(true);
-                    job.fn(job.args);
+                    try {
+                        job.fn(job.args);
+                    } catch (ex:Dynamic) {
+                        // CallbackException
+                    }
                 }
             }));
         }
