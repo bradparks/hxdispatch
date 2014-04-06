@@ -66,7 +66,11 @@ class Promise<T> extends hxdispatch.Promise<T>
     {
         var callback:Callback<T>;
         while ((callback = this.thens.pop(false)) != null) {
-            callback(args);
+            try {
+                callback(args);
+            } catch (ex:Dynamic) {
+                // CallbackException
+            }
         }
     }
 

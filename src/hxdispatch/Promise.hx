@@ -65,7 +65,11 @@ class Promise<T>
     {
         var callback:Callback<T>;
         for (callback in this.callbacks) {
-            callback(args);
+            try {
+                callback(args);
+            } catch (ex:Dynamic) {
+                // CallbackException
+            }
         }
     }
 

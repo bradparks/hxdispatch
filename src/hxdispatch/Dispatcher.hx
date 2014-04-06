@@ -43,7 +43,11 @@ class Dispatcher<T>
      */
     private function executeCallback(callback:Callback<T>, args:Null<T>):Void
     {
-        callback(args);
+        try {
+            callback(args);
+        } catch (ex:Dynamic) {
+            // CallbackException
+        }
     }
 
     /**
