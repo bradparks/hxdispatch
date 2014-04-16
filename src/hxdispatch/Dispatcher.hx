@@ -1,7 +1,9 @@
 package hxdispatch;
 
-import Map;
+import haxe.ds.IntMap;
 import hxdispatch.Callback;
+import hxdispatch.Event;
+import hxstd.util.Reflector;
 
 /**
  * The Dispatcher class can be used to have a central Event dispatching service/instance.
@@ -14,14 +16,14 @@ import hxdispatch.Callback;
  * @generic E the type of the events one can subscribe to
  * @generic A the type of arguments the callbacks accept
  */
-class Dispatcher<E, A>
+class Dispatcher<E:Event, A>
 {
     /**
      * Stores a map of events and their subscribers.
      *
-     * @var Map<E, Array<Callback<A>>>
+     * @var IntMap<Array<Callback<A>>>
      */
-    private var map:Map<E, Array<Callback<A>>>;
+    private var map:IntMap<Array<Callback<A>>>;
 
 
     /**
@@ -29,7 +31,7 @@ class Dispatcher<E, A>
      */
     public function new():Void
     {
-        this.map = new Map<E, Array<Callback<A>>>();
+        this.map = new IntMap<Array<Callback<A>>>();
     }
 
     /**
@@ -56,7 +58,7 @@ class Dispatcher<E, A>
      */
     public function hasEvent(event:E):Bool
     {
-        return this.map.exists(event);
+        return this.map.exists(Reflector.hashCode(event));
     }
 
     /**
@@ -70,7 +72,7 @@ class Dispatcher<E, A>
     public function subscribe(event:E, callback:Callback<A>):Bool
     {
         if (this.hasEvent(event) && callback != null) {
-            var callbacks:Array<Callback<A>> = this.map.get(event);
+            var callbacks:Array<Callback<A>> = this.map.get(Reflector.hashCode(event));
             if (!Lambda.exists(callbacks, function(fn:Callback<A>):Bool {
                 return Reflect.compareMethods(callback, fn);
             })) {
@@ -94,7 +96,7 @@ class Dispatcher<E, A>
     {
         if (!this.hasEvent(event)) {
             var callbacks:Array<Callback<A>> = new Array<Callback<A>>();
-            this.map.set(event, callbacks);
+            this.map.set(Reflector.hashCode(event), callbacks);
 
             return true;
         }
@@ -113,7 +115,7 @@ class Dispatcher<E, A>
     public function trigger(event:E, ?arg:A = null):Feedback
     {
         if (this.hasEvent(event)) {
-            var callbacks:Array<Callback<A>> = this.map.get(event).copy();
+            var callbacks:Array<Callback<A>> = this.map.get(Reflector.hashCode(event)).copy();
             var callback:Callback<A>;
             for (callback in callbacks) {
                 this.executeCallback(callback, arg);
@@ -136,7 +138,7 @@ class Dispatcher<E, A>
     public function unsubscribe(event:E, callback:Callback<A>):Bool
     {
         if (this.hasEvent(event) && callback != null) {
-            if (this.map.get(event).remove(callback)) {
+            if (this.map.get(Reflector.hashCode(event)).remove(callback)) {
                 return true;
             }
         }
@@ -154,7 +156,7 @@ class Dispatcher<E, A>
     public function unregister(event:E):Bool
     {
         if (this.hasEvent(event)) {
-            this.map.remove(event);
+            this.map.remove(Reflector.hashCode(event));
 
             return true;
         }
