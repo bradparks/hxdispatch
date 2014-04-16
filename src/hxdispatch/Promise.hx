@@ -1,6 +1,7 @@
 package hxdispatch;
 
 import hxdispatch.Callback;
+import hxdispatch.State;
 import hxdispatch.WorkflowException;
 import hxstd.Exception;
 
@@ -30,11 +31,11 @@ class Promise<T>
     private var callbacks:{ done:List<Callback<T>>, rejected:List<Callback<T>>, resolved:List<Callback<T>> };
 
     /**
-     * Stores the status.
+     * Stores the state.
      *
-     * @var hxdispatch.Promise.Status
+     * @var hxdispatch.State
      */
-    private var status:Status;
+    private var state:State;
 
 
     /**
@@ -46,7 +47,7 @@ class Promise<T>
     {
         this.callbacks = { done: new List<Callback<T>>(), rejected: new List<Callback<T>>(), resolved: new List<Callback<T>>() };
         this.resolves  = resolves;
-        this.status    = Status.NONE;
+        this.state     = State.NONE;
     }
 
     /**
@@ -73,7 +74,7 @@ class Promise<T>
      */
     public function isDone():Bool
     {
-        return this.status != Status.NONE;
+        return this.state != State.NONE;
     }
 
     /**
@@ -83,7 +84,7 @@ class Promise<T>
      */
     public function isRejected():Bool
     {
-        return this.status == Status.REJECTED;
+        return this.state == State.REJECTED;
     }
 
     /**
@@ -93,7 +94,7 @@ class Promise<T>
      */
     public function isResolved():Bool
     {
-        return this.status == Status.RESOLVED;
+        return this.state == State.RESOLVED;
     }
 
     /**
@@ -124,7 +125,7 @@ class Promise<T>
     public function reject(?arg:T = null):Void
     {
         if (!this.isDone()) {
-            this.status = Status.REJECTED;
+            this.state = State.REJECTED;
             this.executeCallbacks(this.callbacks.rejected, arg);
             this.executeCallbacks(this.callbacks.done, arg);
 
@@ -167,7 +168,7 @@ class Promise<T>
     {
         if (!this.isDone()) {
             if (--this.resolves == 0) {
-                this.status = Status.RESOLVED;
+                this.state = State.RESOLVED;
                 this.executeCallbacks(this.callbacks.resolved, arg);
                 this.executeCallbacks(this.callbacks.done, arg);
 
@@ -232,15 +233,4 @@ class Promise<T>
 
         return promise;
     }
-}
-
-
-/**
- * Statuses representing the various states a Promise can have.
- */
-private enum Status
-{
-    NONE;     // newly initialized
-    REJECTED;
-    RESOLVED;
 }

@@ -1,5 +1,6 @@
 package hxdispatch;
 
+import hxdispatch.State;
 import hxdispatch.WorkflowException;
 
 /**
@@ -24,11 +25,11 @@ class Future<T>
     private var value:T;
 
     /**
-     * Stores the status.
+     * Stores the state.
      *
-     * @var hxdispatch.Future.Status
+     * @var hxdispatch.State
      */
-    private var status:Status;
+    private var state:State;
 
 
     /**
@@ -39,7 +40,7 @@ class Future<T>
         #if (!cpp && !java)
             this.value  = null;
         #end
-        this.status = Status.NONE;
+        this.state = State.NONE;
     }
 
     /**
@@ -67,7 +68,7 @@ class Future<T>
      */
     public function isReady():Bool
     {
-        return this.status != Status.NONE;
+        return this.state != State.NONE;
     }
 
     /**
@@ -77,7 +78,7 @@ class Future<T>
      */
     public function isRejected():Bool
     {
-        return this.status == Status.REJECTED;
+        return this.state == State.REJECTED;
     }
 
     /**
@@ -87,7 +88,7 @@ class Future<T>
      */
     public function isResolved():Bool
     {
-        return this.status == Status.RESOLVED;
+        return this.state == State.RESOLVED;
     }
 
     /**
@@ -98,7 +99,7 @@ class Future<T>
     public function reject():Void
     {
         if (!this.isReady()) {
-            this.status = Status.REJECTED;
+            this.state = State.REJECTED;
         } else {
             throw new WorkflowException("Future has already been rejected or resolved");
         }
@@ -115,21 +116,9 @@ class Future<T>
     {
         if (!this.isReady()) {
             this.value  = value;
-            this.status = Status.RESOLVED;
+            this.state = State.RESOLVED;
         } else {
             throw new WorkflowException("Future has already been resolved");
         }
     }
 }
-
-
-/**
- * Statuses representing the various states a Future can have.
- */
-private enum Status
-{
-    NONE;     // newly initialized
-    REJECTED;
-    RESOLVED;
-}
-

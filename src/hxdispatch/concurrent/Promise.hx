@@ -1,4 +1,4 @@
-package hxdispatch.threaded;
+package hxdispatch.concurrent;
 
 #if cpp
     import cpp.vm.Deque;
@@ -13,11 +13,10 @@ package hxdispatch.threaded;
     import neko.vm.Mutex;
     import neko.vm.Thread;
 #else
-    #error "Threaded Promise is not supported on target platform due to the lack of Deque/Mutex/Thread feature."
+    #error "Concurrent Promise is not supported on target platform due to the lack of Deque/Mutex/Thread feature."
 #end
 import hxdispatch.Callback;
 import hxdispatch.WorkflowException;
-import hxdispatch.threaded.Signal;
 
 /**
  * Thread-safe Promise implementation.
