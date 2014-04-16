@@ -1,5 +1,6 @@
 package hxdispatch;
 
+import Map;
 import haxe.ds.IntMap;
 import hxdispatch.Callback;
 import hxdispatch.Event;
@@ -21,9 +22,9 @@ class Dispatcher<E:Event, A>
     /**
      * Stores a map of events and their subscribers.
      *
-     * @var IntMap<Array<Callback<A>>>
+     * @var IMap<E, Array<Callback<A>>>
      */
-    private var map:IntMap<Array<Callback<A>>>;
+    private var map:IMap<E, Array<Callback<A>>>;
 
 
     /**
@@ -31,7 +32,7 @@ class Dispatcher<E:Event, A>
      */
     public function new():Void
     {
-        this.map = new IntMap<Array<Callback<A>>>();
+        this.map = cast new IntMap<Array<Callback<A>>>();
     }
 
     /**
@@ -58,7 +59,7 @@ class Dispatcher<E:Event, A>
      */
     public function hasEvent(event:E):Bool
     {
-        return this.map.exists(Reflector.hashCode(event));
+        return this.map.exists(this.toTypeConstrain(event));
     }
 
     /**
@@ -72,7 +73,7 @@ class Dispatcher<E:Event, A>
     public function subscribe(event:E, callback:Callback<A>):Bool
     {
         if (this.hasEvent(event) && callback != null) {
-            var callbacks:Array<Callback<A>> = this.map.get(Reflector.hashCode(event));
+            var callbacks:Array<Callback<A>> = this.map.get(this.toTypeConstrain(event));
             if (!Lambda.exists(callbacks, function(fn:Callback<A>):Bool {
                 return Reflect.compareMethods(callback, fn);
             })) {
@@ -96,12 +97,28 @@ class Dispatcher<E:Event, A>
     {
         if (!this.hasEvent(event)) {
             var callbacks:Array<Callback<A>> = new Array<Callback<A>>();
-            this.map.set(Reflector.hashCode(event), callbacks);
+            this.map.set(this.toTypeConstrain(event), callbacks);
 
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * Returns the Event converted to the type constrain.
+     *
+     * This method was introduced to allow subclasses to override
+     * one method only rather than having to change code in all classes
+     * communicating with the map.
+     *
+     * @param Event event the event to get the constrain for/of
+     *
+     * @return E
+     */
+    private function toTypeConstrain(event:Event):E
+    {
+        return cast Reflector.hashCode(event);
     }
 
     /**
@@ -115,7 +132,7 @@ class Dispatcher<E:Event, A>
     public function trigger(event:E, ?arg:A = null):Feedback
     {
         if (this.hasEvent(event)) {
-            var callbacks:Array<Callback<A>> = this.map.get(Reflector.hashCode(event)).copy();
+            var callbacks:Array<Callback<A>> = this.map.get(this.toTypeConstrain(event)).copy();
             var callback:Callback<A>;
             for (callback in callbacks) {
                 this.executeCallback(callback, arg);
@@ -138,7 +155,7 @@ class Dispatcher<E:Event, A>
     public function unsubscribe(event:E, callback:Callback<A>):Bool
     {
         if (this.hasEvent(event) && callback != null) {
-            if (this.map.get(Reflector.hashCode(event)).remove(callback)) {
+            if (this.map.get(this.toTypeConstrain(event)).remove(callback)) {
                 return true;
             }
         }
@@ -156,7 +173,7 @@ class Dispatcher<E:Event, A>
     public function unregister(event:E):Bool
     {
         if (this.hasEvent(event)) {
-            this.map.remove(Reflector.hashCode(event));
+            this.map.remove(this.toTypeConstrain(event));
 
             return true;
         }

@@ -7,4 +7,4 @@ package hxdispatch;
  * that is used to identify an Event.
  * This might be replaced with a smarter variant some day.
  */
-typedef Event = Dynamic
+typedef Event = Dynamic;
