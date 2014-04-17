@@ -84,7 +84,7 @@ class Promise<T>
     private function executeCallbacks(callbacks:Iterable<Callback<T>>, arg:T):Void
     {
         var callback:Callback<T>;
-        for (callback in Lambda.array(callbacks)) { // make sure we iterate over a copy
+        for (callback in callbacks) {
             try {
                 callback(arg);
             } catch (ex:Dynamic) {}
@@ -132,8 +132,7 @@ class Promise<T>
     {
         if (!this.isDone()) {
             this.state = State.REJECTED;
-            this.executeCallbacks(this.callbacks.rejected, arg);
-            this.executeCallbacks(this.callbacks.done, arg);
+            this.executeCallbacks(Lambda.concat(this.callbacks.rejected, this.callbacks.done), arg);
 
             this.callbacks.done     = null;
             this.callbacks.rejected = null;
@@ -175,8 +174,7 @@ class Promise<T>
         if (!this.isDone()) {
             if (--this.resolves == 0) {
                 this.state = State.RESOLVED;
-                this.executeCallbacks(this.callbacks.resolved, arg);
-                this.executeCallbacks(this.callbacks.done, arg);
+                this.executeCallbacks(Lambda.concat(this.callbacks.resolved, this.callbacks.done), arg);
 
                 this.callbacks.done     = null;
                 this.callbacks.rejected = null;
