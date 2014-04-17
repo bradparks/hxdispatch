@@ -117,7 +117,7 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
             #if !js this.mutex.release(); #end
             var callback:Callback<T>;
             for (callback in callbacks) {
-                this.executeCallback(callback(arg), arg);
+                this.executeCallback(callback, arg);
             }
 
             return { status: Status.OK };
