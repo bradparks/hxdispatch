@@ -16,13 +16,6 @@ class Cascade<T>
      */
     private var tiers:List<Tier<T>>;
 
-    /**
-     * Stores the Tiers to be executed at the end.
-     *
-     * @var List<hxdispatch.Cascade.Tier<T>>
-     */
-    private var finals:List<Tier<T>>;
-
 
     /**
      * Constructor to initialize a new Cascade.
@@ -30,7 +23,6 @@ class Cascade<T>
     public function new():Void
     {
         this.tiers  = new List<Tier<T>>();
-        this.finals = new List<Tier<T>>();
     }
 
     /**
@@ -43,35 +35,13 @@ class Cascade<T>
     public function descend(arg:T):T
     {
         var tier:Tier<T>;
-        for (tier in Lambda.array(this.tiers)) {
+        for (tier in Lambda.array(this.tiers)) { // make sure we iterate over a copy
             try {
                 arg = tier(arg);
-            } catch (ex:Dynamic) {
-
-            }
-        }
-        for (tier in Lambda.array(this.finals)) {
-            try {
-                arg = tier(arg);
-            } catch (ex:Dynamic) {
-
-            }
+            } catch (ex:Dynamic) {}
         }
 
         return arg;
-    }
-
-    /**
-     * Adds the Tier to the end of the Cascade.
-     *
-     * @param hxdispatch.Cascade.Tier<T> callback the Tier to add
-     *
-     * @return hxdispatch.Cascade<T>
-     */
-    public function finally(callback:Tier<T>):Cascade<T>
-    {
-        this.finals.add(callback);
-        return this;
     }
 
     /**

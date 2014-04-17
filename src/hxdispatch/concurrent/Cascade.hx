@@ -41,31 +41,17 @@ class Cascade<T> extends hxdispatch.Cascade<T>
     public function descend(arg:T):T
     {
         this.mutex.acquire();
-        var tiers:Array<Tier<T>> = Lambda.array(this.tiers).concat(Lambda.array(this.finals));
+        var tiers:Array<Tier<T>> = Lambda.array(this.tiers);
         this.mutex.release();
 
         var tier:Tier<T>;
         for (tier in tiers) {
             try {
                 arg = tier(arg);
-            } catch (ex:Dynamic) {
-
-            }
+            } catch (ex:Dynamic) {}
         }
 
         return arg;
-    }
-
-    /**
-     * @{inherit}
-     */
-    public function finally(callback:Tier<T>):Cascade<T>
-    {
-        this.mutex.acquire();
-        this.finals.add(callback);
-        this.mutex.release();
-
-        return this;
     }
 
     /**
