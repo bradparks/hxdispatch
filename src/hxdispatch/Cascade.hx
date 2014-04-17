@@ -21,7 +21,7 @@ class Cascade<T>
      *
      * @var List<hxdispatch.Cascade.Tier<T>>
      */
-    private var finally:List<Tier<T>>;
+    private var finals:List<Tier<T>>;
 
 
     /**
@@ -69,7 +69,7 @@ class Cascade<T>
      */
     public function finally(callback:Tier<T>):Cascade<T>
     {
-        this.finally.add(callback);
+        this.finals.add(callback);
         return this;
     }
 

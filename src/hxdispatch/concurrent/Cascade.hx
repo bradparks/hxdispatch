@@ -41,7 +41,7 @@ class Cascade<T> extends hxdispatch.Cascade<T>
     public function descend(arg:T):T
     {
         this.mutex.acquire();
-        var tiers:Array<Tier<T>> = Lambda.array(this.tiers).concat(Lambda.array(this.finally));
+        var tiers:Array<Tier<T>> = Lambda.array(this.tiers).concat(Lambda.array(this.finals));
         this.mutex.release();
 
         var tier:Tier<T>;
@@ -62,7 +62,7 @@ class Cascade<T> extends hxdispatch.Cascade<T>
     public function finally(callback:Tier<T>):Cascade<T>
     {
         this.mutex.acquire();
-        this.finally.add(callback);
+        this.finals.add(callback);
         this.mutex.release();
 
         return this;
