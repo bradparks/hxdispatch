@@ -1,7 +1,7 @@
 package hxdispatch.tests.concurrent;
 
 /**
- * TODO: add JS to concurrent build list (but not compatible with Promise)
+ *
  */
 class Runner
 {
@@ -11,6 +11,7 @@ class Runner
 
         r.add( new hxdispatch.tests.concurrent.TestCascade() );
         r.add( new hxdispatch.tests.concurrent.TestDispatcher() );
+        r.add( new hxdispatch.tests.concurrent.TestFuture() );
         r.add( new hxdispatch.tests.concurrent.TestPromise() );
 
         r.run();
