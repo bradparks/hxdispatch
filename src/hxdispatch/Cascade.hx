@@ -49,7 +49,7 @@ class Cascade<T>
 
             }
         }
-        for (tier in Lambda.array(this.finally)) {
+        for (tier in Lambda.array(this.finals)) {
             try {
                 arg = tier(arg);
             } catch (ex:Dynamic) {
