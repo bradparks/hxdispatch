@@ -81,7 +81,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
     override public function testMultipleResolves():Void
     {
         var executed:Bool = false;
-        this.promise = new hxdispatch.Promise<Int>(2);
+        this.promise = new hxdispatch.async.Promise<Int>(new hxdispatch.async.ThreadExecutor(), 2);
         this.promise.done(function(arg:Int):Void {
             executed = true;
         });
