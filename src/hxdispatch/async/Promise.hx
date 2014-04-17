@@ -83,7 +83,9 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
             var callback:Callback<T>;
             for (callback in callbacks) {
                 this.executor.execute(function(arg:T):Void {
-                    callback(arg);
+                    try {
+                        callback(arg);
+                    } catch (ex:Dynamic) {}
 
                     #if !js mutex.acquire();
                     if (--count == 0) {
@@ -99,14 +101,14 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
      * Unlocks the Lock that is used to block waiters in await() method.
      */
     #if !js
-    private function unlock():Void
-    {
-        this.mutex.waiters.acquire();
-        for (i in 0...this.waiters) {
-            this.lock.release();
+        private function unlock():Void
+        {
+            this.mutex.waiters.acquire();
+            for (i in 0...this.waiters) {
+                this.lock.release();
+            }
+            this.waiters = 0;
+            this.mutex.waiters.release();
         }
-        this.waiters = 0;
-        this.mutex.waiters.release();
-    }
     #end
 }
