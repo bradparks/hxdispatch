@@ -15,17 +15,17 @@ class Cascade<T> extends hxdispatch.concurrent.Cascade<T>
     /**
      * Stores the Executor used to process the Tiers.
      *
-     * @var hxdispatch.async.Executor<hxdispatch.Cascade.Tier<T>>
+     * @var hxdispatch.async.Executor<T>
      */
-    private var executor:Executor<Tier<T>>;
+    private var executor:Executor<T>;
 
 
     /**
-     * @param hxdispatch.async.Executor<hxdispatch.Cascade.Tier<T>> the Tier Executor to use
+     * @param hxdispatch.async.Executor<T> the Tier Executor to use
      *
      * @{inherit}
      */
-    public function new(executor:Executor<Tier<T>>):Void
+    public function new(executor:Executor<T>):Void
     {
         super();
         this.executor = executor;
