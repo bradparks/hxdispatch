@@ -198,13 +198,6 @@ class TestPromise extends haxe.unit.TestCase
         this.promise.resolve(0);
         assertFalse(executed);
 
-        executed = false;
-        this.promise = new hxdispatch.Promise<Int>(2);
-        this.promise.done(function(arg:Int):Void {
-            executed = true;
-        });
-
-        this.promise.resolve(0);
         this.promise.resolve(0);
         assertTrue(executed);
     }
