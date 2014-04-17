@@ -1,0 +1,46 @@
+# C++
+-lib  hxdispatch
+-cp   tests
+-main Runner.hx
+-cpp  bin/cpp
+-cmd  ./bin/cpp/Runner
+
+# C#
+--next
+-lib  hxdispatch
+-cp   tests
+-main Runner.hx
+-cs   bin/cs
+-cmd  mono bin/cs/bin/Runner.exe
+
+# Java
+--next
+-lib  hxdispatch
+-cp   tests
+-main Runner.hx
+-java bin/java
+-cmd  java -jar bin/java/Runner.jar
+
+# Neko
+--next
+-lib  hxdispatch
+-cp   tests
+-main Runner.hx
+-neko bin/Runner.n
+-cmd  neko bin/Runner.n
+
+# PHP
+--next
+-lib  hxdispatch
+-cp   tests
+-main Runner.hx
+-php  bin/php
+-cmd  php bin/php/index.php
+
+# SWF
+--next
+-lib  hxdispatch
+-cp   tests
+-main Runner.hx
+-swf  bin/Runner.swf
+-cmd  echo "Open bin/runner.swf in browser to check SWF test results"
