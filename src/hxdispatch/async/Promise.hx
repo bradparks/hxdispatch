@@ -31,10 +31,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     {
         var callback:Callback<T>;
         for (callback in Lambda.array(callbacks)) { // make sure we iterate over a copy
-            this.executor.execute(function(arg:T):Void {
-                    callback(arg);
-                } catch (ex:Dynamic) {}
-            }, arg);
+            this.executor.execute(callback, arg);
         }
     }
 }
