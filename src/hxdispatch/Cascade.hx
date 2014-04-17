@@ -29,7 +29,8 @@ class Cascade<T>
      */
     public function new():Void
     {
-        this.tiers = new List<Tier<T>>();
+        this.tiers  = new List<Tier<T>>();
+        this.finals = new List<Tier<T>>();
     }
 
     /**
