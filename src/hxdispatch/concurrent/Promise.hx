@@ -102,7 +102,7 @@ class Promise<T> extends hxdispatch.Promise<T>
         if (!done) {
             this.state = State.REJECTED;
             #if !js this.mutex.state.release(); #end
-            this.executeCallbacks(Lambda.concat(this.callbacks.rejected, this.callbacks.done), arg);
+            this.executeCallbacks(Lambda.array(this.callbacks.rejected).concat(Lambda.array(this.callbacks.done)), arg);
 
             this.callbacks.done     = null;
             this.callbacks.rejected = null;
@@ -140,7 +140,7 @@ class Promise<T> extends hxdispatch.Promise<T>
             if (--this.resolves == 0) {
                 this.state = State.RESOLVED;
                 #if !js this.mutex.state.release(); #end
-                this.executeCallbacks(Lambda.concat(this.callbacks.resolved, this.callbacks.done), arg);
+                this.executeCallbacks(Lambda.array(this.callbacks.resolved).concat(Lambda.array(this.callbacks.done)), arg);
 
                 this.callbacks.done     = null;
                 this.callbacks.rejected = null;

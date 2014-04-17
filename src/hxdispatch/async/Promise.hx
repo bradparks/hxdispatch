@@ -68,16 +68,16 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     /**
      * @{inherit}
      */
-    override private function executeCallbacks(callbacks:List<Callback<T>>, arg:T):Void
+    override private function executeCallbacks(callbacks:Iterable<Callback<T>>, arg:T):Void
     {
         var callback:Callback<T>;
-        if (callbacks.isEmpty()) {
+        if (callbacks.length == 0) {
             this.unlock();
         } else {
             for (callback in callbacks) {
                 this.executor.execute(function(arg:T):Void {
                     callback(arg);
-                    if (callback == callbacks.last()) {
+                    if (callback == callbacks[callbacks.length - 1]) {
                         this.unlock();
                     }
                 }, arg);
