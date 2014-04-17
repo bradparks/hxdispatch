@@ -6,7 +6,7 @@ package hxdispatch.concurrent;
     import java.vm.Mutex;
 #elseif neko
     import neko.vm.Mutex;
-#elseif !js
+#else
     #error "Concurrent Cascade is not supported on target platform due to the lack of Mutex feature."
 #end
 import hxdispatch.Cascade.Tier;
@@ -23,7 +23,7 @@ class Cascade<T> extends hxdispatch.Cascade<T>
      *
      * @var Mutex
      */
-    #if !js private var mutex:Mutex; #end
+    private var mutex:Mutex;
 
 
     /**
@@ -32,7 +32,7 @@ class Cascade<T> extends hxdispatch.Cascade<T>
     public function new():Void
     {
         super();
-        #if !js this.mutex = new Mutex(); #end
+        this.mutex = new Mutex();
     }
 
     /**
@@ -40,9 +40,9 @@ class Cascade<T> extends hxdispatch.Cascade<T>
      */
     override public function descend(arg:T):T
     {
-        #if !js this.mutex.acquire(); #end
+        this.mutex.acquire();
         var tiers:Array<Tier<T>> = Lambda.array(this.tiers);
-        #if !js this.mutex.release(); #end
+        this.mutex.release();
 
         var tier:Tier<T>;
         for (tier in tiers) {
@@ -57,9 +57,9 @@ class Cascade<T> extends hxdispatch.Cascade<T>
      */
     override public function initially(callback:Tier<T>):Cascade<T>
     {
-        #if !js this.mutex.acquire(); #end
+        this.mutex.acquire();
         this.tiers.push(callback);
-        #if !js this.mutex.release(); #end
+        this.mutex.release();
 
         return this;
     }
@@ -69,9 +69,9 @@ class Cascade<T> extends hxdispatch.Cascade<T>
      */
     override public function then(callback:Tier<T>):Cascade<T>
     {
-        #if !js this.mutex.acquire(); #end
+        this.mutex.acquire();
         this.tiers.add(callback);
-        #if !js this.mutex.release(); #end
+        this.mutex.release();
 
         return this;
     }

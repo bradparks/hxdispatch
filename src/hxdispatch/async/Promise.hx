@@ -18,9 +18,9 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
      *
      * @{inherit}
      */
-    public function new(executor:Executor<Callback<T>>):Void
+    public function new(executor:Executor<Callback<T>>, ?resolves:Int = 1):Void
     {
-        super();
+        super(resolves);
         this.executor = executor;
     }
 

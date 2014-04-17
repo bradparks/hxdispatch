@@ -4,7 +4,11 @@ import hxdispatch.Cascade.Tier;
 import hxdispatch.concurrent.Future;
 
 /**
+ * This Cascade implementation is a thread-safe, asynchronous implementation.
  *
+ * Each Tier is executed by the asynchronous Executor.
+ *
+ * @{inherit}
  */
 class Cascade<T> extends hxdispatch.concurrent.Cascade<T>
 {

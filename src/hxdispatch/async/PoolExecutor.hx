@@ -1,13 +1,16 @@
 package hxdispatch.async;
 
 #if cpp
+    import cpp.vm.Deque;
     import cpp.vm.Thread;
 #elseif java
+    import java.vm.Deque;
     import java.vm.Thread;
 #elseif neko
+    import neko.vm.Deque;
     import neko.vm.Thread;
 #else
-    #error "Pooled Executor is not supported on target platform due to the lack of Thread feature."
+    #error "Pooled Executor is not supported on target platform due to the lack of Deque/Thread feature."
 #end
 import haxe.ds.Vector;
 import hxdispatch.Callback;

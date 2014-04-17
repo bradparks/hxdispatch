@@ -4,8 +4,7 @@ import hxdispatch.Callback;
 import hxdispatch.async.Executor;
 
 /**
- * This Dispatcher implementation is a thread-safe, asynchronous implementation
- * of a Dispatcher.
+ * This Dispatcher implementation is a thread-safe, asynchronous implementation.
  *
  * Each Callback is executed by the asynchronous Executor.
  *
