@@ -8,66 +8,93 @@ import hxdispatch.Event.Args;
 /**
  * The Dispatcher class can be used to have a central Event dispatching service/instance.
  *
- * Objects can register new events, listen for triggers and much more.
+ * Objects can register new Events, listen for triggers and much more.
  *
- * Since this is a non-threaded version all callbacks are executed in sync and the benefit of
+ * Since this is a non-threaded version all Callbacks are executed in sync and the benefit of
  * using the class is not as large as when used in multi-threaded/async environments.
  *
- * @generic T the type of arguments the callbacks/events accept (use Args for a generic version)
+ * @generic A:Args  the type of arguments the Callbacks accept
  */
-class Dispatcher<T>
+class Dispatcher<A:Args>
 {
-    private var map:Map<Event, Array<Callback<T>>>;
-    public var events(get, never):Array<Event>;
+    /**
+     * Stores a map of Events and their Callbacks.
+     *
+     * @var Map<Event, Array<hxdispatch.Callback<A>>>
+     */
+    private var map:Map<Event, Array<Callback<A>>>;
+
 
     /**
      * Constructor to initialize a new Dispatcher.
      */
     public function new():Void
     {
-        this.map = new Map<Event, Array<Callback<T>>>();
-
-        // internal events
-        this.map.set("_eventRegistered",   new Array<Callback<T>>());
-        this.map.set("_eventUnregistered", new Array<Callback<T>>());
-        this.map.set("_eventTriggered",    new Array<Callback<T>>());
-        this.map.set("_eventListened",     new Array<Callback<T>>());
-        this.map.set("_eventUnlistened",   new Array<Callback<T>>());
+        this.map = new Map<Event, Array<Callback<A>>>();
     }
 
     /**
-     * Executes the callback with the provided arguments.
+     * Attachs the Callback to the Event.
      *
-     * @param Callback<T> callback the callback to execute
-     * @param Null<T>     args     the arguments to pass to the callback
+     * @param Event                  event    the Event to attach to
+     * @param hxdispatch.Callback<A> callback the Callback to add
+     *
+     * @return Bool true if attached
      */
-    private function executeCallback(callback:Callback<T>, args:Null<T>):Void
+    public function attach(event:Event, callback:Callback<A>):Bool
+    {
+        if (this.hasEvent(event) && callback != null) {
+            var callbacks:Array<Callback<A>> = this.map.get(event);
+            if (!Lambda.exists(callbacks, function(fn:Callback<A>):Bool {
+                return Reflect.compareMethods(callback, fn);
+            })) {
+                callbacks.push(callback);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Dettachs the Callback from the Event.
+     *
+     * @param Event                  event    the Event to dettach from
+     * @param hxdispatch.Callback<A> callback the Callback to remove
+     *
+     * @return Bool true if dettached successfully
+     */
+    public function dettach(event:Event, callback:Callback<A>):Bool
+    {
+        if (this.hasEvent(event) && callback != null) {
+            if (this.map.get(event).remove(callback)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Executes the Callback with the provided argument.
+     *
+     * @param hxdispatch.Callback<A> callback the Callback to execute
+     * @param A                      arg      the argument to pass to the Callback
+     */
+    private function executeCallback(callback:Callback<A>, arg:A):Void
     {
         try {
-            callback(args);
+            callback(arg);
         } catch (ex:Dynamic) {
             // CallbackException
         }
     }
 
     /**
-     * Returns an Array of all registered events.
+     * Checks if the Event is already registered.
      *
-     * @return Array<Event> the registered events
-     */
-    private function get_events():Array<Event>
-    {
-        var events:Array<Event> = new Array<Event>();
-        for (key in this.map.keys()) {
-            events.push(key);
-        }
-        return events;
-    }
-
-    /**
-     * Checks if the event is already registered.
-     *
-     * @param Event event the event's name
+     * @param Event event the Event to search for
      *
      * @return Bool
      */
@@ -77,55 +104,17 @@ class Dispatcher<T>
     }
 
     /**
-     * Adds the callback function as a listener to the named event.
+     * Registers the new Event.
      *
-     * @param Event       event    the event's name
-     * @param Callback<T> callback the callback to add
-     *
-     * @return Bool true if added to the list
-     */
-    public function listenEvent(event:Event, callback:Callback<T>):Bool
-    {
-        if (this.hasEvent(event) && callback != null) {
-            var callbacks:Array<Callback<T>> = this.map.get(event);
-            if (!Lambda.exists(callbacks, function(fn:Callback<T>):Bool {
-                return Reflect.compareMethods(callback, fn);
-            })) {
-                callbacks.push(callback);
-                this.trigger("_eventListened");
-
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @see EventDispatcher.listenEvent()
-     */
-    public inline function onEvent(event:Event, callback:Callback<T>):Bool
-    {
-        return this.listenEvent(event, callback);
-    }
-
-    /**
-     * Registers a new event with an optional callback.
-     *
-     * @param   Event       event    the event's name
-     * @param   Callback<T> callback the initial callback to set
+     * @param Event event the Event to register
      *
      * @return Bool true if registered successfully
      */
-    public function registerEvent(event:Event, ?callback:Callback<T>):Bool
+    public function register(event:Event):Bool
     {
         if (!this.hasEvent(event)) {
-            var callbacks:Array<Callback<T>> = new Array<Callback<T>>();
-            if (callback != null) {
-                callbacks.push(callback);
-            }
+            var callbacks:Array<Callback<A>> = new Array<Callback<A>>();
             this.map.set(event, callbacks);
-            this.trigger("_eventRegistered");
 
             return true;
         }
@@ -134,24 +123,20 @@ class Dispatcher<T>
     }
 
     /**
-     * Triggers the named event with the optional arguments.
+     * Triggers the event (with the optional event argument).
      *
-     * @param Event   event the event's name
-     * @param Null<T> args  the optional arguments to pass to the callbacks
+     * @param Event event the Event to trigger
+     * @param A     arg   the optional argument to pass to the Callbacks
      *
-     * @return Feedback
+     * @return hxdispatch.Dispatcher.Feedback
      */
-    public function trigger(event:Event, ?args:Null<T>):Feedback
+    public function trigger(event:Event, ?arg:A = null):Feedback
     {
         if (this.hasEvent(event)) {
-            var callbacks:Array<Callback<T>> = this.map.get(event).copy();
-            var callback:Callback<T>;
+            var callbacks:Array<Callback<A>> = this.map.get(event).copy();
+            var callback:Callback<A>;
             for (callback in callbacks) {
-                this.executeCallback(callback, args);
-            }
-
-            if (event != "_eventTriggered") {
-                this.trigger("_eventTriggered");
+                this.executeCallback(callback, arg);
             }
 
             return { status: Status.OK };
@@ -161,36 +146,15 @@ class Dispatcher<T>
     }
 
     /**
-     * Unlistens/removes the callback from the event listeners.
+     * Unregisters the Event from the Dispatcher.
      *
-     * @param Event       event    the event's name
-     * @param Callback<T> callback the callback to remove
+     * @param Event event the Event to unregister
      *
-     * @return Bool true if removed successfully
+     * @return Bool true if unregistered successfully
      */
-    public function unlistenEvent(event:Event, callback:Callback<T>):Bool
-    {
-        if (this.hasEvent(event) && callback != null) {
-            if (this.map.get(event).remove(callback)) {
-                this.trigger("_eventUnlistened");
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Unregisters an event by completely removing it.
-     *
-     * @param Event event the event's name
-     *
-     * @return Bool true if removed successfully
-     */
-    public function unregisterEvent(event:Event):Bool
+    public function unregister(event:Event):Bool
     {
         if (this.hasEvent(event)) {
-            this.trigger("_eventUnregistered");
             this.map.remove(event);
 
             return true;

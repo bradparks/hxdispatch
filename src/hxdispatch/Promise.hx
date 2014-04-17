@@ -1,6 +1,7 @@
 package hxdispatch;
 
 import hxdispatch.Callback;
+import hxdispatch.State;
 import hxdispatch.WorkflowException;
 import hxstd.Exception;
 
@@ -15,58 +16,99 @@ import hxstd.Exception;
  */
 class Promise<T>
 {
-    private var callbacks:Array<Callback<T>>;
+    /**
+     * Stores the number of required resolves before the Promise gets marked as done.
+     *
+     * @var Int
+     */
     private var resolves:Int;
 
-    public var isDone(get, never):Bool;
-    public var isRejected(default, null):Bool;
-    public var isResolved(default, null):Bool;
+    /**
+     * Stores the callbacks to be executed for the various state events.
+     *
+     * @var { done:List<hxdispatch.Callback<T>>, rejected:List<hxdispatch.Callback<T>>, resolved:List<hxdispatch.Callback<T>> }
+     */
+    private var callbacks:{ done:List<Callback<T>>, rejected:List<Callback<T>>, resolved:List<Callback<T>> };
+
+    /**
+     * Stores the state.
+     *
+     * @var hxdispatch.State
+     */
+    private var state:State;
+
 
     /**
      * Constructor to initialize a new Promise.
      *
-     * @param Int resolves the number of required resolves
+     * @param Int resolves the number of required resolves before the Promise gets marked as done
      */
     public function new(?resolves:Int = 1):Void
     {
-        this.callbacks  = new Array<Callback<T>>();
-        this.resolves   = resolves;
-        this.isRejected = false;
-        this.isResolved = false;
+        this.callbacks = { done: new List<Callback<T>>(), rejected: new List<Callback<T>>(), resolved: new List<Callback<T>>() };
+        this.resolves  = resolves;
+        this.state     = State.NONE;
     }
 
     /**
-     * Blocks the calling execution thread until the Promise has
-     * been marked as rejected or resolved.
+     * Method allowing to register callbacks to be executed when the Promise
+     * has been marked as done.
      *
-     * @throws String always as this method is not implemented in non-threaded version
+     * @param hxdispatch.Callback<T> callback the callback to register
+     *
+     * @throws hxdispatch.WorkflowException if the Promise has already been marked as done
      */
-    public function await():Void
+    public function done(callback:Callback<T>):Void
     {
-        throw new Exception("await() not supported in non-threaded Promise");
+        if (!this.isDone()) {
+            this.callbacks.done.add(callback);
+        } else {
+            throw new WorkflowException("Promise has already been rejected or resolved");
+        }
     }
 
     /**
-     * Internal getter method for the isDone property.
+     * Checks if the Promise has been marked as done.
      *
-     * @return Bool true if the Promise has been rejected or resolved
+     * @return Bool
      */
-    private function get_isDone():Bool
+    public function isDone():Bool
     {
-        return this.resolves <= 0 && (this.isRejected || this.isResolved);
+        return this.state != State.NONE;
     }
 
     /**
-     * Executes the registered callbacks with the provided arguments.
+     * Checks if the Promise has been rejected.
      *
-     * @param T args the arguments to pass to the callbacks
+     * @return Bool
      */
-    private function executeCallbacks(args:T):Void
+    public function isRejected():Bool
+    {
+        return this.state == State.REJECTED;
+    }
+
+    /**
+     * Checks if the Promise has been resolved.
+     *
+     * @return Bool
+     */
+    public function isResolved():Bool
+    {
+        return this.state == State.RESOLVED;
+    }
+
+    /**
+     * Executes the registered callbacks with the provided argument.
+     *
+     * @param Iterable<hxdispatch.Callback<T>> callbacks the callbacks to execute
+     * @param T                                arg       the argument to pass to the callbacks
+     */
+    private function executeCallbacks(callbacks:Iterable<Callback<T>>, arg:T):Void
     {
         var callback:Callback<T>;
-        for (callback in this.callbacks) {
+        for (callback in Lambda.array(callbacks)) {
             try {
-                callback(args);
+                callback(arg);
             } catch (ex:Dynamic) {
                 // CallbackException
             }
@@ -76,35 +118,63 @@ class Promise<T>
     /**
      * Rejects the Promise.
      *
-     * A rejected Promise is marked as "done" immediately.
+     * A rejected Promise is marked as done immediately.
      *
-     * @throws String if the Promise has already been marked as done
+     * @throws hxdispatch.WorkflowException if the Promise has already been marked as done
      */
-    public function reject():Void
+    public function reject(?arg:T = null):Void
     {
-        if (!this.isDone) {
-            this.isRejected = true;
+        if (!this.isDone()) {
+            this.state = State.REJECTED;
+            this.executeCallbacks(this.callbacks.rejected, arg);
+            this.executeCallbacks(this.callbacks.done, arg);
+
+            this.callbacks.done     = null;
+            this.callbacks.rejected = null;
+            this.callbacks.resolved = null;
         } else {
             throw new WorkflowException("Promise has already been rejected or resolved");
         }
     }
 
     /**
-     * Resolves the Promise with the provided arguments.
+     * Method allowing to register callbacks to be executed when the Promise
+     * has rejected.
      *
-     * The arguments are passed to the registered callbacks when this is the last
+     * @param hxdispatch.Callback<T> callback the callback to register
+     *
+     * @throws hxdispatch.WorkflowException if the Promise has already been marked as done
+     */
+    public function rejected(callback:Callback<T>):Void
+    {
+        if (!this.isDone()) {
+            this.callbacks.rejected.add(callback);
+        } else {
+            throw new WorkflowException("Promise has already been rejected or resolved");
+        }
+    }
+
+    /**
+     * Resolves the Promise with the provided argument.
+     *
+     * The argument is passed to the registered callbacks when this is the last
      * required resolve() call, ignored otherwise.
      *
-     * @param T args the arguments to pass to the callbacks
+     * @param T arg the argument to pass to the callbacks
      *
-     * @throws String if the Promise has already been marked as done
+     * @throws hxdispatch.WorkflowException if the Promise has already been marked as done
      */
-    public function resolve(args:T):Void
+    public function resolve(?arg:T = null):Void
     {
-        if (!this.isDone) {
-            if (--this.resolves <= 0) {
-                this.executeCallbacks(args);
-                this.isResolved = true;
+        if (!this.isDone()) {
+            if (--this.resolves == 0) {
+                this.state = State.RESOLVED;
+                this.executeCallbacks(this.callbacks.resolved, arg);
+                this.executeCallbacks(this.callbacks.done, arg);
+
+                this.callbacks.done     = null;
+                this.callbacks.rejected = null;
+                this.callbacks.resolved = null;
             }
         } else {
             throw new WorkflowException("Promise has already been rejected or resolved");
@@ -113,47 +183,51 @@ class Promise<T>
 
     /**
      * Method allowing to register callbacks to be executed when the Promise
-     * has been marked as "done".
+     * has resolved.
      *
-     * @param Callback<T> callback the callback to register
+     * @param hxdispatch.Callback<T> callback the callback to register
      *
-     * @throws String if the Promise has already been marked as done
+     * @throws hxdispatch.WorkflowException if the Promise has already been marked as done
      */
-    public function then(callback:Callback<T>):Void
+    public function resolved(callback:Callback<T>):Void
     {
-        if (!this.isDone) {
-            this.callbacks.push(callback);
+        if (!this.isDone()) {
+            this.callbacks.resolved.add(callback);
         } else {
             throw new WorkflowException("Promise has already been rejected or resolved");
         }
     }
 
     /**
-     * Ad-hook function that allows waiting for multiple Promises at once.
+     * Returns a new Promise that will get marked as done when all passed
+     * Promises have been marked as done.
      *
      * @see https://github.com/jdonaldson/promhx where I have stolen the idea
      *
-     * @param Array<Promise<T>> promises the Promises to wait for
+     * @param Iterable<hxdispatch.Promise<T>> promises the Promises to wait for
      *
-     * @return Promise<T> a new Promise summarizing the other ones
+     * @return hxdispatch.Promise<T> a new Promise summarizing the other ones
      *
-     * @throws String if all Promises have already been done
+     * @throws hxdispatch.WorkflowException if all Promises have already been marked as done
      */
-    public static function when<T>(promises:Array<Promise<T>>):Promise<T>
+    public static function when<T>(promises:Iterable<Promise<T>>):Promise<T>
     {
-        var hasUnresolved:Bool = false;
-        var promise:Promise<T> = new Promise<T>(0);
+        var promise:Promise<T> = new Promise<T>(1);
         for (p in promises) {
-            if (!p.isDone) {
-                hasUnresolved = true;
+            if (!p.isDone()) {
                 ++promise.resolves;
-                p.then(function(args:T):Void {
-                    promise.resolve(args);
+                p.done(function(arg:T):Void {
+                    if (p.isRejected()) {
+                        promise.reject(arg);
+                    } else {
+                        promise.resolve(arg);
+                    }
                 });
             }
         }
+        --promise.resolves;
 
-        if (hasUnresolved) {
+        if (promise.resolves == 0) {
             throw new WorkflowException("Promises have already been rejected or resolved");
         }
 

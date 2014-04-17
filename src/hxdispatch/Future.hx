@@ -1,12 +1,13 @@
 package hxdispatch;
 
+import hxdispatch.State;
 import hxdispatch.WorkflowException;
 
 /**
  * A Future can be understood as a pledge that it will contain a
  * valid value at some time (that is not right now).
  *
- * This is useful if you know that you some data will somewhen be available
+ * This is useful if you know that some data will somewhen be available
  * but you are not sure when (but need to wait for it).
  *
  * This version is not thread safe and therefor not of much use, as it will
@@ -16,11 +17,20 @@ import hxdispatch.WorkflowException;
  */
 class Future<T>
 {
+    /**
+     * Stores the value that was passed when resolving.
+     *
+     * @var T
+     */
     private var value:T;
 
-    public var isReady(get, never):Bool;
-    public var isRejected(default, null):Bool;
-    public var isResolved(default, null):Bool;
+    /**
+     * Stores the state.
+     *
+     * @var hxdispatch.State
+     */
+    private var state:State;
+
 
     /**
      * Constructor to initialize a new Future.
@@ -30,8 +40,7 @@ class Future<T>
         #if (!cpp && !java)
             this.value  = null;
         #end
-        this.isRejected = false;
-        this.isResolved = false;
+        this.state = State.NONE;
     }
 
     /**
@@ -41,11 +50,11 @@ class Future<T>
      *
      * @return T the value set
      *
-     * @throws String if the future has not been resolved yet (since the non-threaded version can't wait)
+     * @throws hxdispatch.WorkflowException if the Future has not been resolved yet (since the non-threaded version can't wait)
      */
     public function get(?block:Bool = true):T
     {
-        if (this.isReady) {
+        if (this.isReady()) {
             return this.value;
         }
 
@@ -53,25 +62,44 @@ class Future<T>
     }
 
     /**
-     * Internal method for the isReady property to check if the Future's value
-     * has been set yet.
+     * Checks if the Future is ready (e.g. it is either rejected or resolved).
      *
-     * @return Bool true if value is set
+     * @return Bool
      */
-    private function get_isReady():Bool
+    public function isReady():Bool
     {
-        return this.isRejected || this.isResolved;
+        return this.state != State.NONE;
     }
 
     /**
-     * Rejects the Future, thus marking it as "failed".
+     * Checks if the Future has been rejected.
      *
-     * @throws String if the future has already been marked as ready
+     * @return Bool
+     */
+    public function isRejected():Bool
+    {
+        return this.state == State.REJECTED;
+    }
+
+    /**
+     * Checks if the Future has been resolved.
+     *
+     * @return Bool
+     */
+    public function isResolved():Bool
+    {
+        return this.state == State.RESOLVED;
+    }
+
+    /**
+     * Rejects the Future, thus marking it as failed.
+     *
+     * @throws hxdispatch.WorkflowException if the Future has already been marked as ready
      */
     public function reject():Void
     {
-        if (!this.isReady) {
-            this.isRejected = true;
+        if (!this.isReady()) {
+            this.state = State.REJECTED;
         } else {
             throw new WorkflowException("Future has already been rejected or resolved");
         }
@@ -82,13 +110,13 @@ class Future<T>
      *
      * @param T value the value to set
      *
-     * @throws String if the future has already been marked as ready
+     * @throws hxdispatch.WorkflowException if the Future has already been marked as ready
      */
     public function resolve(value:T):Void
     {
-        if (!this.isReady) {
-            this.value      = value;
-            this.isResolved = true;
+        if (!this.isReady()) {
+            this.value  = value;
+            this.state = State.RESOLVED;
         } else {
             throw new WorkflowException("Future has already been resolved");
         }
