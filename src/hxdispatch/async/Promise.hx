@@ -115,6 +115,9 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
 
                     #if !js mutex.acquire();
                     if (--count == 0) {
+                        this.mutex.state.acquire();
+                        this.executing = false;
+                        this.mutex.state.release();
                         this.unlock();
                     }
                     mutex.release(); #end
