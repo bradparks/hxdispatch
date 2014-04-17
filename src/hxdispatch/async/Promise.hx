@@ -2,12 +2,15 @@ package hxdispatch.async;
 
 #if cpp
     import cpp.vm.Lock;
+    import cpp.vm.Mutex;
 #elseif java
     import java.vm.Lock;
+    import java.vm.Mutex;
 #elseif neko
     import neko.vm.Lock;
+    import neko.vm.Mutex;
 #elseif !js
-    #error "Async Promise is not supported on target platform due to the lack of Lock feature."
+    #error "Async Promise is not supported on target platform due to the lack of Lock/Mutex feature."
 #end
 
 /**
@@ -27,7 +30,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
      *
      * @var Lock
      */
-    private var lock:Lock;
+    #if !js private var lock:Lock; #end
 
     /**
      * Stores the number of waiters.
@@ -45,25 +48,27 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     public function new(executor:Executor<T>, ?resolves:Int = 1):Void
     {
         super(resolves);
-        this.executor = executor;
-        this.lock     = new Lock();
-        this.waiters  = 0;
+        this.executor     = executor;
+        #if !js this.lock = new Lock(); #end
+        this.waiters      = 0;
     }
 
     /**
      * Blocks the calling Thread until the Promise has been marked as done
      * and Callbacks have been processed.
      */
-    public function await():Void
-    {
-        if (!this.isDone()) {
-            this.mutex.waiters.acquire();
-            ++this.waiters;
-            this.mutex.waiters.release();
+    #if !js
+        public function await():Void
+        {
+            if (!this.isDone()) {
+                this.mutex.waiters.acquire();
+                ++this.waiters;
+                this.mutex.waiters.release();
 
-            this.lock.wait();
+                this.lock.wait();
+            }
         }
-    }
+    #end
 
     /**
      * @{inherit}
@@ -72,19 +77,19 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     {
         var count:Int;
         if ((count = Lambda.count(callbacks)) == 0) {
-            this.unlock();
+            #if !js this.unlock(); #end
         } else {
-            var mutex:Mutex = new Mutex();
+            #if !js var mutex:Mutex = new Mutex(); #end
             var callback:Callback<T>;
             for (callback in callbacks) {
                 this.executor.execute(function(arg:T):Void {
                     callback(arg);
 
-                    mutex.acquire();
+                    #if !js mutex.acquire();
                     if (--count == 0) {
                         this.unlock();
                     }
-                    mutex.release();
+                    mutex.release(); #end
                 }, arg);
             }
         }
@@ -93,6 +98,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     /**
      * Unlocks the Lock that is used to block waiters in await() method.
      */
+    #if !js
     private function unlock():Void
     {
         this.mutex.waiters.acquire();
@@ -102,4 +108,5 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
         this.waiters = 0;
         this.mutex.waiters.release();
     }
+    #end
 }
