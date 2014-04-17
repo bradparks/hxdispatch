@@ -36,9 +36,7 @@ class Cascade<T>
     {
         var tier:Tier<T>;
         for (tier in Lambda.array(this.tiers)) { // make sure we iterate over a copy
-            try {
-                arg = tier(arg);
-            } catch (ex:Dynamic) {}
+            arg = tier(arg);
         }
 
         return arg;

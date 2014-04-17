@@ -46,9 +46,7 @@ class Cascade<T> extends hxdispatch.Cascade<T>
 
         var tier:Tier<T>;
         for (tier in tiers) {
-            try {
-                arg = tier(arg);
-            } catch (ex:Dynamic) {}
+            arg = tier(arg);
         }
 
         return arg;

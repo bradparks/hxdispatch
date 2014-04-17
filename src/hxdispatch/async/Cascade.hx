@@ -40,9 +40,7 @@ class Cascade<T> extends hxdispatch.concurrent.Cascade<T>
         this.executor.execute(function(arg:T):Void {
             var tier:Tier<T>;
             for (tier in tiers) {
-                try {
-                    arg = tier(arg);
-                } catch (ex:Dynamic) {}
+                arg = tier(arg);
             }
             future.resolve(arg);
         }, arg);
