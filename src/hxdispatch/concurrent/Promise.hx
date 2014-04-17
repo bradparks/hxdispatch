@@ -1,22 +1,16 @@
 package hxdispatch.concurrent;
 
 #if cpp
-    import cpp.vm.Deque;
     import cpp.vm.Lock;
     import cpp.vm.Mutex;
-    import cpp.vm.Thread;
 #elseif java
-    import java.vm.Deque;
     import java.vm.Lock;
     import java.vm.Mutex;
-    import java.vm.Thread;
 #elseif neko
-    import neko.vm.Deque;
     import neko.vm.Lock;
     import neko.vm.Mutex;
-    import neko.vm.Thread;
 #else
-    #error "Concurrent Promise is not supported on target platform due to the lack of Deque/Lock/Mutex/Thread feature."
+    #error "Concurrent Promise is not supported on target platform due to the lack of Lock/Mutex feature."
 #end
 import hxdispatch.Callback;
 import hxdispatch.State;
@@ -76,6 +70,7 @@ class Promise<T> extends hxdispatch.Promise<T>
             this.mutex.waiters.acquire();
             ++this.waiters;
             this.mutex.waiters.release();
+
             this.lock.wait();
         }
     }
@@ -150,7 +145,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      * @{inherit}
      */
-    override public function reject(?arg:T = null):Void
+    override public function reject(arg:T):Void
     {
         this.mutex.state.acquire();
         var done:Bool = this.state != State.NONE;
@@ -189,7 +184,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      * @{inherit}
      */
-    override public function resolve(?arg:T = null):Void
+    override public function resolve(arg:T):Void
     {
         this.mutex.state.acquire();
         var done:Bool = this.state != State.NONE;

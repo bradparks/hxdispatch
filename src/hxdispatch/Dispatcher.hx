@@ -3,7 +3,6 @@ package hxdispatch;
 import Map;
 import hxdispatch.Callback;
 import hxdispatch.Event;
-import hxdispatch.Event.Args;
 
 /**
  * The Dispatcher class can be used to have a central Event dispatching service/instance.
@@ -13,16 +12,16 @@ import hxdispatch.Event.Args;
  * Since this is a non-threaded version all Callbacks are executed in sync and the benefit of
  * using the class is not as large as when used in multi-threaded/async environments.
  *
- * @generic A:Args  the type of arguments the Callbacks accept
+ * @generic A the type of arguments the Callbacks accept
  */
-class Dispatcher<A:Args>
+class Dispatcher<T>
 {
     /**
      * Stores a map of Events and their Callbacks.
      *
-     * @var Map<Event, Array<hxdispatch.Callback<A>>>
+     * @var Map<Event, Array<hxdispatch.Callback<T>>>
      */
-    private var map:Map<Event, Array<Callback<A>>>;
+    private var map:Map<Event, Array<Callback<T>>>;
 
 
     /**
@@ -30,22 +29,22 @@ class Dispatcher<A:Args>
      */
     public function new():Void
     {
-        this.map = new Map<Event, Array<Callback<A>>>();
+        this.map = new Map<Event, Array<Callback<T>>>();
     }
 
     /**
      * Attachs the Callback to the Event.
      *
      * @param Event                  event    the Event to attach to
-     * @param hxdispatch.Callback<A> callback the Callback to add
+     * @param hxdispatch.Callback<T> callback the Callback to add
      *
      * @return Bool true if attached
      */
-    public function attach(event:Event, callback:Callback<A>):Bool
+    public function attach(event:Event, callback:Callback<T>):Bool
     {
         if (this.hasEvent(event) && callback != null) {
-            var callbacks:Array<Callback<A>> = this.map.get(event);
-            if (!Lambda.exists(callbacks, function(fn:Callback<A>):Bool {
+            var callbacks:Array<Callback<T>> = this.map.get(event);
+            if (!Lambda.exists(callbacks, function(fn:Callback<T>):Bool {
                 return Reflect.compareMethods(callback, fn);
             })) {
                 callbacks.push(callback);
@@ -61,11 +60,11 @@ class Dispatcher<A:Args>
      * Dettachs the Callback from the Event.
      *
      * @param Event                  event    the Event to dettach from
-     * @param hxdispatch.Callback<A> callback the Callback to remove
+     * @param hxdispatch.Callback<T> callback the Callback to remove
      *
      * @return Bool true if dettached successfully
      */
-    public function dettach(event:Event, callback:Callback<A>):Bool
+    public function dettach(event:Event, callback:Callback<T>):Bool
     {
         if (this.hasEvent(event) && callback != null) {
             if (this.map.get(event).remove(callback)) {
@@ -79,16 +78,14 @@ class Dispatcher<A:Args>
     /**
      * Executes the Callback with the provided argument.
      *
-     * @param hxdispatch.Callback<A> callback the Callback to execute
-     * @param A                      arg      the argument to pass to the Callback
+     * @param hxdispatch.Callback<T> callback the Callback to execute
+     * @param T                      arg      the argument to pass to the Callback
      */
-    private function executeCallback(callback:Callback<A>, arg:A):Void
+    private function executeCallback(callback:Callback<T>, arg:T):Void
     {
         try {
             callback(arg);
-        } catch (ex:Dynamic) {
-            // CallbackException
-        }
+        } catch (ex:Dynamic) {}
     }
 
     /**
@@ -113,7 +110,7 @@ class Dispatcher<A:Args>
     public function register(event:Event):Bool
     {
         if (!this.hasEvent(event)) {
-            var callbacks:Array<Callback<A>> = new Array<Callback<A>>();
+            var callbacks:Array<Callback<T>> = new Array<Callback<T>>();
             this.map.set(event, callbacks);
 
             return true;
@@ -126,15 +123,15 @@ class Dispatcher<A:Args>
      * Triggers the event (with the optional event argument).
      *
      * @param Event event the Event to trigger
-     * @param A     arg   the optional argument to pass to the Callbacks
+     * @param T     arg   the optional argument to pass to the Callbacks
      *
      * @return hxdispatch.Dispatcher.Feedback
      */
-    public function trigger(event:Event, ?arg:A = null):Feedback
+    public function trigger(event:Event, arg:T):Feedback
     {
         if (this.hasEvent(event)) {
-            var callbacks:Array<Callback<A>> = this.map.get(event).copy();
-            var callback:Callback<A>;
+            var callbacks:Array<Callback<T>> = this.map.get(event).copy();
+            var callback:Callback<T>;
             for (callback in callbacks) {
                 this.executeCallback(callback, arg);
             }

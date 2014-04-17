@@ -1,7 +1,7 @@
 package hxdispatch;
 
 /**
- * The Cascade (waterfall) class can be used to execute Callbacks
+ * The Cascade (waterfall) class can be used to execute functions
  * (so called Tiers) in order, passing the return value of each Tier
  * to the next one.
  *

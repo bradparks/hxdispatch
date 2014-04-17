@@ -26,9 +26,13 @@ class Promise<T>
     /**
      * Stores the callbacks to be executed for the various state events.
      *
-     * @var { done:List<hxdispatch.Callback<T>>, rejected:List<hxdispatch.Callback<T>>, resolved:List<hxdispatch.Callback<T>> }
+     * @var { done:List<Callback<T>>, rejected:List<Callback<T>>, resolved:List<Callback<T>> }
      */
-    private var callbacks:{ done:List<Callback<T>>, rejected:List<Callback<T>>, resolved:List<Callback<T>> };
+    private var callbacks:{
+        done:List<Callback<T>>,
+        rejected:List<Callback<T>>,
+        resolved:List<Callback<T>>
+    };
 
     /**
      * Stores the state.
@@ -45,7 +49,11 @@ class Promise<T>
      */
     public function new(?resolves:Int = 1):Void
     {
-        this.callbacks = { done: new List<Callback<T>>(), rejected: new List<Callback<T>>(), resolved: new List<Callback<T>>() };
+        this.callbacks = {
+            done:     new List<Callback<T>>(),
+            rejected: new List<Callback<T>>(),
+            resolved: new List<Callback<T>>()
+        };
         this.resolves  = resolves;
         this.state     = State.NONE;
     }
@@ -64,6 +72,22 @@ class Promise<T>
             this.callbacks.done.add(callback);
         } else {
             throw new WorkflowException("Promise has already been rejected or resolved");
+        }
+    }
+
+    /**
+     * Executes the registered callbacks with the provided argument.
+     *
+     * @param Iterable<hxdispatch.Callback<T>> callbacks the callbacks to execute
+     * @param T                                arg       the argument to pass to the callbacks
+     */
+    private function executeCallbacks(callbacks:Iterable<Callback<T>>, arg:T):Void
+    {
+        var callback:Callback<T>;
+        for (callback in Lambda.array(callbacks)) { // make sure we iterate over a copy
+            try {
+                callback(arg);
+            } catch (ex:Dynamic) {}
         }
     }
 
@@ -98,31 +122,13 @@ class Promise<T>
     }
 
     /**
-     * Executes the registered callbacks with the provided argument.
-     *
-     * @param Iterable<hxdispatch.Callback<T>> callbacks the callbacks to execute
-     * @param T                                arg       the argument to pass to the callbacks
-     */
-    private function executeCallbacks(callbacks:Iterable<Callback<T>>, arg:T):Void
-    {
-        var callback:Callback<T>;
-        for (callback in Lambda.array(callbacks)) {
-            try {
-                callback(arg);
-            } catch (ex:Dynamic) {
-                // CallbackException
-            }
-        }
-    }
-
-    /**
      * Rejects the Promise.
      *
      * A rejected Promise is marked as done immediately.
      *
      * @throws hxdispatch.WorkflowException if the Promise has already been marked as done
      */
-    public function reject(?arg:T = null):Void
+    public function reject(arg:T):Void
     {
         if (!this.isDone()) {
             this.state = State.REJECTED;
@@ -164,7 +170,7 @@ class Promise<T>
      *
      * @throws hxdispatch.WorkflowException if the Promise has already been marked as done
      */
-    public function resolve(?arg:T = null):Void
+    public function resolve(arg:T):Void
     {
         if (!this.isDone()) {
             if (--this.resolves == 0) {

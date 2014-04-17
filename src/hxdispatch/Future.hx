@@ -20,9 +20,9 @@ class Future<T>
     /**
      * Stores the value that was passed when resolving.
      *
-     * @var T
+     * @var Null<T>
      */
-    private var value:T;
+    private var value:Null<T>;
 
     /**
      * Stores the state.
@@ -37,9 +37,7 @@ class Future<T>
      */
     public function new():Void
     {
-        #if (!cpp && !java)
-            this.value  = null;
-        #end
+        #if (!cpp && !java) this.value  = null; #end
         this.state = State.NONE;
     }
 
@@ -48,11 +46,11 @@ class Future<T>
      *
      * @param Bool block either to wait until a value is set or not
      *
-     * @return T the value set
+     * @return Null<T> the value set
      *
      * @throws hxdispatch.WorkflowException if the Future has not been resolved yet (since the non-threaded version can't wait)
      */
-    public function get(?block:Bool = true):T
+    public function get(?block:Bool = true):Null<T>
     {
         if (this.isReady()) {
             return this.value;

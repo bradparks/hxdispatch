@@ -4,7 +4,8 @@ import haxe.PosInfos;
 import hxstd.Exception;
 
 /**
- *
+ * Exception to signalize problems in the workflow/code flow
+ * or errors/problems caused by synchronization between threads.
  */
 class WorkflowException extends Exception
 {
