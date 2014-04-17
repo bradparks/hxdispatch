@@ -1,16 +1,13 @@
 package hxdispatch.concurrent;
 
 #if cpp
-    import cpp.vm.Lock;
     import cpp.vm.Mutex;
 #elseif java
-    import java.vm.Lock;
     import java.vm.Mutex;
 #elseif neko
-    import neko.vm.Lock;
     import neko.vm.Mutex;
 #elseif !js
-    #error "Concurrent Promise is not supported on target platform due to the lack of Lock/Mutex feature."
+    #error "Concurrent Promise is not supported on target platform due to the lack of Mutex feature."
 #end
 import hxdispatch.Callback;
 import hxdispatch.State;
@@ -33,20 +30,6 @@ class Promise<T> extends hxdispatch.Promise<T>
      */
     #if !js private var mutex:{ state:Mutex, waiters:Mutex }; #end
 
-    /**
-     * Stores the Lock used to block await() callers.
-     *
-     * @var Lock
-     */
-    #if !js private var lock:Lock; #end
-
-    /**
-     * Stores the number of waiters.
-     *
-     * @var Int
-     */
-    private var waiters:Int;
-
 
     /**
      * @{inherit}
@@ -54,31 +37,8 @@ class Promise<T> extends hxdispatch.Promise<T>
     public function new(?resolves:Int = 1):Void
     {
         super(resolves);
-
-        #if !js this.mutex   = { state: new Mutex(), waiters: new Mutex() }
-        this.lock    = new Lock(); #end
-        this.waiters = 0;
+        #if !js this.mutex = { state: new Mutex(), waiters: new Mutex() } #end
     }
-
-    /**
-     * Blocks the calling Thread until the Promise has been marked as done
-     * and Callbacks have been processed.
-     *
-     * JS: This method is not available, but we make the Promise JS compatible so one can
-     * use the async version.
-     */
-    #if !js
-        public function await():Void
-        {
-            if (!this.isDone()) {
-                this.mutex.waiters.acquire();
-                ++this.waiters;
-                this.mutex.waiters.release();
-
-                this.lock.wait();
-            }
-        }
-    #end
 
     /**
      * @{inherit}
@@ -133,26 +93,6 @@ class Promise<T> extends hxdispatch.Promise<T>
     }
 
     /**
-     * Unlocks the Lock that is used to block waiters in await() method.
-     *
-     * @param Int times the number of times the release() method should be called
-     *
-     * JS: This method is not available, but we make the Promise JS compatible so one can
-     * use the async version.
-     */
-    #if !js
-        private function unlock(times:Int):Void
-        {
-            this.mutex.waiters.acquire();
-            for (i in 0...times) {
-                this.lock.release();
-                --this.waiters;
-            }
-            this.mutex.waiters.release();
-        }
-    #end
-
-    /**
      * @{inherit}
      */
     override public function reject(arg:T):Void
@@ -162,9 +102,7 @@ class Promise<T> extends hxdispatch.Promise<T>
         if (!done) {
             this.state = State.REJECTED;
             #if !js this.mutex.state.release(); #end
-            this.executeCallbacks(this.callbacks.rejected, arg);
-            this.executeCallbacks(this.callbacks.done, arg);
-            #if !js this.unlock(this.waiters); #end
+            this.executeCallbacks(Lambda.concat(this.callbacks.rejected, this.callbacks.done), arg);
 
             this.callbacks.done     = null;
             this.callbacks.rejected = null;
@@ -202,9 +140,7 @@ class Promise<T> extends hxdispatch.Promise<T>
             if (--this.resolves == 0) {
                 this.state = State.RESOLVED;
                 #if !js this.mutex.state.release(); #end
-                this.executeCallbacks(this.callbacks.resolved, arg);
-                this.executeCallbacks(this.callbacks.done, arg);
-                #if !js this.unlock(this.waiters); #end
+                this.executeCallbacks(Lambda.concat(this.callbacks.resolved, this.callbacks.done), arg);
 
                 this.callbacks.done     = null;
                 this.callbacks.rejected = null;
