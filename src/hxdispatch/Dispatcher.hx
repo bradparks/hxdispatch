@@ -1,30 +1,28 @@
 package hxdispatch;
 
 import Map;
-import haxe.ds.IntMap;
 import hxdispatch.Callback;
 import hxdispatch.Event;
-import hxstd.util.Reflector;
+import hxdispatch.Event.Args;
 
 /**
  * The Dispatcher class can be used to have a central Event dispatching service/instance.
  *
- * Objects can register new events, listen for triggers and much more.
+ * Objects can register new Events, listen for triggers and much more.
  *
- * Since this is a non-threaded version all callbacks are executed in sync and the benefit of
+ * Since this is a non-threaded version all Callbacks are executed in sync and the benefit of
  * using the class is not as large as when used in multi-threaded/async environments.
  *
- * @generic E the type of the events one can subscribe to
- * @generic A the type of arguments the callbacks accept
+ * @generic A:Args  the type of arguments the Callbacks accept
  */
-class Dispatcher<E:Event, A>
+class Dispatcher<A:Args>
 {
     /**
-     * Stores a map of events and their subscribers.
+     * Stores a map of Events and their Callbacks.
      *
-     * @var IMap<E, Array<Callback<A>>>
+     * @var Map<Event, Array<hxdispatch.Callback<A>>>
      */
-    private var map:IMap<E, Array<Callback<A>>>;
+    private var map:Map<Event, Array<Callback<A>>>;
 
 
     /**
@@ -32,48 +30,21 @@ class Dispatcher<E:Event, A>
      */
     public function new():Void
     {
-        this.map = cast new IntMap<Array<Callback<A>>>();
+        this.map = new Map<Event, Array<Callback<A>>>();
     }
 
     /**
-     * Executes the callback with the provided argument.
+     * Attachs the Callback to the Event.
      *
-     * @param Callback<A> callback the callback to execute
-     * @param A           arg      the argument to pass to the callback
+     * @param Event                  event    the Event to attach to
+     * @param hxdispatch.Callback<A> callback the Callback to add
+     *
+     * @return Bool true if attached
      */
-    private function executeCallback(callback:Callback<A>, arg:A):Void
-    {
-        try {
-            callback(arg);
-        } catch (ex:Dynamic) {
-            // CallbackException
-        }
-    }
-
-    /**
-     * Checks if the event is already registered.
-     *
-     * @param E event the event to search for
-     *
-     * @return Bool
-     */
-    public function hasEvent(event:E):Bool
-    {
-        return this.map.exists(this.toTypeConstrain(event));
-    }
-
-    /**
-     * Adds the callback to the event's subscriber list.
-     *
-     * @param E           event    the event to subscribe to
-     * @param Callback<A> callback the callback to add
-     *
-     * @return Bool true if added to the list
-     */
-    public function subscribe(event:E, callback:Callback<A>):Bool
+    public function attach(event:Event, callback:Callback<A>):Bool
     {
         if (this.hasEvent(event) && callback != null) {
-            var callbacks:Array<Callback<A>> = this.map.get(this.toTypeConstrain(event));
+            var callbacks:Array<Callback<A>> = this.map.get(event);
             if (!Lambda.exists(callbacks, function(fn:Callback<A>):Bool {
                 return Reflect.compareMethods(callback, fn);
             })) {
@@ -87,17 +58,63 @@ class Dispatcher<E:Event, A>
     }
 
     /**
-     * Registers the new event.
+     * Dettachs the Callback from the Event.
      *
-     * @param E event the event to register
+     * @param Event                  event    the Event to dettach from
+     * @param hxdispatch.Callback<A> callback the Callback to remove
+     *
+     * @return Bool true if dettached successfully
+     */
+    public function dettach(event:Event, callback:Callback<A>):Bool
+    {
+        if (this.hasEvent(event) && callback != null) {
+            if (this.map.get(event).remove(callback)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Executes the Callback with the provided argument.
+     *
+     * @param hxdispatch.Callback<A> callback the Callback to execute
+     * @param A                      arg      the argument to pass to the Callback
+     */
+    private function executeCallback(callback:Callback<A>, arg:A):Void
+    {
+        try {
+            callback(arg);
+        } catch (ex:Dynamic) {
+            // CallbackException
+        }
+    }
+
+    /**
+     * Checks if the Event is already registered.
+     *
+     * @param Event event the Event to search for
+     *
+     * @return Bool
+     */
+    public function hasEvent(event:Event):Bool
+    {
+        return this.map.exists(event);
+    }
+
+    /**
+     * Registers the new Event.
+     *
+     * @param Event event the Event to register
      *
      * @return Bool true if registered successfully
      */
-    public function register(event:E):Bool
+    public function register(event:Event):Bool
     {
         if (!this.hasEvent(event)) {
             var callbacks:Array<Callback<A>> = new Array<Callback<A>>();
-            this.map.set(this.toTypeConstrain(event), callbacks);
+            this.map.set(event, callbacks);
 
             return true;
         }
@@ -106,33 +123,17 @@ class Dispatcher<E:Event, A>
     }
 
     /**
-     * Returns the Event converted to the type constrain.
+     * Triggers the event (with the optional event argument).
      *
-     * This method was introduced to allow subclasses to override
-     * one method only rather than having to change code in all classes
-     * communicating with the map.
+     * @param Event event the Event to trigger
+     * @param A     arg   the optional argument to pass to the Callbacks
      *
-     * @param Event event the event to get the constrain for/of
-     *
-     * @return E
+     * @return hxdispatch.Dispatcher.Feedback
      */
-    private function toTypeConstrain(event:Event):E
-    {
-        return cast Reflector.hashCode(event);
-    }
-
-    /**
-     * Triggers the event (with the optional event arguments).
-     *
-     * @param E event the event to trigger
-     * @param A arg   the optional argument to pass to the callbacks
-     *
-     * @return Feedback
-     */
-    public function trigger(event:E, ?arg:A = null):Feedback
+    public function trigger(event:Event, ?arg:A = null):Feedback
     {
         if (this.hasEvent(event)) {
-            var callbacks:Array<Callback<A>> = this.map.get(this.toTypeConstrain(event)).copy();
+            var callbacks:Array<Callback<A>> = this.map.get(event).copy();
             var callback:Callback<A>;
             for (callback in callbacks) {
                 this.executeCallback(callback, arg);
@@ -145,35 +146,16 @@ class Dispatcher<E:Event, A>
     }
 
     /**
-     * Removes the callback from the event's subscriber list.
+     * Unregisters the Event from the Dispatcher.
      *
-     * @param E           event    the event to remove the callback from
-     * @param Callback<A> callback the callback to remove
-     *
-     * @return Bool true if removed successfully
-     */
-    public function unsubscribe(event:E, callback:Callback<A>):Bool
-    {
-        if (this.hasEvent(event) && callback != null) {
-            if (this.map.get(this.toTypeConstrain(event)).remove(callback)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Unregisters the event from the Dispatcher.
-     *
-     * @param E event the event to unregister
+     * @param Event event the Event to unregister
      *
      * @return Bool true if unregistered successfully
      */
-    public function unregister(event:E):Bool
+    public function unregister(event:Event):Bool
     {
         if (this.hasEvent(event)) {
-            this.map.remove(this.toTypeConstrain(event));
+            this.map.remove(event);
 
             return true;
         }

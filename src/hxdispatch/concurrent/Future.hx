@@ -142,11 +142,10 @@ class Future<T> extends hxdispatch.Future<T>
         var ready:Bool = this.state != State.NONE;
         if (!ready) {
             this.state = State.REJECTED;
+            this.mutex.state.release();
             this.unlock(this.waiters);
-        }
-        this.mutex.state.release();
-
-        if (ready) {
+        } else {
+            this.mutex.state.release();
             throw new WorkflowException("Future has already been rejected or resolved");
         }
     }
@@ -161,11 +160,10 @@ class Future<T> extends hxdispatch.Future<T>
         if (!ready) {
             this.value = value;
             this.state = State.RESOLVED;
+            this.mutex.state.release();
             this.unlock(this.waiters);
-        }
-        this.mutex.state.release();
-
-        if (ready) {
+        } else {
+            this.mutex.state.release();
             throw new WorkflowException("Future has already been rejected or resolved");
         }
     }

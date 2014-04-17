@@ -50,7 +50,7 @@ class Future<T>
      *
      * @return T the value set
      *
-     * @throws WorkflowException if the Future has not been resolved yet (since the non-threaded version can't wait)
+     * @throws hxdispatch.WorkflowException if the Future has not been resolved yet (since the non-threaded version can't wait)
      */
     public function get(?block:Bool = true):T
     {
@@ -94,7 +94,7 @@ class Future<T>
     /**
      * Rejects the Future, thus marking it as failed.
      *
-     * @throws WorkflowException if the future has already been marked as ready
+     * @throws hxdispatch.WorkflowException if the Future has already been marked as ready
      */
     public function reject():Void
     {
@@ -110,7 +110,7 @@ class Future<T>
      *
      * @param T value the value to set
      *
-     * @throws WorkflowException if the future has already been marked as ready
+     * @throws hxdispatch.WorkflowException if the Future has already been marked as ready
      */
     public function resolve(value:T):Void
     {

@@ -1,4 +1,4 @@
-package hxdispatch.threaded;
+package hxdispatch.concurrent;
 
 #if cpp
     import cpp.vm.Thread;
@@ -12,41 +12,42 @@ package hxdispatch.threaded;
     #error "ThreadDispatcher is not supported on target platform due to the lack of Thread feature."
 #end
 import hxdispatch.Callback;
+import hxdispatch.Event.Args;
 
 /**
  * The ThreadDispatcher implementation is a thread-safe, asynchronous implementation
  * of a Dispatcher.
  *
- * Each callback is executed within its own thread and therefor fully non-blocking.
+ * Each Callback is executed within its own thread and therefor fully non-blocking.
  *
  * It's recommended to use this implementation for long-running callbacks that are not triggered
  * to often (as this would spawn a lot threads).
  *
  * @{inherit}
  */
-class ThreadDispatcher<T> extends hxdispatch.threaded.Dispatcher<T>
+class ThreadDispatcher<A:Args> extends hxdispatch.concurrent.Dispatcher<A>
 {
     /**
      * @{inherit}
      */
-    override private function executeCallback(callback:Callback<T>, args:Null<T>):Void
+    override private function executeCallback(callback:Callback<A>, arg:Null<A>):Void
     {
         #if !js
-        Thread.create(function():Void {
-            try {
-                callback(args);
-            } catch (ex:Dynamic) {
-                // CallbackException
-            }
-        });
+            Thread.create(function():Void {
+                try {
+                    callback(arg);
+                } catch (ex:Dynamic) {
+                    // CallbackException
+                }
+            });
         #else
-        Timer.delay(function():Void {
-            try {
-                callback(args);
-            } catch (ex:Dynamic) {
-                // CallbackException
-            }
-        }, 0);
+            Timer.delay(function():Void {
+                try {
+                    callback(arg);
+                } catch (ex:Dynamic) {
+                    // CallbackException
+                }
+            }, 0);
         #end
     }
 }

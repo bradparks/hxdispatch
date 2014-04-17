@@ -106,7 +106,7 @@ class Promise<T>
     private function executeCallbacks(callbacks:Iterable<Callback<T>>, arg:T):Void
     {
         var callback:Callback<T>;
-        for (callback in callbacks) {
+        for (callback in Lambda.array(callbacks)) {
             try {
                 callback(arg);
             } catch (ex:Dynamic) {
