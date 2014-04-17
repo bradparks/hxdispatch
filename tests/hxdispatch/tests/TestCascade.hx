@@ -1,3 +1,5 @@
+package hxdispatch.tests;
+
 /**
  * TestSuite for the hxdispatch.Cascade class.
  */

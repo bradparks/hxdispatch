@@ -1,15 +1,22 @@
 # C++
 -lib  hxdispatch
 -cp   tests
--main Runner.hx
+-main hxdispatch/tests/Runner.hx
 -cpp  bin/cpp
 -cmd  ./bin/cpp/Runner
+
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/concurrent/Runner.hx
+-cpp  bin/concurrent/cpp
+-cmd  ./bin/concurrent/cpp/Runner
 
 # C#
 --next
 -lib  hxdispatch
 -cp   tests
--main Runner.hx
+-main hxdispatch/tests/Runner.hx
 -cs   bin/cs
 -cmd  mono bin/cs/bin/Runner.exe
 
@@ -17,23 +24,45 @@
 --next
 -lib  hxdispatch
 -cp   tests
--main Runner.hx
+-main hxdispatch/tests/Runner.hx
 -java bin/java
 -cmd  java -jar bin/java/Runner.jar
+
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/concurrent/Runner.hx
+-java bin/concurrent/java
+-cmd  java -jar bin/concurrent/java/Runner.jar
+
+# JS
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/Runner.hx
+-js   bin/Runner.js
+-cmd  node bin/Runner.js
 
 # Neko
 --next
 -lib  hxdispatch
 -cp   tests
--main Runner.hx
+-main hxdispatch/tests/Runner.hx
 -neko bin/Runner.n
 -cmd  neko bin/Runner.n
+
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/concurrent/Runner.hx
+-neko bin/concurrent/Runner.n
+-cmd  neko bin/concurrent/Runner.n
 
 # PHP
 --next
 -lib  hxdispatch
 -cp   tests
--main Runner.hx
+-main hxdispatch/tests/Runner.hx
 -php  bin/php
 -cmd  php bin/php/index.php
 
@@ -41,6 +70,6 @@
 --next
 -lib  hxdispatch
 -cp   tests
--main Runner.hx
+-main hxdispatch/tests/Runner.hx
 -swf  bin/Runner.swf
 -cmd  echo "Open bin/runner.swf in browser to check SWF test results"
