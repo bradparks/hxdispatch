@@ -132,7 +132,7 @@ class Promise<T>
     {
         if (!this.isDone()) {
             this.state = State.REJECTED;
-            this.executeCallbacks(Lambda.concat(this.callbacks.rejected, this.callbacks.done), arg);
+            this.executeCallbacks(Lambda.array(this.callbacks.rejected).concat(Lambda.array(this.callbacks.done)), arg);
 
             this.callbacks.done     = null;
             this.callbacks.rejected = null;
@@ -174,7 +174,7 @@ class Promise<T>
         if (!this.isDone()) {
             if (--this.resolves == 0) {
                 this.state = State.RESOLVED;
-                this.executeCallbacks(Lambda.concat(this.callbacks.resolved, this.callbacks.done), arg);
+                this.executeCallbacks(Lambda.array(this.callbacks.resolved).concat(Lambda.array(this.callbacks.done)), arg);
 
                 this.callbacks.done     = null;
                 this.callbacks.rejected = null;
