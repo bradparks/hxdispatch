@@ -27,7 +27,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     /**
      * @{inherit}
      */
-    private function executeCallbacks(callbacks:Iterable<Callback<T>>, arg:T):Void
+    override private function executeCallbacks(callbacks:Iterable<Callback<T>>, arg:T):Void
     {
         var callback:Callback<T>;
         for (callback in Lambda.array(callbacks)) { // make sure we iterate over a copy

@@ -38,7 +38,7 @@ class Cascade<T> extends hxdispatch.Cascade<T>
     /**
      * @{inherit}
      */
-    public function descend(arg:T):T
+    override public function descend(arg:T):T
     {
         this.mutex.acquire();
         var tiers:Array<Tier<T>> = Lambda.array(this.tiers);
@@ -55,7 +55,7 @@ class Cascade<T> extends hxdispatch.Cascade<T>
     /**
      * @{inherit}
      */
-    public function initially(callback:Tier<T>):Cascade<T>
+    override public function initially(callback:Tier<T>):Cascade<T>
     {
         this.mutex.acquire();
         this.tiers.push(callback);
@@ -67,7 +67,7 @@ class Cascade<T> extends hxdispatch.Cascade<T>
     /**
      * @{inherit}
      */
-    public function then(callback:Tier<T>):Cascade<T>
+    override public function then(callback:Tier<T>):Cascade<T>
     {
         this.mutex.acquire();
         this.tiers.add(callback);
