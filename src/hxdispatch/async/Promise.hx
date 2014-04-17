@@ -19,6 +19,13 @@ package hxdispatch.async;
 class Promise<T> extends hxdispatch.concurrent.Promise<T>
 {
     /**
+     * Stores either the Callbacks are being executed or not.
+     *
+     * @var Bool
+     */
+    private var executing:Bool;
+
+    /**
      * Stores the Executor used to process Callbacks.
      *
      * @var hxdispatch.async.Executor<T>
@@ -48,6 +55,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     public function new(executor:Executor<T>, ?resolves:Int = 1):Void
     {
         super(resolves);
+        this.executing    = false;
         this.executor     = executor;
         #if !js this.lock = new Lock(); #end
         this.waiters      = 0;
@@ -60,7 +68,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     #if !js
         public function await():Void
         {
-            if (!this.isDone()) {
+            if (!this.isDone() || this.isExecuting()) {
                 this.mutex.waiters.acquire();
                 ++this.waiters;
                 this.mutex.waiters.release();
@@ -71,6 +79,20 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     #end
 
     /**
+     * Checks if the Promise is still executing its Callbacks.
+     *
+     * @return Bool
+     */
+    public function isExecuting():Bool
+    {
+        #if !js this.mutex.state.acquire(); #end
+        var ret:Bool = this.executing;
+        #if !js this.mutex.state.release(); #end
+
+        return ret;
+    }
+
+    /**
      * @{inherit}
      */
     override private function executeCallbacks(callbacks:Iterable<Callback<T>>, arg:T):Void
@@ -79,7 +101,11 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
         if ((count = Lambda.count(callbacks)) == 0) {
             #if !js this.unlock(); #end
         } else {
-            #if !js var mutex:Mutex = new Mutex(); #end
+            #if !js this.mutex.state.acquire(); #end
+            this.executing = true;
+            #if !js this.mutex.state.release();
+            var mutex:Mutex = new Mutex(); #end
+
             var callback:Callback<T>;
             for (callback in callbacks) {
                 this.executor.execute(function(arg:T):Void {
