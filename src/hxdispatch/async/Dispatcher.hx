@@ -64,7 +64,7 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
             #if !js this.mutex.acquire(); #end
             var callbacks:Array<Callback<T>> = this.map.get(event).copy();
             #if !js
-                var promise:Promise<Nil>     = new Promise<Nil>(new Executor.Sequential, callbacks.length);
+                var promise:Promise<Nil>     = new Promise<Nil>(new Executor.Sequential(), callbacks.length);
             #else
                 var promise:Promise<Nil>     = new Promise<Nil>(callbacks.length);
             #end
