@@ -15,6 +15,8 @@ package hxdispatch.async;
     import hxdispatch.Promise;
 #end
 import hxdispatch.Callback;
+import hxdispatch.Dispatcher.Feedback;
+import hxdispatch.Dispatcher.Status;
 import hxdispatch.async.Executor;
 import hxstd.Nil;
 
