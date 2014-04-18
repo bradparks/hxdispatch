@@ -10,7 +10,7 @@ package hxdispatch.async;
     #error "Async Dispatcher is not supported on target platform due to the lack of Mutex feature."
 #end
 #if !js
-    import hxdispatch.concurrent.Promise;
+    import hxdispatch.async.Promise;
 #else
     import hxdispatch.Promise;
 #end
