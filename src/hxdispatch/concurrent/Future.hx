@@ -53,6 +53,7 @@ class Future<T> extends hxdispatch.Future<T>
     public function new():Void
     {
         super();
+
         this.mutex   = { state: new Mutex(), waiters: new Mutex() }
         this.lock    = new Lock();
         this.waiters = 0;

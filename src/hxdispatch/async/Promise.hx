@@ -55,6 +55,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     public function new(executor:Executor<T>, ?resolves:Int = 1):Void
     {
         super(resolves);
+
         this.executing    = false;
         this.executor     = executor;
         #if !js this.lock = new Lock(); #end

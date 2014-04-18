@@ -62,7 +62,6 @@ class Cascade<T> extends hxdispatch.concurrent.Cascade<T>
         public function plunge(arg:T):Void
         {
             var tiers:Array<Tier<T>> = Lambda.array(this.tiers);
-            var future:Future<T>     = new Future<T>();
             this.executor.execute(function(arg:T):Void {
                 var tier:Tier<T>;
                 for (tier in tiers) {
