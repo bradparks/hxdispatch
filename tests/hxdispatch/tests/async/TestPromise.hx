@@ -15,6 +15,14 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
         this.promise = new hxdispatch.async.Promise<Int>(new hxdispatch.async.ThreadExecutor());
     }
 
+    /**
+     * @{inherit}
+     */
+    override private function getPromise(?resolves:Int = 1):Promise<Dynamic>
+    {
+        return new hxdispatch.async.Promise<Dynamic>(new hxdispatch.async.ThreadExecutor(), resolves);
+    }
+
 
     /**
      * Overriden since async Promise will not wait until the Callback sets the executed Bool to true.
@@ -159,5 +167,63 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
         this.promise.reject(0);
         untyped this.promise.await();
         assertFalse(executed);
+    }
+
+    /**
+     * Overriden since async Promise will not wait until the Callback sets the executed Bool to true.
+     *
+     * @{inherit}
+     */
+    override public function testWhen():Void
+    {
+        var p  = this.getPromise();
+        var p2 = this.getPromise();
+        var executed:Bool = false;
+
+        hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
+            executed = true;
+        });
+        p.resolve(0); p2.resolve(0);
+        Sys.sleep(0.2); // "wait" for async Promise
+        assertTrue(executed);
+    }
+
+    /**
+     * Overriden since async Promise will not wait until the Callback sets the executed Bool to true.
+     *
+     * @{inherit}
+     */
+    override public function testWhenPassesArgument():Void
+    {
+        var p  = this.getPromise();
+        var p2 = this.getPromise();
+        var input:Int = 5;
+        var value:Int = 0;
+
+        hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
+            value = arg;
+        });
+        p.resolve(0); p2.resolve(input);
+        Sys.sleep(0.2); // "wait" for async Promise
+        assertEquals(input, value);
+    }
+
+    /**
+     * Overriden since async Promise will not wait until the Callback sets the executed Bool to true.
+     *
+     * @{inherit}
+     */
+    override public function testWhenRejected():Void
+    {
+        var p  = this.getPromise();
+        var p2 = this.getPromise();
+        var executed:Bool = false;
+
+        hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
+            executed = true;
+        });
+        p.reject(0);
+        Sys.sleep(0.2); // "wait" for async Promise
+        assertTrue(executed);
     }
 }

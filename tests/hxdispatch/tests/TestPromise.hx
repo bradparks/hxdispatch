@@ -8,9 +8,9 @@ class TestPromise extends haxe.unit.TestCase
     /**
      * Stores the Promise on which the tests are run.
      *
-     * @var hxdispatch.Promise<Int>
+     * @var hxdispatch.Promise<Dynamic>
      */
-    private var promise:hxdispatch.Promise<Int>;
+    private var promise:hxdispatch.Promise<Dynamic>;
 
 
     /**
@@ -18,7 +18,7 @@ class TestPromise extends haxe.unit.TestCase
      */
     override public function setup():Void
     {
-        this.promise = new hxdispatch.Promise<Int>();
+        this.promise = new hxdispatch.Promise<Dynamic>();
     }
 
     /**
@@ -27,6 +27,18 @@ class TestPromise extends haxe.unit.TestCase
     override public function tearDown():Void
     {
         this.promise = null;
+    }
+
+    /**
+     * Promise factory.
+     *
+     * @param Int resolves the number of resolves the Promise requires
+     *
+     * @return hxdispatch.Promise<Dynamic>
+     */
+    private function getPromise(?resolves:Int = 1):Promise<Dynamic>
+    {
+        return new hxdispatch.Promise<Dynamic>(resolves);
     }
 
 
@@ -188,7 +200,7 @@ class TestPromise extends haxe.unit.TestCase
     public function testMultipleResolves():Void
     {
         var executed:Bool = false;
-        this.promise = new hxdispatch.Promise<Int>(2);
+        this.promise = this.getPromise(2);
         this.promise.done(function(arg:Int):Void {
             executed = true;
         });
@@ -343,8 +355,8 @@ class TestPromise extends haxe.unit.TestCase
      */
     public function testWhen():Void
     {
-        var p:hxdispatch.Promise<Int>  = new hxdispatch.Promise<Int>();
-        var p2:hxdispatch.Promise<Int> = new hxdispatch.Promise<Int>();
+        var p  = this.getPromise();
+        var p2 = this.getPromise();
         var executed:Bool = false;
 
         hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
@@ -363,8 +375,8 @@ class TestPromise extends haxe.unit.TestCase
      */
     public function testWhenPassesArgument():Void
     {
-        var p:hxdispatch.Promise<Int>  = new hxdispatch.Promise<Int>();
-        var p2:hxdispatch.Promise<Int> = new hxdispatch.Promise<Int>();
+        var p  = this.getPromise();
+        var p2 = this.getPromise();
         var input:Int = 5;
         var value:Int = 0;
 
@@ -384,8 +396,8 @@ class TestPromise extends haxe.unit.TestCase
      */
     public function testWhenRejected():Void
     {
-        var p:hxdispatch.Promise<Int>  = new hxdispatch.Promise<Int>();
-        var p2:hxdispatch.Promise<Int> = new hxdispatch.Promise<Int>();
+        var p  = this.getPromise();
+        var p2 = this.getPromise();
         var executed:Bool = false;
 
         hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
@@ -404,8 +416,8 @@ class TestPromise extends haxe.unit.TestCase
      */
     public function testWhenThrowsWorkflowException():Void
     {
-        var p:hxdispatch.Promise<Int>  = new hxdispatch.Promise<Int>();
-        var p2:hxdispatch.Promise<Int> = new hxdispatch.Promise<Int>();
+        var p  = this.getPromise();
+        var p2 = this.getPromise();
         p.resolve(0); p2.resolve(0);
 
         try {

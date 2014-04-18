@@ -12,4 +12,12 @@ class TestPromise extends hxdispatch.tests.TestPromise
     {
         this.promise = new hxdispatch.concurrent.Promise<Int>();
     }
+
+    /**
+     * @{inherit}
+     */
+    override private function getPromise(?resolves:Int = 1):Promise<Dynamic>
+    {
+        return new hxdispatch.concurrent.Promise<Dynamic>(resolves);
+    }
 }
