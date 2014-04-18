@@ -1,7 +1,22 @@
 package hxdispatch.async;
 
+#if cpp
+    import cpp.vm.Mutex;
+#elseif java
+    import java.vm.Mutex;
+#elseif neko
+    import neko.vm.Mutex;
+#elseif !js
+    #error "Async Dispatcher is not supported on target platform due to the lack of Mutex feature."
+#end
+#if !js
+    import hxdispatch.concurrent.Promise;
+#else
+    import hxdispatch.Promise;
+#end
 import hxdispatch.Callback;
 import hxdispatch.async.Executor;
+import hxstd.Nil;
 
 /**
  * This Dispatcher implementation is a thread-safe, asynchronous implementation.
@@ -37,5 +52,29 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
     override private function executeCallback(callback:Callback<T>, arg:T):Void
     {
         this.executor.execute(callback, arg);
+    }
+
+    /**
+     * @{inherit}
+     */
+    override public function trigger(event:Event, arg:T):Feedback
+    {
+        if (this.hasEvent(event)) {
+            #if !js this.mutex.acquire(); #end
+            var callbacks:Array<Callback<T>> = this.map.get(event).copy();
+            var promise:Promise<Nil>         = new Promise<Nil>(callbacks.length);
+            #if !js this.mutex.release(); #end
+            var callback:Callback<T>;
+            for (callback in callbacks) {
+                this.executeCallback(function(arg:T):Void {
+                    callback(arg);
+                    promise.resolve(null);
+                }, arg);
+            }
+
+            return { status: Status.TRIGGERED, promise: promise };
+        }
+
+        return { status: Status.NO_SUCH_EVENT };
     }
 }
