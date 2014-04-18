@@ -28,6 +28,11 @@ typedef Executor<T> =
 class Sequential<T> // implements Executor<T>
 {
     /**
+     * Constructor to initialize a new Sequential.
+     */
+    public function new():Void {}
+
+    /**
      * @{inherit}
      */
     public function execute(callback:Callback<T>, arg:T):Void
