@@ -2,8 +2,6 @@ package hxdispatch.tests.concurrent;
 
 /**
  * TestSuite for the hxdispatch.concurrent.Future class.
- *
- * TODO: concurrent specific tests
  */
 class TestFuture extends hxdispatch.tests.TestFuture
 {

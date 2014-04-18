@@ -48,7 +48,7 @@ class TestCascade extends haxe.unit.TestCase
      * If an exception is thrown, we cannot assume the following Tiers still work correctly.
      *
      * Attn: This test depends on the then() method - make sure all tests for that
-     * method work before looking for errors in initially() when this test fails.
+     * method work before looking for errors in descend() when this test fails.
      */
     public function testDescendDoesNotCatchExceptions():Void
     {
@@ -76,7 +76,7 @@ class TestCascade extends haxe.unit.TestCase
      * of all "til-then" added Tiers.
      *
      * Attn: This test depends on the then() method - make sure all tests for that
-     * method work before looking for errors in initially() when this test fails.
+     * method work before looking for errors in descend() when this test fails.
      */
     public function testDescendIteratesOverCopy():Void
     {

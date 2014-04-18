@@ -1,7 +1,7 @@
 package hxdispatch.tests;
 
 /**
- *
+ * TestSuite runner for classes in hxdispatch package.
  */
 class Runner
 {

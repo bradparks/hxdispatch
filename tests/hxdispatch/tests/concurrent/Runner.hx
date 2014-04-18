@@ -1,7 +1,7 @@
 package hxdispatch.tests.concurrent;
 
 /**
- *
+ * TestSuite runner for classes in hxdispatch.concurrent package.
  */
 class Runner
 {

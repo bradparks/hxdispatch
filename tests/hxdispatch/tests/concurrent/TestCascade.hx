@@ -2,8 +2,6 @@ package hxdispatch.tests.concurrent;
 
 /**
  * TestSuite for the hxdispatch.concurrent.Cascade class.
- *
- * TODO: concurrent specific tests
  */
 class TestCascade extends hxdispatch.tests.TestCascade
 {

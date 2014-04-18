@@ -9,12 +9,12 @@
 -cpp  bin/cpp
 -cmd  ./bin/cpp/Runner
 
-# --next
-# -lib  hxdispatch
-# -cp   tests
-# -main hxdispatch/tests/async/Runner.hx
-# -cpp  bin/async/cpp
-# -cmd  ./bin/async/cpp/Runner
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/async/Runner.hx
+-cpp  bin/async/cpp
+-cmd  ./bin/async/cpp/Runner
 
 --next
 -lib  hxdispatch
@@ -39,12 +39,12 @@
 -java bin/java
 -cmd  java -jar bin/java/Runner.jar
 
---next
--lib  hxdispatch
--cp   tests
--main hxdispatch/tests/async/Runner.hx
--java bin/async/java
--cmd  java -jar bin/async/java/Runner.jar
+# --next
+# -lib  hxdispatch
+# -cp   tests
+# -main hxdispatch/tests/async/Runner.hx
+# -java bin/async/java
+# -cmd  java -jar bin/async/java/Runner.jar
 
 --next
 -lib  hxdispatch

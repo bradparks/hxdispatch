@@ -3,7 +3,6 @@ package hxdispatch.tests.async;
 /**
  * TestSuite for the hxdispatch.async.Promise class.
  *
- * TODO: static when() method
  * TODO: async specific tests
  */
 class TestPromise extends hxdispatch.tests.concurrent.TestPromise

@@ -2,8 +2,6 @@ package hxdispatch.tests;
 
 /**
  * TestSuite for the hxdispatch.Promise class.
- *
- * TODO: static when() method
  */
 class TestPromise extends haxe.unit.TestCase
 {
@@ -330,6 +328,88 @@ class TestPromise extends haxe.unit.TestCase
         this.promise.resolve(0);
         try {
             this.promise.resolved(function(arg:Int):Void {});
+            assertFalse(true);
+        } catch (ex:hxdispatch.WorkflowException) {
+            assertTrue(true);
+        }
+    }
+
+    /**
+     * Checks that the when() function works and resulting Promise is maked as done
+     * when input Promises get rejected/resolved.
+     *
+     * Attn: This tests depends on the resolve() method - make sure it works before
+     * looking for errors in when() function.
+     */
+    public function testWhen():Void
+    {
+        var p:hxdispatch.Promise<Int>  = new hxdispatch.Promise<Int>();
+        var p2:hxdispatch.Promise<Int> = new hxdispatch.Promise<Int>();
+        var executed:Bool = false;
+
+        hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
+            executed = true;
+        });
+        p.resolve(0); p2.resolve(0);
+        assertTrue(executed);
+    }
+
+    /**
+     * Checks that the when() function passes the argument from the last reject/resolve
+     * to the summarizing Promise.
+     *
+     * Attn: This tests depends on the resolve() method - make sure it works before
+     * looking for errors in when() function.
+     */
+    public function testWhenPassesArgument():Void
+    {
+        var p:hxdispatch.Promise<Int>  = new hxdispatch.Promise<Int>();
+        var p2:hxdispatch.Promise<Int> = new hxdispatch.Promise<Int>();
+        var input:Int = 5;
+        var value:Int = 0;
+
+        hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
+            value = arg;
+        });
+        p.resolve(0); p2.resolve(input);
+        assertEquals(input, value);
+    }
+
+    /**
+     * Checks that the summarizing Promise from when() function is marked as done when
+     * one of the input Promises gets rejected.
+     *
+     * Attn: This tests depends on the resolve() method - make sure it works before
+     * looking for errors in when() function.
+     */
+    public function testWhenRejected():Void
+    {
+        var p:hxdispatch.Promise<Int>  = new hxdispatch.Promise<Int>();
+        var p2:hxdispatch.Promise<Int> = new hxdispatch.Promise<Int>();
+        var executed:Bool = false;
+
+        hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
+            executed = true;
+        });
+        p.reject(0);
+        assertTrue(executed);
+    }
+
+    /**
+     * Checks that the when() function throws an Exception when trying to get
+     * a summary Promise for already resolved Promises.
+     *
+     * Attn: This tests depends on the resolve() method - make sure it works before
+     * looking for errors in when() function.
+     */
+    public function testWhenThrowsWorkflowException():Void
+    {
+        var p:hxdispatch.Promise<Int>  = new hxdispatch.Promise<Int>();
+        var p2:hxdispatch.Promise<Int> = new hxdispatch.Promise<Int>();
+        p.resolve(0); p2.resolve(0);
+
+        try {
+            hxdispatch.Promise.when([p, p2]);
             assertFalse(true);
         } catch (ex:hxdispatch.WorkflowException) {
             assertTrue(true);
