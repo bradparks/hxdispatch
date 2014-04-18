@@ -12,7 +12,7 @@ package hxdispatch.async;
 #if !js
     import hxdispatch.async.Promise;
 #else
-    import hxdispatch.Promise;
+    import hxdispatch.concurrent.Promise;
 #end
 import hxdispatch.Callback;
 import hxdispatch.Dispatcher.Status;
@@ -63,7 +63,11 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
         if (this.hasEvent(event)) {
             #if !js this.mutex.acquire(); #end
             var callbacks:Array<Callback<T>> = this.map.get(event).copy();
-            var promise:Promise<Nil>         = new Promise<Nil>(callbacks.length);
+            #if !js
+                var promise:Promise<Nil>     = new Promise<Nil>(null, callbacks.length);
+            #else
+                var promise:Promise<Nil>     = new Promise<Nil>(callbacks.length);
+            #end
             #if !js this.mutex.release(); #end
             var callback:Callback<T>;
             for (callback in callbacks) {

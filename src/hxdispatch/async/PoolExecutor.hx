@@ -19,7 +19,7 @@ import hxdispatch.async.Executor;
 /**
  *
  */
-class PoolExecutor<T> implements Executor<T>
+class PoolExecutor<T> // implements Executor<T>
 {
     /**
      * Stores the executor threads that will handle the jobs.

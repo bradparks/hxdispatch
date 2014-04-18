@@ -3,11 +3,11 @@ package hxdispatch.async;
 import hxdispatch.Callback;
 
 /**
- * The Executor interface can be used to realize an asynchronous
+ * The Executor typedef can be used to realize an asynchronous
  * function/callback handler that processed the argument passed
  * to the execute() function without blocking the caller.
  */
-interface Executor<T>
+typedef Executor<T> =
 {
     /**
      * Executes the provided Callback with the given argument.
