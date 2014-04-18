@@ -2,12 +2,15 @@ package hxdispatch.async;
 
 #if cpp
     import cpp.vm.Lock;
+    import cpp.vm.Mutex;
 #elseif java
     import java.vm.Lock;
+    import java.vm.Mutex;
 #elseif neko
     import neko.vm.Lock;
+    import neko.vm.Mutex;
 #elseif !js
-    #error "Async Promise is not supported on target platform due to the lack of Lock feature."
+    #error "Async Promise is not supported on target platform due to the lack of Lock/Mutex feature."
 #end
 
 /**
@@ -15,6 +18,13 @@ package hxdispatch.async;
  */
 class Promise<T> extends hxdispatch.concurrent.Promise<T>
 {
+    /**
+     * Stores either the Callbacks are being executed or not.
+     *
+     * @var Bool
+     */
+    private var executing:Bool;
+
     /**
      * Stores the Executor used to process Callbacks.
      *
@@ -27,7 +37,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
      *
      * @var Lock
      */
-    private var lock:Lock;
+    #if !js private var lock:Lock; #end
 
     /**
      * Stores the number of waiters.
@@ -45,24 +55,41 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     public function new(executor:Executor<T>, ?resolves:Int = 1):Void
     {
         super(resolves);
-        this.executor = executor;
-        this.lock     = new Lock();
-        this.waiters  = 0;
+        this.executing    = false;
+        this.executor     = executor;
+        #if !js this.lock = new Lock(); #end
+        this.waiters      = 0;
     }
 
     /**
      * Blocks the calling Thread until the Promise has been marked as done
      * and Callbacks have been processed.
      */
-    public function await():Void
-    {
-        if (!this.isDone()) {
-            this.mutex.waiters.acquire();
-            ++this.waiters;
-            this.mutex.waiters.release();
+    #if !js
+        public function await():Void
+        {
+            if (!this.isDone() || this.isExecuting()) {
+                this.mutex.waiters.acquire();
+                ++this.waiters;
+                this.mutex.waiters.release();
 
-            this.lock.wait();
+                this.lock.wait();
+            }
         }
+    #end
+
+    /**
+     * Checks if the Promise is still executing its Callbacks.
+     *
+     * @return Bool
+     */
+    public function isExecuting():Bool
+    {
+        #if !js this.mutex.state.acquire(); #end
+        var ret:Bool = this.executing;
+        #if !js this.mutex.state.release(); #end
+
+        return ret;
     }
 
     /**
@@ -70,16 +97,30 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
      */
     override private function executeCallbacks(callbacks:Iterable<Callback<T>>, arg:T):Void
     {
-        var callback:Callback<T>;
-        if (callbacks.length == 0) {
-            this.unlock();
+        var count:Int;
+        if ((count = Lambda.count(callbacks)) == 0) {
+            #if !js this.unlock(); #end
         } else {
+            #if !js this.mutex.state.acquire(); #end
+            this.executing = true;
+            #if !js this.mutex.state.release();
+            var mutex:Mutex = new Mutex(); #end
+
+            var callback:Callback<T>;
             for (callback in callbacks) {
                 this.executor.execute(function(arg:T):Void {
-                    callback(arg);
-                    if (callback == callbacks[callbacks.length - 1]) {
+                    try {
+                        callback(arg);
+                    } catch (ex:Dynamic) {}
+
+                    #if !js mutex.acquire();
+                    if (--count == 0) {
+                        this.mutex.state.acquire();
+                        this.executing = false;
+                        this.mutex.state.release();
                         this.unlock();
                     }
+                    mutex.release(); #end
                 }, arg);
             }
         }
@@ -88,13 +129,15 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     /**
      * Unlocks the Lock that is used to block waiters in await() method.
      */
-    private function unlock():Void
-    {
-        this.mutex.waiters.acquire();
-        for (i in 0...this.waiters) {
-            this.lock.release();
+    #if !js
+        private function unlock():Void
+        {
+            this.mutex.waiters.acquire();
+            for (i in 0...this.waiters) {
+                this.lock.release();
+            }
+            this.waiters = 0;
+            this.mutex.waiters.release();
         }
-        this.waiters = 0;
-        this.mutex.waiters.release();
-    }
+    #end
 }

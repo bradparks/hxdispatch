@@ -1,7 +1,9 @@
 package hxdispatch.async;
 
+#if !js
+    import hxdispatch.concurrent.Future;
+#end
 import hxdispatch.Cascade.Tier;
-import hxdispatch.concurrent.Future;
 
 /**
  * This Cascade implementation is a thread-safe, asynchronous implementation.
@@ -32,23 +34,41 @@ class Cascade<T> extends hxdispatch.concurrent.Cascade<T>
     }
 
     /**
-     * @{inherit}
+     * Asynchronous descends all the Tiers.
+     *
+     * @param T arg the argument to pass to the first Tier
+     *
+     * @return Future<T> a Future that will get resolved by the last Tier
      */
-    public function plunge(arg:T):Future<T>
-    {
-        this.mutex.acquire();
-        var tiers:Array<Tier<T>> = Lambda.array(this.tiers);
-        this.mutex.release();
+    #if !js
+        public function plunge(arg:T):Future<T>
+        {
+            this.mutex.acquire();
+            var tiers:Array<Tier<T>> = Lambda.array(this.tiers);
+            this.mutex.release();
 
-        var future:Future<T> = new Future<T>();
-        this.executor.execute(function(arg:T):Void {
-            var tier:Tier<T>;
-            for (tier in tiers) {
-                arg = tier(arg);
-            }
-            future.resolve(arg);
-        }, arg);
+            var future:Future<T> = new Future<T>();
+            this.executor.execute(function(arg:T):Void {
+                var tier:Tier<T>;
+                for (tier in tiers) {
+                    arg = tier(arg);
+                }
+                future.resolve(arg);
+            }, arg);
 
-        return future;
-    }
+            return future;
+        }
+    #else
+        public function plunge(arg:T):Void
+        {
+            var tiers:Array<Tier<T>> = Lambda.array(this.tiers);
+            var future:Future<T>     = new Future<T>();
+            this.executor.execute(function(arg:T):Void {
+                var tier:Tier<T>;
+                for (tier in tiers) {
+                    arg = tier(arg);
+                }
+            }, arg);
+        }
+    #end
 }
