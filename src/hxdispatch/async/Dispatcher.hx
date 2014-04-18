@@ -65,7 +65,7 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
             var callbacks:Array<Callback<T>> = this.map.get(event).copy();
             #if !js
                 var promise:Promise<Nil>     = new Promise<Nil>({
-                    public function execute(callback:Callback<Nil>, arg:Nil):Void
+                    function execute(callback:Callback<Nil>, arg:Nil):Void
                     {
                         callback(arg);
                     }
