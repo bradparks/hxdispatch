@@ -15,7 +15,6 @@ package hxdispatch.async;
     import hxdispatch.Promise;
 #end
 import hxdispatch.Callback;
-import hxdispatch.Dispatcher.Feedback;
 import hxdispatch.Dispatcher.Status;
 import hxdispatch.async.Executor;
 import hxstd.Nil;
@@ -80,3 +79,12 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
         return { status: Status.NO_SUCH_EVENT };
     }
 }
+
+
+/**
+ * @{inherit}
+ */
+typedef Feedback =
+{> hxdispatch.Dispatcher.Feedback,
+    @:optional public var promise:Promise<Nil>;
+};
