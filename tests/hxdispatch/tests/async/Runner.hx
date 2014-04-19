@@ -15,6 +15,10 @@ class Runner
         r.add( new hxdispatch.tests.async.TestPromise() );
         r.add( new hxdispatch.tests.async.TestThreadExecutor() );
 
-        r.run();
+        var success:Bool = r.run();
+
+        #if sys
+            Sys.exit(success ? 0 : 1);
+        #end
     }
 }

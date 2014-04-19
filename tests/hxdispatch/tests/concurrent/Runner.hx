@@ -16,6 +16,10 @@ class Runner
         #end
         r.add( new hxdispatch.tests.concurrent.TestPromise() );
 
-        r.run();
+        var success:Bool = r.run();
+
+        #if sys
+            Sys.exit(success ? 0 : 1);
+        #end
     }
 }
