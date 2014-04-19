@@ -11,7 +11,9 @@ class Runner
 
         r.add( new hxdispatch.tests.concurrent.TestCascade() );
         r.add( new hxdispatch.tests.concurrent.TestDispatcher() );
-        r.add( new hxdispatch.tests.concurrent.TestFuture() );
+        #if !js
+            r.add( new hxdispatch.tests.concurrent.TestFuture() );
+        #end
         r.add( new hxdispatch.tests.concurrent.TestPromise() );
 
         r.run();

@@ -39,6 +39,7 @@
 -java bin/java
 -cmd  java -jar bin/java/Runner.jar
 
+# fails and background Threads block main flow, so commented out for now
 # --next
 # -lib  hxdispatch
 # -cp   tests
@@ -60,6 +61,22 @@
 -main hxdispatch/tests/Runner.hx
 -js   bin/Runner.js
 -cmd  node bin/Runner.js
+
+# we don't test JS async since waiting for callbacks is not supported
+# so tests may fail due to callbacks not being executed before asserting
+# --next
+# -lib  hxdispatch
+# -cp   tests
+# -main hxdispatch/tests/async/Runner.hx
+# -js   bin/async/Runner.js
+# -cmd  node bin/async/Runner.js
+
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/concurrent/Runner.hx
+-js   bin/concurrent/Runner.js
+-cmd  node bin/concurrent/Runner.js
 
 # Neko
 --next
