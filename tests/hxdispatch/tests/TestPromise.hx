@@ -393,6 +393,8 @@ class TestPromise extends haxe.unit.TestCase
      *
      * Attn: This tests depends on the resolve() method - make sure it works before
      * looking for errors in when() function.
+     *
+     * @see https://github.com/HaxeFoundation/haxe/issues/2901
      */
     public function testWhenRejected():Void
     {
@@ -400,7 +402,7 @@ class TestPromise extends haxe.unit.TestCase
         var p2 = this.getPromise();
         var executed:Bool = false;
 
-        hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
+        hxdispatch.Promise.when([p, p2]).done(function(arg:Dynamic):Void {
             executed = true;
         });
         p.reject(0);
