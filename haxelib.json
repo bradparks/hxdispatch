@@ -8,8 +8,8 @@
     "dependencies": {
         "hxstd": ""
     },
-    "version": "1.2.0",
-    "releasenote": "Dropped Thread communication in favour of Locks; Cascade class; usage examples",
+    "version": "2.0.0",
+    "releasenote": "Refactored whole code base; new async package; unit tests; Executor class",
     "contributors": [
         "MaddinXx"
     ]
