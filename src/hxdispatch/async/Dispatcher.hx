@@ -58,13 +58,16 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
     /**
      * @{inherit}
      */
-    override public function trigger(event:Event, arg:T):Feedback
+    override public function trigger(event:Event, arg:T, ?executor = null):Feedback
     {
         if (this.hasEvent(event)) {
             #if !js this.mutex.acquire(); #end
             var callbacks:Array<Callback<T>> = this.map.get(event).copy();
             #if !js
-                var promise:Promise<Nil>     = new Promise<Nil>(new Executor.Sequential(), callbacks.length);
+                if (executor == null) {
+                    executor = new Executor.Sequential();
+                }
+                var promise:Promise<Nil>     = new Promise<Nil>(executor, callbacks.length);
             #else
                 var promise:Promise<Nil>     = new Promise<Nil>(callbacks.length);
             #end
