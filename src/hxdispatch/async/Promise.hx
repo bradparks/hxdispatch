@@ -145,8 +145,12 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     /**
      * @{inherit}
      */
-    public static function when<T>(promises:Array<Promise<T>>, ?executor:Executor<T> = new Executor.Sequential<T>()):Promise<T>
+    public static function when<T>(promises:Array<Promise<T>>, ?executor:Executor<T> = null):Promise<T>
     {
+        if (executor == null) {
+            executor = new Executor.Sequential<T>();
+        }
+
         var promise:Promise<T> = new Promise<T>(executor, 1);
         var done:Bool;
         for (p in promises) {
