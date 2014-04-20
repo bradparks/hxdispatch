@@ -3,17 +3,14 @@ package hxdispatch.concurrent;
 #if cpp
     import cpp.vm.Lock;
     import cpp.vm.Mutex;
-    import cpp.vm.Thread;
 #elseif java
     import java.vm.Lock;
     import java.vm.Mutex;
-    import java.vm.Thread;
 #elseif neko
     import neko.vm.Lock;
     import neko.vm.Mutex;
-    import neko.vm.Thread;
 #else
-    #error "Concurrent Future is not supported on target platform due to the lack of Lock/Mutex/Thread feature."
+    #error "Concurrent Future is not supported on target platform due to the lack of Lock/Mutex feature."
 #end
 import hxdispatch.State;
 import hxdispatch.WorkflowException;
@@ -56,6 +53,7 @@ class Future<T> extends hxdispatch.Future<T>
     public function new():Void
     {
         super();
+
         this.mutex   = { state: new Mutex(), waiters: new Mutex() }
         this.lock    = new Lock();
         this.waiters = 0;
@@ -64,7 +62,7 @@ class Future<T> extends hxdispatch.Future<T>
     /**
      * @{inherit}
      */
-    override public function get(?block:Bool = true):T
+    override public function get(?block:Bool = true):Null<T>
     {
         if (!this.isReady()) {
             if (block) {

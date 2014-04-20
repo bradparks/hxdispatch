@@ -23,7 +23,7 @@ class Cascade<T> extends hxdispatch.Cascade<T>
      *
      * @var Mutex
      */
-    private var Mutex:Mutex;
+    #if !js private var mutex:Mutex; #end
 
 
     /**
@@ -32,25 +32,21 @@ class Cascade<T> extends hxdispatch.Cascade<T>
     public function new():Void
     {
         super();
-        this.mutex = new Mutex();
+        #if !js this.mutex = new Mutex(); #end
     }
 
     /**
      * @{inherit}
      */
-    public function descend(arg:T):T
+    override public function descend(arg:T):T
     {
-        this.mutex.acquire();
-        var tiers:Array<Tier<T>> = Lambda.array(this.tiers).concat(Lambda.array(this.finals));
-        this.mutex.release();
+        #if !js this.mutex.acquire(); #end
+        var tiers:Array<Tier<T>> = Lambda.array(this.tiers);
+        #if !js this.mutex.release(); #end
 
         var tier:Tier<T>;
         for (tier in tiers) {
-            try {
-                arg = tier(arg);
-            } catch (ex:Dynamic) {
-
-            }
+            arg = tier(arg);
         }
 
         return arg;
@@ -59,23 +55,11 @@ class Cascade<T> extends hxdispatch.Cascade<T>
     /**
      * @{inherit}
      */
-    public function finally(callback:Tier<T>):Cascade<T>
+    override public function initially(callback:Tier<T>):Cascade<T>
     {
-        this.mutex.acquire();
-        this.finals.add(callback);
-        this.mutex.release();
-
-        return this;
-    }
-
-    /**
-     * @{inherit}
-     */
-    public function initially(callback:Tier<T>):Cascade<T>
-    {
-        this.mutex.acquire();
+        #if !js this.mutex.acquire(); #end
         this.tiers.push(callback);
-        this.mutex.release();
+        #if !js this.mutex.release(); #end
 
         return this;
     }
@@ -83,11 +67,11 @@ class Cascade<T> extends hxdispatch.Cascade<T>
     /**
      * @{inherit}
      */
-    public function then(callback:Tier<T>):Cascade<T>
+    override public function then(callback:Tier<T>):Cascade<T>
     {
-        this.mutex.acquire();
+        #if !js this.mutex.acquire(); #end
         this.tiers.add(callback);
-        this.mutex.release();
+        #if !js this.mutex.release(); #end
 
         return this;
     }

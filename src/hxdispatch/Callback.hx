@@ -1,6 +1,6 @@
 package hxdispatch;
 
 /**
- * Alias typedef used by Promises and Dispatchers.
+ * Typedef for functions that are considered a callback (as in JS).
  */
-typedef Callback<T> = Null<T>->Void;
+typedef Callback<T> = T->Void;

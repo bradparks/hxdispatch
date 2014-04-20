@@ -13,13 +13,6 @@ import hxdispatch.Callback;
 import hxdispatch.Dispatcher.Feedback;
 import hxdispatch.Dispatcher.Status;
 import hxdispatch.Event;
-import hxdispatch.Event.Args;
-#if !js
-    import hxdispatch.concurrent.Promise;
-#else
-    import hxdispatch.Promise;
-#end
-import hxstd.Nil;
 
 /**
  * Threads-safe Dispatcher implementation preventing register, listen and trigger
@@ -27,7 +20,7 @@ import hxstd.Nil;
  *
  * @{inherit}
  */
-class Dispatcher<A:Args> extends hxdispatch.Dispatcher<A>
+class Dispatcher<T> extends hxdispatch.Dispatcher<T>
 {
     /**
      * Stores the Mutex used to synchronize access.
@@ -49,13 +42,13 @@ class Dispatcher<A:Args> extends hxdispatch.Dispatcher<A>
     /**
      * @{inherit}
      */
-    override public function attach(event:Event, callback:Callback<A>):Bool
+    override public function attach(event:Event, callback:Callback<T>):Bool
     {
         var listening:Bool = false;
         #if !js this.mutex.acquire(); #end
         if (this.map.exists(event) && callback != null) {
-            var callbacks:Array<Callback<A>> = this.map.get(event);
-            if (!Lambda.exists(callbacks, function(fn:Callback<A>):Bool {
+            var callbacks:Array<Callback<T>> = this.map.get(event);
+            if (!Lambda.exists(callbacks, function(fn:Callback<T>):Bool {
                 return Reflect.compareMethods(callback, fn);
             })) {
                 callbacks.push(callback);
@@ -70,7 +63,7 @@ class Dispatcher<A:Args> extends hxdispatch.Dispatcher<A>
     /**
      * @{inherit}
      */
-    override public function dettach(event:Event, callback:Callback<A>):Bool
+    override public function dettach(event:Event, callback:Callback<T>):Bool
     {
         var unlistened:Bool = false;
         #if !js this.mutex.acquire(); #end
@@ -104,7 +97,7 @@ class Dispatcher<A:Args> extends hxdispatch.Dispatcher<A>
         var registered:Bool = false;
         #if !js this.mutex.acquire(); #end
         if (!this.map.exists(event)) {
-            var callbacks:Array<Callback<A>> = new Array<Callback<A>>();
+            var callbacks:Array<Callback<T>> = new Array<Callback<T>>();
             this.map.set(event, callbacks);
             registered = true;
         }
@@ -116,22 +109,18 @@ class Dispatcher<A:Args> extends hxdispatch.Dispatcher<A>
     /**
      * @{inherit}
      */
-    override public function trigger(event:Event, ?arg:A = null):Feedback
+    override public function trigger(event:Event, arg:T):Feedback
     {
         if (this.hasEvent(event)) {
             #if !js this.mutex.acquire(); #end
-            var callbacks:Array<Callback<A>> = this.map.get(event).copy();
+            var callbacks:Array<Callback<T>> = this.map.get(event).copy();
             #if !js this.mutex.release(); #end
-            var promise:Promise<Nil> = new Promise<Nil>(callbacks.length);
-            var callback:Callback<A>;
+            var callback:Callback<T>;
             for (callback in callbacks) {
-                this.executeCallback(function(arg:Null<A>):Void {
-                    callback(arg);
-                    promise.resolve(null);
-                }, arg);
+                this.executeCallback(callback, arg);
             }
 
-            return { status: Status.TRIGGERED, promise: promise };
+            return { status: Status.OK };
         }
 
         return { status: Status.NO_SUCH_EVENT };
@@ -148,18 +137,8 @@ class Dispatcher<A:Args> extends hxdispatch.Dispatcher<A>
             this.map.remove(event);
             unregistered = true;
         }
-
         #if !js this.mutex.release(); #end
 
         return unregistered;
     }
 }
-
-
-/**
- * @{inherit}
- */
-typedef Feedback =
-{> hxdispatch.Feedback,
-    @:optional public var promise:Promise<Nil>;
-};

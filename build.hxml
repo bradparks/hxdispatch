@@ -1,0 +1,117 @@
+-cmd mkdir -p bin/async
+-cmd mkdir -p bin/concurrent
+
+# C++
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/Runner.hx
+-cpp  bin/cpp
+-cmd  ./bin/cpp/Runner
+
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/async/Runner.hx
+-cpp  bin/async/cpp
+-cmd  ./bin/async/cpp/Runner
+
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/concurrent/Runner.hx
+-cpp  bin/concurrent/cpp
+-cmd  ./bin/concurrent/cpp/Runner
+
+# C#
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/Runner.hx
+-cs   bin/cs
+-cmd  mono bin/cs/bin/Runner.exe
+
+# Java
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/Runner.hx
+-java bin/java
+-cmd  java -jar bin/java/Runner.jar
+
+# fails and background Threads block main flow, so commented out for now
+# --next
+# -lib  hxdispatch
+# -cp   tests
+# -main hxdispatch/tests/async/Runner.hx
+# -java bin/async/java
+# -cmd  java -jar bin/async/java/Runner.jar
+
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/concurrent/Runner.hx
+-java bin/concurrent/java
+-cmd  java -jar bin/concurrent/java/Runner.jar
+
+# JS
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/Runner.hx
+-js   bin/Runner.js
+-cmd  node bin/Runner.js
+
+# we don't test JS async since waiting for callbacks is not supported
+# so tests may fail due to callbacks not being executed before asserting
+# --next
+# -lib  hxdispatch
+# -cp   tests
+# -main hxdispatch/tests/async/Runner.hx
+# -js   bin/async/Runner.js
+# -cmd  node bin/async/Runner.js
+
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/concurrent/Runner.hx
+-js   bin/concurrent/Runner.js
+-cmd  node bin/concurrent/Runner.js
+
+# Neko
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/Runner.hx
+-neko bin/Runner.n
+-cmd  neko bin/Runner.n
+
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/async/Runner.hx
+-neko bin/async/Runner.n
+-cmd  neko bin/async/Runner.n
+
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/concurrent/Runner.hx
+-neko bin/concurrent/Runner.n
+-cmd  neko bin/concurrent/Runner.n
+
+# PHP
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/Runner.hx
+-php  bin/php
+-cmd  php bin/php/index.php
+
+# SWF
+--next
+-lib  hxdispatch
+-cp   tests
+-main hxdispatch/tests/Runner.hx
+-swf  bin/Runner.swf
+-cmd  echo "Open bin/runner.swf in browser to check SWF test results"
