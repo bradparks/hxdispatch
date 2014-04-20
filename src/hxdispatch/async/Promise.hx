@@ -141,4 +141,35 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
             this.mutex.waiters.release();
         }
     #end
+
+    /**
+     * @{inherit}
+     */
+    public static function when<T>(promises:Array<Promise<T>>, ?executor:Executor<T> = new Executor.Sequential<T>()):Promise<T>
+    {
+        var promise:Promise<T> = new Promise<T>(executor, 1);
+        var done:Bool;
+        for (p in promises) {
+            #if !js p.mutex.state.acquire(); #end
+            done = p.state != State.NONE;
+            if (!done) {
+                ++promise.resolves;
+                p.done(function(arg:T):Void {
+                    if (p.isRejected()) {
+                        promise.reject(arg);
+                    } else {
+                        promise.resolve(arg);
+                    }
+                });
+            }
+            #if !js p.mutex.state.release(); #end
+        }
+        --promise.resolves;
+
+        if (promise.resolves == 0) {
+            throw new WorkflowException("Promises have already been rejected or resolved");
+        }
+
+        return promise;
+    }
 }
