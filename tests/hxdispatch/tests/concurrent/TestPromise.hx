@@ -16,7 +16,7 @@ class TestPromise extends hxdispatch.tests.TestPromise
     /**
      * @{inherit}
      */
-    override private function getPromise(?resolves:Int = 1):Promise<Dynamic>
+    override private function getPromise(?resolves:Int = 1):hxdispatch.concurrent.Promise<Dynamic>
     {
         return new hxdispatch.concurrent.Promise<Dynamic>(resolves);
     }

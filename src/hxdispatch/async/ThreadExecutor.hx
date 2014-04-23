@@ -20,7 +20,7 @@ import hxdispatch.async.Executor;
  *
  * It is well-suited for long running operations, but less for frequent executions.
  */
-class ThreadExecutor<T> // implements Executor<T>
+class ThreadExecutor<T> implements Executor<T>
 {
     /**
      * Constructor to initialize a new ThreadExecutor.
