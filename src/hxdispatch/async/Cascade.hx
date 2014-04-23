@@ -4,6 +4,7 @@ package hxdispatch.async;
     import hxdispatch.concurrent.Future;
 #end
 import hxdispatch.Cascade.Tier;
+import hxdispatch.async.Executor;
 
 /**
  * This Cascade implementation is a thread-safe, asynchronous implementation.

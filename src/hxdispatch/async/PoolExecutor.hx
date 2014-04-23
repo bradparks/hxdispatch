@@ -17,9 +17,13 @@ import hxdispatch.Callback;
 import hxdispatch.async.Executor;
 
 /**
+ * The PoolExecutor Executor implementation uses a fixed-size pool of
+ * worker/execution threads to process the callbacks passed by execute().
  *
+ * This implementation is recommended for applications that "trigger" the
+ * execute() method quite often.
  */
-class PoolExecutor<T> // implements Executor<T>
+class PoolExecutor<T> implements Executor<T>
 {
     /**
      * Stores the executor threads that will handle the jobs.
@@ -31,7 +35,7 @@ class PoolExecutor<T> // implements Executor<T>
     /**
      * Stores the jobs/callbacks the executors need to process.
      *
-     * @var Deque<Job<T>>
+     * @var Deque<hxdispatch.async.PoolExecutor.Job<T>>
      */
     private var jobs:Deque<Job<T>>;
 

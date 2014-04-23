@@ -12,6 +12,7 @@ package hxdispatch.async;
 #elseif !js
     #error "Async Promise is not supported on target platform due to the lack of Lock/Mutex feature."
 #end
+import hxdispatch.async.Executor;
 
 /**
  *

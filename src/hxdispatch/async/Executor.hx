@@ -3,13 +3,15 @@ package hxdispatch.async;
 import hxdispatch.Callback;
 
 /**
- * The Executor typedef can be used to realize an asynchronous
+ * The Executor interface can be used to realize an asynchronous
  * function/callback handler that processed the argument passed
  * to the execute() function without blocking the caller.
  *
+ * @see https://github.com/andyli/hxAnonCls for a nice way to init anonymous Executors
+ *
  * @generic T the type of argument(s) the Callbacks accept
  */
-typedef Executor<T> =
+interface Executor<T>
 {
     /**
      * Executes the provided Callback with the given argument.
@@ -25,7 +27,7 @@ typedef Executor<T> =
  * Sequential Executor to be used as a fallback for situations
  * where an Executor is required but we do not want an async one.
  */
-class Sequential<T> // implements Executor<T>
+class Sequential<T> implements Executor<T>
 {
     /**
      * Constructor to initialize a new Sequential.
