@@ -8,8 +8,8 @@
     "dependencies": {
         "hxstd": ""
     },
-    "version": "2.0.0",
-    "releasenote": "Refactored whole code base; new async package; unit tests; Executor class",
+    "version": "2.0.1",
+    "releasenote": "Fix incompatible fn override; Executor as interface (nice with hxAnonCls)",
     "contributors": [
         "MaddinXx"
     ]
