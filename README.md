@@ -1,4 +1,4 @@
-# hxdispatch
+# hxdispatch [![build status](https://ci.rackster.ch/projects/2/status.png?ref=master)](https://ci.rackster.ch/projects/2?ref=master)
 
 > An optionally asynchronous dispatch library for Haxe.
 
