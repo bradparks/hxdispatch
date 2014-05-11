@@ -12,7 +12,7 @@ package hxdispatch.async;
 import haxe.ds.Vector;
 import hxdispatch.Callback;
 import hxdispatch.async.Executor;
-import hxstd.vm.Thread;
+import hxstd.vm.Looper;
 
 /**
  * The PoolExecutor Executor implementation uses a fixed-size pool of
@@ -26,9 +26,9 @@ class PoolExecutor<T> implements Executor<T>
     /**
      * Stores the executor threads that will handle the jobs.
      *
-     * @var Vector<Thread>
+     * @var Vector<Looper>
      */
-    private var executors:Vector<Thread>;
+    private var executors:Vector<Looper>;
 
     /**
      * Stores the jobs/callbacks the executors need to process.
@@ -45,7 +45,7 @@ class PoolExecutor<T> implements Executor<T>
      */
     public function new(?pool:Int = 1):Void
     {
-        this.executors = new Vector<Thread>(pool);
+        this.executors = new Vector<Looper>(pool);
         this.jobs      = new Deque<Job<T>>();
         this.initialize();
     }
@@ -56,14 +56,11 @@ class PoolExecutor<T> implements Executor<T>
     private function initialize():Void
     {
         for (i in 0...this.executors.length) {
-            this.executors.set(i, Thread.create(function():Void {
-                var job:Job<T>;
-                while (true) {
-                    job = this.jobs.pop(true);
-                    try {
-                        job.fn(job.arg);
-                    } catch (ex:Dynamic) {}
-                }
+            this.executors.set(i, Looper.create(function():Void {
+                var job:Job<T> = this.jobs.pop(true);
+                try {
+                    job.fn(job.arg);
+                } catch (ex:Dynamic) {}
             }));
         }
     }
