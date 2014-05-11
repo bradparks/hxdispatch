@@ -6,10 +6,10 @@
     "description": "An optionally asynchronous dispatch library.",
     "classPath": "src",
     "dependencies": {
-        "hxstd": ""
+        "hxstd": "2.*.*"
     },
-    "version": "2.0.1",
-    "releasenote": "Fix incompatible fn override; Executor as interface (nice with hxAnonCls)",
+    "version": "2.0.2",
+    "releasenote": "Migrated Threads to hxstd.vm.Thread",
     "contributors": [
         "MaddinXx"
     ]

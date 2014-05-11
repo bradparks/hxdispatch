@@ -1,14 +1,8 @@
 package hxdispatch.async;
 
-#if cpp
-    import cpp.vm.Thread;
-#elseif java
-    import java.vm.Thread;
-#elseif js
-    import haxe.Timer;
-#elseif neko
-    import neko.vm.Thread;
-#else
+#if (cpp || cs || java || neko)
+    import hxstd.vm.Thread;
+#elseif !js
     #error "Threaded Executor is not supported on target platform due to the lack of Thread feature."
 #end
 import hxdispatch.Callback;
