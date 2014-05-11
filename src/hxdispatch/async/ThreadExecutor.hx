@@ -1,13 +1,12 @@
 package hxdispatch.async;
 
-#if js
-    import cpp.vm.Thread;
-#elseif !(cpp || cs || java || neko)
+#if (cpp || cs || java || neko)
+    import hxstd.vm.Thread;
+#elseif !js
     #error "Threaded Executor is not supported on target platform due to the lack of Thread feature."
 #end
 import hxdispatch.Callback;
 import hxdispatch.async.Executor;
-import hxstd.vm.Thread;
 
 /**
  * The ThreadExecutor is an Executor implementation that processes
