@@ -16,6 +16,7 @@ import hxstd.threading.Executor;
 
 /**
  *
+ * TODO: bug on line 153 (upstream?)
  */
 class Promise<T> extends hxdispatch.concurrent.Promise<T>
 {
@@ -149,7 +150,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     public static function when<T>(promises:Array<Promise<T>>, ?executor:Executor<T> = null):Promise<T>
     {
         if (executor == null) {
-            executor = new Executor.Sequential<T>();
+            executor = new hxstd.threading.Executor.Sequential<T>();
         }
 
         var promise:Promise<T> = new Promise<T>(executor, 1);

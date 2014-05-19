@@ -24,6 +24,8 @@ import hxstd.Nil;
  *
  * Each Callback is executed by the asynchronous Executor.
  *
+ * TODO: bug on line 69 (upstream?)
+ *
  * @{inherit}
  */
 class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
@@ -64,7 +66,7 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
             #if !js this.mutex.acquire(); #end
             var callbacks:Array<Callback<T>> = this.map.get(event).copy();
             #if !js
-                var promise:Promise<Nil> = new Promise<Nil>(new Executor.Sequential<Nil>(), callbacks.length);
+                var promise:Promise<Nil> = new Promise<Nil>(new hxstd.threading.Executor.Sequential<Nil>(), callbacks.length);
             #else
                 var promise:Promise<Nil> = new Promise<Nil>(callbacks.length);
             #end

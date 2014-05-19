@@ -4,6 +4,7 @@ package hxdispatch.tests.async;
  * TestSuite for the hxdispatch.async.Dispatcher class.
  *
  * TODO: async specific tests
+ * TODO: mock ThreadExecutor
  */
 class TestDispatcher extends hxdispatch.tests.concurrent.TestDispatcher
 {
@@ -12,7 +13,7 @@ class TestDispatcher extends hxdispatch.tests.concurrent.TestDispatcher
      */
     override public function setup():Void
     {
-        this.dispatcher = new hxdispatch.async.Dispatcher<Int>(new hxdispatch.async.ThreadExecutor());
+        this.dispatcher = new hxdispatch.async.Dispatcher<Int>(new hxstd.threading.ThreadExecutor());
     }
 
 
