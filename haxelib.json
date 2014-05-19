@@ -6,10 +6,10 @@
     "description": "An optionally asynchronous dispatch library.",
     "classPath": "src",
     "dependencies": {
-        "hxstd": "2.*"
+        "hxstd": "2.1.0"
     },
-    "version": "2.0.2",
-    "releasenote": "Migrated Threads to hxstd.vm.Thread",
+    "version": "2.1.0",
+    "releasenote": "Switched to hxstd.threading package",
     "contributors": [
         "MaddinXx"
     ]
