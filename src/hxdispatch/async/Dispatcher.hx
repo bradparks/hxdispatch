@@ -16,7 +16,7 @@ package hxdispatch.async;
 #end
 import hxdispatch.Callback;
 import hxdispatch.Dispatcher.Status;
-import hxdispatch.async.Executor;
+import hxstd.threading.Executor;
 import hxstd.Nil;
 
 /**
@@ -31,13 +31,13 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
     /**
      * Stores the Executor used to process Callbacks.
      *
-     * @var hxdispatch.async.Executor<T>
+     * @var hxstd.threading.Executor<T>
      */
     private var executor:Executor<T>;
 
 
     /**
-     * @param hxdispatch.async.Executor<T> the Callback Executor to use
+     * @param hxstd.threading.Executor<T> the Callback Executor to use
      *
      * @{inherit}
      */
@@ -64,9 +64,9 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
             #if !js this.mutex.acquire(); #end
             var callbacks:Array<Callback<T>> = this.map.get(event).copy();
             #if !js
-                var promise:Promise<Nil>     = new Promise<Nil>(new Executor.Sequential<Nil>(), callbacks.length);
+                var promise:Promise<Nil> = new Promise<Nil>(new Executor.Sequential<Nil>(), callbacks.length);
             #else
-                var promise:Promise<Nil>     = new Promise<Nil>(callbacks.length);
+                var promise:Promise<Nil> = new Promise<Nil>(callbacks.length);
             #end
             #if !js this.mutex.release(); #end
             var callback:Callback<T>;

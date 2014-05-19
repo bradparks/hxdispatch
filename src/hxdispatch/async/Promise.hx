@@ -12,7 +12,7 @@ package hxdispatch.async;
 #elseif !js
     #error "Async Promise is not supported on target platform due to the lack of Lock/Mutex feature."
 #end
-import hxdispatch.async.Executor;
+import hxstd.threading.Executor;
 
 /**
  *
@@ -29,7 +29,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     /**
      * Stores the Executor used to process Callbacks.
      *
-     * @var hxdispatch.async.Executor<T>
+     * @var hxstd.threading.Executor<T>
      */
     private var executor:Executor<T>;
 
@@ -49,7 +49,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
 
 
     /**
-     * @param hxdispatch.async.Executor<T> the Callback Executor to use
+     * @param hxstd.threading.Executor<T> the Callback Executor to use
      *
      * @{inherit}
      */

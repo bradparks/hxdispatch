@@ -11,9 +11,7 @@ class Runner
 
         r.add( new hxdispatch.tests.async.TestCascade() );
         r.add( new hxdispatch.tests.async.TestDispatcher() );
-        r.add( new hxdispatch.tests.async.TestPoolExecutor() );
         r.add( new hxdispatch.tests.async.TestPromise() );
-        r.add( new hxdispatch.tests.async.TestThreadExecutor() );
 
         var success:Bool = r.run();
 

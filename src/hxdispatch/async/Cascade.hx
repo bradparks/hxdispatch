@@ -4,7 +4,7 @@ package hxdispatch.async;
     import hxdispatch.concurrent.Future;
 #end
 import hxdispatch.Cascade.Tier;
-import hxdispatch.async.Executor;
+import hxstd.threading.Executor;
 
 /**
  * This Cascade implementation is a thread-safe, asynchronous implementation.
@@ -18,13 +18,13 @@ class Cascade<T> extends hxdispatch.concurrent.Cascade<T>
     /**
      * Stores the Executor used to process the Tiers.
      *
-     * @var hxdispatch.async.Executor<T>
+     * @var hxstd.threading.Executor<T>
      */
     private var executor:Executor<T>;
 
 
     /**
-     * @param hxdispatch.async.Executor<T> the Tier Executor to use
+     * @param hxstd.threading.Executor<T> the Tier Executor to use
      *
      * @{inherit}
      */
