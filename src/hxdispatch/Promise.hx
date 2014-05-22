@@ -85,9 +85,13 @@ class Promise<T>
     {
         var callback:Callback<T>;
         for (callback in callbacks) {
-            try {
+            #if HXDISPATCH_DEBUG
                 callback(arg);
-            } catch (ex:Dynamic) {}
+            #else
+                try {
+                    callback(arg);
+                } catch (ex:Dynamic) {}
+            #end
         }
     }
 
