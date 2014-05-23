@@ -8,6 +8,7 @@
 -main hxdispatch/tests/Runner.hx
 -lib  hxstd
 -cpp  bin/cpp
+-D    HXCPP_M64
 -cmd  ./bin/cpp/Runner
 
 --next
@@ -16,6 +17,7 @@
 -main hxdispatch/tests/async/Runner.hx
 -lib  hxstd
 -cpp  bin/async/cpp
+-D    HXCPP_M64
 -cmd  ./bin/async/cpp/Runner
 
 --next
@@ -24,6 +26,7 @@
 -main hxdispatch/tests/concurrent/Runner.hx
 -lib  hxstd
 -cpp  bin/concurrent/cpp
+-D    HXCPP_M64
 -cmd  ./bin/concurrent/cpp/Runner
 
 # C#
