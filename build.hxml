@@ -19,6 +19,7 @@
 -lib  hxstd
 -cpp  bin/async/cpp
 -D    HXCPP_M64
+-D    HXCPP_NO_COLOUR
 -cmd  ./bin/async/cpp/Runner
 
 --next
@@ -28,6 +29,7 @@
 -lib  hxstd
 -cpp  bin/concurrent/cpp
 -D    HXCPP_M64
+-D    HXCPP_NO_COLOUR
 -cmd  ./bin/concurrent/cpp/Runner
 
 # C#
