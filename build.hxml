@@ -1,5 +1,6 @@
 -cmd mkdir -p bin/async
 -cmd mkdir -p bin/concurrent
+-cmd haxelib install mcover
 
 # C++
 --next
@@ -7,39 +8,21 @@
 -cp   tests
 -main hxdispatch/tests/Runner.hx
 -lib  hxstd
+-lib  mcover
 -cpp  bin/cpp
 -D    HXCPP_M64
 -D    HXCPP_NO_COLOUR
+--macro mcover.MCover.coverage([''], ['src'])
 -cmd  ./bin/cpp/Runner
 
---next
--cp   src
--cp   tests
--main hxdispatch/tests/async/Runner.hx
--lib  hxstd
--cpp  bin/async/cpp
--D    HXCPP_M64
--D    HXCPP_NO_COLOUR
--cmd  ./bin/async/cpp/Runner
-
---next
--cp   src
--cp   tests
--main hxdispatch/tests/concurrent/Runner.hx
--lib  hxstd
--cpp  bin/concurrent/cpp
--D    HXCPP_M64
--D    HXCPP_NO_COLOUR
--cmd  ./bin/concurrent/cpp/Runner
-
 # C#
---next
--cp   src
--cp   tests
--main hxdispatch/tests/Runner.hx
--lib  hxstd
--cs   bin/cs
--cmd  mono bin/cs/bin/Runner.exe
+# --next
+# -cp   src
+# -cp   tests
+# -main hxdispatch/tests/Runner.hx
+# -lib  hxstd
+# -cs   bin/cs
+# -cmd  mono bin/cs/bin/Runner.exe
 
 # Java
 --next
@@ -50,23 +33,6 @@
 -java bin/java
 -cmd  java -jar bin/java/Runner.jar
 
-# fails and background Threads block main flow, so commented out for now
-# --next
-# -cp   src
-# -cp   tests
-# -main hxdispatch/tests/async/Runner.hx
-# -lib  hxstd
-# -java bin/async/java
-# -cmd  java -jar bin/async/java/Runner.jar
-
---next
--cp   src
--cp   tests
--main hxdispatch/tests/concurrent/Runner.hx
--lib  hxstd
--java bin/concurrent/java
--cmd  java -jar bin/concurrent/java/Runner.jar
-
 # JS
 --next
 -cp   src
@@ -76,23 +42,6 @@
 -js   bin/Runner.js
 -cmd  node bin/Runner.js
 
-# we don't test JS async since waiting for callbacks is not supported
-# so tests may fail due to callbacks not being executed before asserting
-# --next
-# -lib  hxdispatch
-# -cp   tests
-# -main hxdispatch/tests/async/Runner.hx
-# -js   bin/async/Runner.js
-# -cmd  node bin/async/Runner.js
-
---next
--cp   src
--cp   tests
--main hxdispatch/tests/concurrent/Runner.hx
--lib  hxstd
--js   bin/concurrent/Runner.js
--cmd  node bin/concurrent/Runner.js
-
 # Neko
 --next
 -cp   src
@@ -101,22 +50,6 @@
 -lib  hxstd
 -neko bin/Runner.n
 -cmd  neko bin/Runner.n
-
---next
--cp   src
--cp   tests
--main hxdispatch/tests/async/Runner.hx
--lib  hxstd
--neko bin/async/Runner.n
--cmd  neko bin/async/Runner.n
-
---next
--cp   src
--cp   tests
--main hxdispatch/tests/concurrent/Runner.hx
--lib  hxstd
--neko bin/concurrent/Runner.n
--cmd  neko bin/concurrent/Runner.n
 
 # PHP
 --next

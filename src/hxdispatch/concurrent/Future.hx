@@ -1,19 +1,17 @@
 package hxdispatch.concurrent;
 
 #if cpp
-    import cpp.vm.Lock;
     import cpp.vm.Mutex;
 #elseif java
-    import java.vm.Lock;
     import java.vm.Mutex;
 #elseif neko
-    import neko.vm.Lock;
     import neko.vm.Mutex;
 #else
     #error "Concurrent Future is not supported on target platform due to the lack of Lock/Mutex feature."
 #end
 import hxdispatch.State;
 import hxdispatch.WorkflowException;
+import hxstd.vm.MultiLock;
 
 /**
  * Thread-safe Future implementation.
@@ -35,9 +33,9 @@ class Future<T> extends hxdispatch.Future<T>
     /**
      * Stores the Lock used to block get() callers.
      *
-     * @var Lock
+     * @var hxstd.vm.MultLock
      */
-    private var lock:Lock;
+    private var lock:MultiLock;
 
     /**
      * Stores the number of waiters.
@@ -55,7 +53,7 @@ class Future<T> extends hxdispatch.Future<T>
         super();
 
         this.mutex   = { state: new Mutex(), waiters: new Mutex() }
-        this.lock    = new Lock();
+        this.lock    = new MultiLock();
         this.waiters = 0;
     }
 
@@ -64,15 +62,18 @@ class Future<T> extends hxdispatch.Future<T>
      */
     override public function get(?block:Bool = true):Null<T>
     {
-        if (!this.isReady()) {
+        this.mutex.state.acquire();
+        if (this.state == State.NONE) {
             if (block) {
                 this.mutex.waiters.acquire();
                 ++this.waiters;
+                this.mutex.state.release();
                 this.mutex.waiters.release();
                 this.lock.wait();
 
                 return this.value;
             } else {
+                this.mutex.state.release();
                 throw new WorkflowException("Future has not been resolved yet");
             }
         }
@@ -124,10 +125,7 @@ class Future<T> extends hxdispatch.Future<T>
     private function unlock(times:Int):Void
     {
         this.mutex.waiters.acquire();
-        for (i in 0...times) {
-            this.lock.release();
-            --this.waiters;
-        }
+        this.lock.release();
         this.mutex.waiters.release();
     }
 
@@ -137,8 +135,7 @@ class Future<T> extends hxdispatch.Future<T>
     override public function reject():Void
     {
         this.mutex.state.acquire();
-        var ready:Bool = this.state != State.NONE;
-        if (!ready) {
+        if (this.state == State.NONE) {
             this.state = State.REJECTED;
             this.mutex.state.release();
             this.unlock(this.waiters);
@@ -154,8 +151,7 @@ class Future<T> extends hxdispatch.Future<T>
     override public function resolve(value:T):Void
     {
         this.mutex.state.acquire();
-        var ready:Bool = this.state != State.NONE;
-        if (!ready) {
+        if (this.state == State.NONE) {
             this.value = value;
             this.state = State.RESOLVED;
             this.mutex.state.release();
