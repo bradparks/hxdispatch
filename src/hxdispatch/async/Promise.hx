@@ -1,14 +1,8 @@
 package hxdispatch.async;
 
-#if cpp
-    import cpp.vm.Lock;
-    import cpp.vm.Mutex;
-#elseif java
-    import java.vm.Lock;
-    import java.vm.Mutex;
-#elseif neko
-    import neko.vm.Lock;
-    import neko.vm.Mutex;
+#if (cpp || cs || java || neko)
+    import hxstd.vm.Lock;
+    import hxstd.vm.Mutex;
 #elseif !js
     #error "Async Promise is not supported on target platform due to the lack of Lock/Mutex feature."
 #end

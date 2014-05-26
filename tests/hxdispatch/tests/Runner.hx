@@ -20,15 +20,14 @@ class Runner
         r.add( new hxdispatch.tests.TestFuture() );
         r.add( new hxdispatch.tests.TestPromise() );
 
-        #if (cpp || java || js || neko)
+        #if (cpp || cs || flash || java || js || neko)
             r.add( new hxdispatch.tests.concurrent.TestCascade() );
             r.add( new hxdispatch.tests.concurrent.TestDispatcher() );
-            #if !js
-                r.add( new hxdispatch.tests.concurrent.TestFuture() );
-            #end
             r.add( new hxdispatch.tests.concurrent.TestPromise() );
 
-            #if !js
+            #if (cpp || cs || java || neko)
+                r.add( new hxdispatch.tests.concurrent.TestFuture() );
+
                 r.add( new hxdispatch.tests.async.TestCascade() );
                 r.add( new hxdispatch.tests.async.TestDispatcher() );
                 r.add( new hxdispatch.tests.async.TestPromise() );
