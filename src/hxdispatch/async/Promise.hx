@@ -48,14 +48,20 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
      *
      * @{inherit}
      */
-    public function new(executor:Executor<T>, ?resolves:Int = 1):Void
+    public function new(executor:Executor<T>, ?resolves:Int = #if cs null #else 1 #end):Void // TODO: Cannot convert type `int' to `haxe.lang.Null<int>'
     {
+        #if cs
+            if (resolves == null) {
+                resolves = 1;
+            }
+        #end
         super(resolves);
 
-        this.executing    = false;
-        this.executor     = executor;
-        #if !js this.lock = new Lock(); #end
-        this.waiters      = 0;
+        this.executing     = false;
+        this.executor      = executor;
+        #if !js this.lock  = new Lock(); #end
+        this.mutex.waiters = new Mutex();
+        this.waiters       = 0;
     }
 
     /**
