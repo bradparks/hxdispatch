@@ -49,7 +49,7 @@ class Future<T> extends hxdispatch.Future<T>
         this.mutex.acquire();
         if (this.state == State.NONE) {
             if (block) {
-                this.mutex.release();
+                this.mutex.release(); // TODO: because we release here, resolve() can finish before wait() is finalized
                 this.lock.wait();
 
                 return this.value;
