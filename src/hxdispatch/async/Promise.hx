@@ -31,7 +31,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     /**
      * Stores the Lock used to block await() callers.
      *
-     * @var Lock
+     * @var hxstd.vm.Lock
      */
     #if !js private var lock:Lock; #end
 

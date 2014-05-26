@@ -21,7 +21,7 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
     /**
      * Stores the Mutex used to synchronize access.
      *
-     * @var Mutex
+     * @var hxstd.vm.Mutex
      */
     #if !js private var mutex:Mutex; #end
 

@@ -18,7 +18,7 @@ class Future<T> extends hxdispatch.Future<T>
     /**
      * Stores the Mutex used to synchronize access to properties.
      *
-     * @var { state:Mutex, waiters:Mutex }
+     * @var { state:hxstd.vm.Mutex, waiters:hxstd.vm.Mutex }
      */
     private var mutex:{ state:Mutex, waiters:Mutex };
 

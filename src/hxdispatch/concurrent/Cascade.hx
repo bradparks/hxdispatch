@@ -17,7 +17,7 @@ class Cascade<T> extends hxdispatch.Cascade<T>
     /**
      * Stores the Mutex used to synchronize access to the Tier lists.
      *
-     * @var Mutex
+     * @var hxstd.vm.Mutex
      */
     #if !js private var mutex:Mutex; #end
 
