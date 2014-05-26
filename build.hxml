@@ -12,6 +12,7 @@
 -cpp  bin/cpp
 -D    HXCPP_M64
 -D    HXCPP_NO_COLOUR
+--macro mcover.MCover.coverage([''], ['src'])
 -cmd  ./bin/cpp/Runner
 
 # C#
@@ -20,7 +21,6 @@
 # -cp   tests
 # -main hxdispatch/tests/Runner.hx
 # -lib  hxstd
-# -lib  mcover
 # -cs   bin/cs
 # -cmd  mono bin/cs/bin/Runner.exe
 
@@ -30,7 +30,6 @@
 -cp   tests
 -main hxdispatch/tests/Runner.hx
 -lib  hxstd
--lib  mcover
 -java bin/java
 -cmd  java -jar bin/java/Runner.jar
 
@@ -40,7 +39,6 @@
 -cp   tests
 -main hxdispatch/tests/Runner.hx
 -lib  hxstd
--lib  mcover
 -js   bin/Runner.js
 -cmd  node bin/Runner.js
 
@@ -50,8 +48,6 @@
 -cp   tests
 -main hxdispatch/tests/Runner.hx
 -lib  hxstd
--lib  mcover
-# --macro mcover.MCover.coverage([''], ['src'])
 -neko bin/Runner.n
 -cmd  neko bin/Runner.n
 
@@ -61,7 +57,6 @@
 -cp   tests
 -main hxdispatch/tests/Runner.hx
 -lib  hxstd
--lib  mcover
 -php  bin/php
 -cmd  php bin/php/index.php
 
@@ -71,6 +66,5 @@
 -cp   tests
 -main hxdispatch/tests/Runner.hx
 -lib  hxstd
--lib  mcover
 -swf  bin/Runner.swf
 -cmd  echo "Open bin/runner.swf in browser to check SWF test results"

@@ -46,8 +46,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function done(callback:Callback<T>):Void
     {
         #if !js this.mutex.state.acquire(); #end
-        var done:Bool = this.state != State.NONE;
-        if (!done) {
+        if (this.state == State.NONE) {
             this.callbacks.done.add(callback);
             #if !js this.mutex.state.release(); #end
         } else {
@@ -98,8 +97,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function reject(arg:T):Void
     {
         #if !js this.mutex.state.acquire(); #end
-        var done:Bool = this.state != State.NONE;
-        if (!done) {
+        if (this.state == State.NONE) {
             this.state = State.REJECTED;
             #if !js this.mutex.state.release(); #end
             this.executeCallbacks(Lambda.array(this.callbacks.rejected).concat(Lambda.array(this.callbacks.done)), arg);
@@ -119,8 +117,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function rejected(callback:Callback<T>):Void
     {
         #if !js this.mutex.state.acquire(); #end
-        var done:Bool = this.state != State.NONE;
-        if (!done) {
+        if (this.state == State.NONE) {
             this.callbacks.rejected.add(callback);
             #if !js this.mutex.state.release(); #end
         } else {
@@ -135,8 +132,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function resolve(arg:T):Void
     {
         #if !js this.mutex.state.acquire(); #end
-        var done:Bool = this.state != State.NONE;
-        if (!done) {
+        if (this.state == State.NONE) {
             if (--this.resolves == 0) {
                 this.state = State.RESOLVED;
                 #if !js this.mutex.state.release(); #end
@@ -160,8 +156,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function resolved(callback:Callback<T>):Void
     {
         #if !js this.mutex.state.acquire(); #end
-        var done:Bool = this.state != State.NONE;
-        if (!done) {
+        if (this.state == State.NONE) {
             this.callbacks.resolved.add(callback);
             #if !js this.mutex.state.release(); #end
         } else {

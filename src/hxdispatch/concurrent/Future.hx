@@ -62,15 +62,18 @@ class Future<T> extends hxdispatch.Future<T>
      */
     override public function get(?block:Bool = true):Null<T>
     {
-        if (!this.isReady()) {
+        this.mutex.state.acquire();
+        if (this.state == State.NONE) {
             if (block) {
                 this.mutex.waiters.acquire();
                 ++this.waiters;
+                this.mutex.state.release();
                 this.mutex.waiters.release();
                 this.lock.wait();
 
                 return this.value;
             } else {
+                this.mutex.state.release();
                 throw new WorkflowException("Future has not been resolved yet");
             }
         }
@@ -132,8 +135,7 @@ class Future<T> extends hxdispatch.Future<T>
     override public function reject():Void
     {
         this.mutex.state.acquire();
-        var ready:Bool = this.state != State.NONE;
-        if (!ready) {
+        if (this.state == State.NONE) {
             this.state = State.REJECTED;
             this.mutex.state.release();
             this.unlock(this.waiters);
@@ -149,8 +151,7 @@ class Future<T> extends hxdispatch.Future<T>
     override public function resolve(value:T):Void
     {
         this.mutex.state.acquire();
-        var ready:Bool = this.state != State.NONE;
-        if (!ready) {
+        if (this.state == State.NONE) {
             this.value = value;
             this.state = State.RESOLVED;
             this.mutex.state.release();

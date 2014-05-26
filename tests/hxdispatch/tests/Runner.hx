@@ -1,8 +1,10 @@
 package hxdispatch.tests;
 
+#if cpp
+    import mcover.coverage.MCoverage;
+    import mcover.coverage.CoverageLogger;
+#end
 import haxe.unit.TestRunner;
-import mcover.coverage.MCoverage;
-import mcover.coverage.CoverageLogger;
 
 /**
  * TestSuite runner for classes in hxdispatch package.
@@ -33,12 +35,11 @@ class Runner
             #end
         #end
 
-        // #if neko
-        //     var logger:CoverageLogger = MCoverage.getLogger();
-        //     logger.report();
-        // #end
-
         var success:Bool = r.run();
+        #if cpp
+            MCoverage.getLogger().report();
+        #end
+
         #if sys
             Sys.exit(success ? 0 : 1);
         #end
