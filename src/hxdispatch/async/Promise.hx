@@ -1,7 +1,7 @@
 package hxdispatch.async;
 
 #if (cpp || cs || java || neko)
-    import hxstd.vm.Lock;
+    import hxstd.vm.MultiLock;
     import hxstd.vm.Mutex;
 #elseif !js
     #error "Async Promise is not supported on target platform due to the lack of Lock/Mutex feature."
@@ -31,16 +31,9 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     /**
      * Stores the Lock used to block await() callers.
      *
-     * @var hxstd.vm.Lock
+     * @var hxstd.vm.MultiLock
      */
-    #if !js private var lock:Lock; #end
-
-    /**
-     * Stores the number of waiters.
-     *
-     * @var Int
-     */
-    private var waiters:Int;
+    #if !js private var lock:MultiLock; #end
 
 
     /**
@@ -48,20 +41,13 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
      *
      * @{inherit}
      */
-    public function new(executor:Executor<T>, ?resolves:Int = #if cs null #else 1 #end):Void // TODO: Cannot convert type `int' to `haxe.lang.Null<int>'
+    public function new(executor:Executor<T>, resolves:Int = 1):Void
     {
-        #if cs
-            if (resolves == null) {
-                resolves = 1;
-            }
-        #end
         super(resolves);
 
         this.executing     = false;
         this.executor      = executor;
-        #if !js this.lock  = new Lock(); #end
-        this.mutex.waiters = new Mutex();
-        this.waiters       = 0;
+        #if !js this.lock  = new MultiLock(); #end
     }
 
     /**
@@ -72,10 +58,6 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
         public function await():Void
         {
             if (!this.isDone() || this.isExecuting()) {
-                this.mutex.waiters.acquire();
-                ++this.waiters;
-                this.mutex.waiters.release();
-
                 this.lock.wait();
             }
         }
@@ -88,9 +70,9 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
      */
     public function isExecuting():Bool
     {
-        #if !js this.mutex.state.acquire(); #end
+        #if !js this.mutex.acquire(); #end
         var ret:Bool = this.executing;
-        #if !js this.mutex.state.release(); #end
+        #if !js this.mutex.release(); #end
 
         return ret;
     }
@@ -104,9 +86,9 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
         if ((count = Lambda.count(callbacks)) == 0) {
             #if !js this.unlock(); #end
         } else {
-            #if !js this.mutex.state.acquire(); #end
+            #if !js this.mutex.acquire(); #end
             this.executing = true;
-            #if !js this.mutex.state.release();
+            #if !js this.mutex.release();
             var mutex:Mutex = new Mutex(); #end
 
             var callback:Callback<T>;
@@ -122,9 +104,9 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
 
                     #if !js mutex.acquire();
                     if (--count == 0) {
-                        this.mutex.state.acquire();
+                        this.mutex.acquire();
                         this.executing = false;
-                        this.mutex.state.release();
+                        this.mutex.release();
                         this.unlock();
                     }
                     mutex.release(); #end
@@ -139,19 +121,16 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     #if !js
         private function unlock():Void
         {
-            this.mutex.waiters.acquire();
-            for (i in 0...this.waiters) {
-                this.lock.release();
-            }
-            this.waiters = 0;
-            this.mutex.waiters.release();
+            this.mutex.acquire();
+            this.lock.release();
+            this.mutex.release();
         }
     #end
 
     /**
      * @{inherit}
      */
-    public static function when<T>(promises:Array<Promise<T>>, ?executor:Executor<T> = null):Promise<T>
+    public static function when<T>(promises:Array<Promise<T>>, ?executor:Executor<T>):Promise<T>
     {
         if (executor == null) {
             executor = new hxstd.threading.Executor.Sequential<T>();
@@ -160,7 +139,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
         var promise:Promise<T> = new Promise<T>(executor, 1);
         var done:Bool;
         for (p in promises) {
-            #if !js p.mutex.state.acquire(); #end
+            #if !js p.mutex.acquire(); #end
             done = p.state != State.NONE;
             if (!done) {
                 ++promise.resolves;
@@ -172,7 +151,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
                     }
                 });
             }
-            #if !js p.mutex.state.release(); #end
+            #if !js p.mutex.release(); #end
         }
         --promise.resolves;
 

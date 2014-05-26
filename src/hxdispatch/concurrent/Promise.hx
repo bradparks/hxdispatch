@@ -22,23 +22,18 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      * Stores the Mutex used to synchronize access to properties.
      *
-     * @var { state:hxstd.vm.Mutex, waiters:hxstd.vm.Mutex }
+     * @var hxstd.vm.Mutex
      */
-    #if !js private var mutex:{ state:Mutex, waiters:Mutex }; #end
+    #if !js private var mutex:Mutex; #end
 
 
     /**
      * @{inherit}
      */
-    public function new(?resolves:Int = #if cs null #else 1 #end):Void // TODO: Cannot convert type `int' to `haxe.lang.Null<int>'
+    public function new(resolves:Int = 1):Void // TODO: Cannot convert type `int' to `haxe.lang.Null<int>'
     {
-        #if cs
-            if (resolves == null) {
-                resolves = 1;
-            }
-        #end
         super(resolves);
-        #if !js this.mutex = { state: new Mutex(), waiters: null } #end
+        #if !js this.mutex = new Mutex(); #end
     }
 
     /**
@@ -46,12 +41,12 @@ class Promise<T> extends hxdispatch.Promise<T>
      */
     override public function done(callback:Callback<T>):Void
     {
-        #if !js this.mutex.state.acquire(); #end
+        #if !js this.mutex.acquire(); #end
         if (this.state == State.NONE) {
             this.callbacks.done.add(callback);
-            #if !js this.mutex.state.release(); #end
+            #if !js this.mutex.release(); #end
         } else {
-            #if !js this.mutex.state.release(); #end
+            #if !js this.mutex.release(); #end
             throw new WorkflowException("Promise has already been rejected or resolved");
         }
     }
@@ -61,9 +56,9 @@ class Promise<T> extends hxdispatch.Promise<T>
      */
     override public function isDone():Bool
     {
-        #if !js this.mutex.state.acquire(); #end
+        #if !js this.mutex.acquire(); #end
         var ret:Bool = this.state != State.NONE;
-        #if !js this.mutex.state.release(); #end
+        #if !js this.mutex.release(); #end
 
         return ret;
     }
@@ -73,9 +68,9 @@ class Promise<T> extends hxdispatch.Promise<T>
      */
     override public function isRejected():Bool
     {
-        #if !js this.mutex.state.acquire(); #end
+        #if !js this.mutex.acquire(); #end
         var ret:Bool = this.state == State.REJECTED;
-        #if !js this.mutex.state.release(); #end
+        #if !js this.mutex.release(); #end
 
         return ret;
     }
@@ -85,9 +80,9 @@ class Promise<T> extends hxdispatch.Promise<T>
      */
     override public function isResolved():Bool
     {
-        #if !js this.mutex.state.acquire(); #end
+        #if !js this.mutex.acquire(); #end
         var ret:Bool = this.state == State.RESOLVED;
-        #if !js this.mutex.state.release(); #end
+        #if !js this.mutex.release(); #end
 
         return ret;
     }
@@ -97,17 +92,17 @@ class Promise<T> extends hxdispatch.Promise<T>
      */
     override public function reject(arg:T):Void
     {
-        #if !js this.mutex.state.acquire(); #end
+        #if !js this.mutex.acquire(); #end
         if (this.state == State.NONE) {
             this.state = State.REJECTED;
-            #if !js this.mutex.state.release(); #end
+            #if !js this.mutex.release(); #end
             this.executeCallbacks(Lambda.array(this.callbacks.rejected).concat(Lambda.array(this.callbacks.done)), arg);
 
             this.callbacks.done     = null;
             this.callbacks.rejected = null;
             this.callbacks.resolved = null;
         } else {
-            #if !js this.mutex.state.release(); #end
+            #if !js this.mutex.release(); #end
             throw new WorkflowException("Promise has already been rejected or resolved");
         }
     }
@@ -117,12 +112,12 @@ class Promise<T> extends hxdispatch.Promise<T>
      */
     override public function rejected(callback:Callback<T>):Void
     {
-        #if !js this.mutex.state.acquire(); #end
+        #if !js this.mutex.acquire(); #end
         if (this.state == State.NONE) {
             this.callbacks.rejected.add(callback);
-            #if !js this.mutex.state.release(); #end
+            #if !js this.mutex.release(); #end
         } else {
-            #if !js this.mutex.state.release(); #end
+            #if !js this.mutex.release(); #end
             throw new WorkflowException("Promise has already been rejected or resolved");
         }
     }
@@ -132,21 +127,21 @@ class Promise<T> extends hxdispatch.Promise<T>
      */
     override public function resolve(arg:T):Void
     {
-        #if !js this.mutex.state.acquire(); #end
+        #if !js this.mutex.acquire(); #end
         if (this.state == State.NONE) {
             if (--this.resolves == 0) {
                 this.state = State.RESOLVED;
-                #if !js this.mutex.state.release(); #end
+                #if !js this.mutex.release(); #end
                 this.executeCallbacks(Lambda.array(this.callbacks.resolved).concat(Lambda.array(this.callbacks.done)), arg);
 
                 this.callbacks.done     = null;
                 this.callbacks.rejected = null;
                 this.callbacks.resolved = null;
             } else {
-                #if !js this.mutex.state.release(); #end
+                #if !js this.mutex.release(); #end
             }
         } else {
-            #if !js this.mutex.state.release(); #end
+            #if !js this.mutex.release(); #end
             throw new WorkflowException("Promise has already been rejected or resolved");
         }
     }
@@ -156,12 +151,12 @@ class Promise<T> extends hxdispatch.Promise<T>
      */
     override public function resolved(callback:Callback<T>):Void
     {
-        #if !js this.mutex.state.acquire(); #end
+        #if !js this.mutex.acquire(); #end
         if (this.state == State.NONE) {
             this.callbacks.resolved.add(callback);
-            #if !js this.mutex.state.release(); #end
+            #if !js this.mutex.release(); #end
         } else {
-            #if !js this.mutex.state.release(); #end
+            #if !js this.mutex.release(); #end
             throw new WorkflowException("Promise has already been rejected or resolved");
         }
     }
@@ -174,7 +169,7 @@ class Promise<T> extends hxdispatch.Promise<T>
         var promise:Promise<T> = new Promise<T>(1);
         var done:Bool;
         for (p in promises) {
-            #if !js p.mutex.state.acquire(); #end
+            #if !js p.mutex.acquire(); #end
             done = p.state != State.NONE;
             if (!done) {
                 ++promise.resolves;
@@ -186,7 +181,7 @@ class Promise<T> extends hxdispatch.Promise<T>
                     }
                 });
             }
-            #if !js p.mutex.state.release(); #end
+            #if !js p.mutex.release(); #end
         }
         --promise.resolves;
 

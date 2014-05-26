@@ -18,9 +18,9 @@ class Future<T> extends hxdispatch.Future<T>
     /**
      * Stores the Mutex used to synchronize access to properties.
      *
-     * @var { state:hxstd.vm.Mutex, waiters:hxstd.vm.Mutex }
+     * @var hxstd.vm.Mutex
      */
-    private var mutex:{ state:Mutex, waiters:Mutex };
+    private var mutex:Mutex;
 
     /**
      * Stores the Lock used to block get() callers.
@@ -28,13 +28,6 @@ class Future<T> extends hxdispatch.Future<T>
      * @var hxstd.vm.MultLock
      */
     private var lock:MultiLock;
-
-    /**
-     * Stores the number of waiters.
-     *
-     * @var Int
-     */
-    private var waiters:Int;
 
 
     /**
@@ -44,28 +37,24 @@ class Future<T> extends hxdispatch.Future<T>
     {
         super();
 
-        this.mutex   = { state: new Mutex(), waiters: new Mutex() }
+        this.mutex   = new Mutex();
         this.lock    = new MultiLock();
-        this.waiters = 0;
     }
 
     /**
      * @{inherit}
      */
-    override public function get(?block:Bool = true):Null<T>
+    override public function get(block:Bool = true):Null<T>
     {
-        this.mutex.state.acquire();
+        this.mutex.acquire();
         if (this.state == State.NONE) {
             if (block) {
-                this.mutex.waiters.acquire();
-                ++this.waiters;
-                this.mutex.state.release();
-                this.mutex.waiters.release();
+                this.mutex.release();
                 this.lock.wait();
 
                 return this.value;
             } else {
-                this.mutex.state.release();
+                this.mutex.release();
                 throw new WorkflowException("Future has not been resolved yet");
             }
         }
@@ -78,9 +67,9 @@ class Future<T> extends hxdispatch.Future<T>
      */
     override public function isReady():Bool
     {
-        this.mutex.state.acquire();
+        this.mutex.acquire();
         var ret:Bool = this.state != State.NONE;
-        this.mutex.state.release();
+        this.mutex.release();
 
         return ret;
     }
@@ -90,9 +79,9 @@ class Future<T> extends hxdispatch.Future<T>
      */
     override public function isRejected():Bool
     {
-        this.mutex.state.acquire();
+        this.mutex.acquire();
         var ret:Bool = this.state == State.REJECTED;
-        this.mutex.state.release();
+        this.mutex.release();
 
         return ret;
     }
@@ -102,23 +91,21 @@ class Future<T> extends hxdispatch.Future<T>
      */
     override public function isResolved():Bool
     {
-        this.mutex.state.acquire();
+        this.mutex.acquire();
         var ret:Bool = this.state == State.RESOLVED;
-        this.mutex.state.release();
+        this.mutex.release();
 
         return ret;
     }
 
     /**
      * Unlocks the Lock that is used to block waiters in get() method.
-     *
-     * @param Int times the number of times the release() method should be called
      */
-    private function unlock(times:Int):Void
+    private function unlock():Void
     {
-        this.mutex.waiters.acquire();
+        this.mutex.acquire();
         this.lock.release();
-        this.mutex.waiters.release();
+        this.mutex.release();
     }
 
     /**
@@ -126,13 +113,13 @@ class Future<T> extends hxdispatch.Future<T>
      */
     override public function reject():Void
     {
-        this.mutex.state.acquire();
+        this.mutex.acquire();
         if (this.state == State.NONE) {
             this.state = State.REJECTED;
-            this.mutex.state.release();
-            this.unlock(this.waiters);
+            this.mutex.release();
+            this.unlock();
         } else {
-            this.mutex.state.release();
+            this.mutex.release();
             throw new WorkflowException("Future has already been rejected or resolved");
         }
     }
@@ -142,14 +129,14 @@ class Future<T> extends hxdispatch.Future<T>
      */
     override public function resolve(value:T):Void
     {
-        this.mutex.state.acquire();
+        this.mutex.acquire();
         if (this.state == State.NONE) {
             this.value = value;
             this.state = State.RESOLVED;
-            this.mutex.state.release();
-            this.unlock(this.waiters);
+            this.mutex.release();
+            this.unlock();
         } else {
-            this.mutex.state.release();
+            this.mutex.release();
             throw new WorkflowException("Future has already been rejected or resolved");
         }
     }

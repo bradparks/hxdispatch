@@ -47,7 +47,7 @@ class Promise<T>
      *
      * @param Int resolves the number of required resolves before the Promise gets marked as done
      */
-    public function new(?resolves:Int = 1):Void
+    public function new(resolves:Int = 1):Void
     {
         this.callbacks = {
             done:     new List<Callback<T>>(),
