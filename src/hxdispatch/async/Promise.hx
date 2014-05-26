@@ -1,14 +1,8 @@
 package hxdispatch.async;
 
-#if cpp
-    import cpp.vm.Lock;
-    import cpp.vm.Mutex;
-#elseif java
-    import java.vm.Lock;
-    import java.vm.Mutex;
-#elseif neko
-    import neko.vm.Lock;
-    import neko.vm.Mutex;
+#if (cpp || cs || java || neko)
+    import hxstd.vm.Lock;
+    import hxstd.vm.Mutex;
 #elseif !js
     #error "Async Promise is not supported on target platform due to the lack of Lock/Mutex feature."
 #end
@@ -37,7 +31,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     /**
      * Stores the Lock used to block await() callers.
      *
-     * @var Lock
+     * @var hxstd.vm.Lock
      */
     #if !js private var lock:Lock; #end
 
@@ -54,14 +48,20 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
      *
      * @{inherit}
      */
-    public function new(executor:Executor<T>, ?resolves:Int = 1):Void
+    public function new(executor:Executor<T>, ?resolves:Int = #if cs null #else 1 #end):Void // TODO: Cannot convert type `int' to `haxe.lang.Null<int>'
     {
+        #if cs
+            if (resolves == null) {
+                resolves = 1;
+            }
+        #end
         super(resolves);
 
-        this.executing    = false;
-        this.executor     = executor;
-        #if !js this.lock = new Lock(); #end
-        this.waiters      = 0;
+        this.executing     = false;
+        this.executor      = executor;
+        #if !js this.lock  = new Lock(); #end
+        this.mutex.waiters = new Mutex();
+        this.waiters       = 0;
     }
 
     /**

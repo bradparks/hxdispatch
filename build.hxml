@@ -51,6 +51,16 @@
 -neko bin/Runner.n
 -cmd  neko bin/Runner.n
 
+# SWF
+--next
+-cp   src
+-cp   tests
+-main hxdispatch/tests/Runner.hx
+-lib  hxstd
+-swf-version 11.4
+-swf  bin/Runner.swf
+-cmd  echo "Open bin/runner.swf in browser to check SWF test results"
+
 # PHP
 --next
 -cp   src
@@ -59,12 +69,3 @@
 -lib  hxstd
 -php  bin/php
 -cmd  php bin/php/index.php
-
-# SWF
---next
--cp   src
--cp   tests
--main hxdispatch/tests/Runner.hx
--lib  hxstd
--swf  bin/Runner.swf
--cmd  echo "Open bin/runner.swf in browser to check SWF test results"

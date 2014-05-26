@@ -1,18 +1,14 @@
 package hxdispatch.async;
 
-#if cpp
-    import cpp.vm.Mutex;
-#elseif java
-    import java.vm.Mutex;
-#elseif neko
-    import neko.vm.Mutex;
+#if (cpp || cs || flash || java || neko)
+    import hxstd.vm.Mutex;
 #elseif !js
     #error "Async Dispatcher is not supported on target platform due to the lack of Mutex feature."
 #end
-#if !js
-    import hxdispatch.async.Promise;
-#else
+#if (flash || js)
     import hxdispatch.concurrent.Promise;
+#else
+    import hxdispatch.async.Promise;
 #end
 import hxdispatch.Callback;
 import hxdispatch.Dispatcher.Status;

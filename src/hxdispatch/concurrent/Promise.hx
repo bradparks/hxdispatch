@@ -1,11 +1,7 @@
 package hxdispatch.concurrent;
 
-#if cpp
-    import cpp.vm.Mutex;
-#elseif java
-    import java.vm.Mutex;
-#elseif neko
-    import neko.vm.Mutex;
+#if (cpp || cs || flash || java || neko)
+    import hxstd.vm.Mutex;
 #elseif !js
     #error "Concurrent Promise is not supported on target platform due to the lack of Mutex feature."
 #end
@@ -26,7 +22,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      * Stores the Mutex used to synchronize access to properties.
      *
-     * @var { state:Mutex, waiters:Mutex }
+     * @var { state:hxstd.vm.Mutex, waiters:hxstd.vm.Mutex }
      */
     #if !js private var mutex:{ state:Mutex, waiters:Mutex }; #end
 
@@ -34,10 +30,15 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      * @{inherit}
      */
-    public function new(?resolves:Int = 1):Void
+    public function new(?resolves:Int = #if cs null #else 1 #end):Void // TODO: Cannot convert type `int' to `haxe.lang.Null<int>'
     {
+        #if cs
+            if (resolves == null) {
+                resolves = 1;
+            }
+        #end
         super(resolves);
-        #if !js this.mutex = { state: new Mutex(), waiters: new Mutex() } #end
+        #if !js this.mutex = { state: new Mutex(), waiters: null } #end
     }
 
     /**

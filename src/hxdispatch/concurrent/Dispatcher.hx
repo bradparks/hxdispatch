@@ -1,11 +1,7 @@
 package hxdispatch.concurrent;
 
-#if cpp
-    import cpp.vm.Mutex;
-#elseif java
-    import java.vm.Mutex;
-#elseif neko
-    import neko.vm.Mutex;
+#if (cpp || cs || flash || java || neko)
+    import hxstd.vm.Mutex;
 #elseif !js
     #error "Concurrent Dispatcher is not supported on target platform due to the lack of Mutex feature."
 #end
@@ -25,7 +21,7 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
     /**
      * Stores the Mutex used to synchronize access.
      *
-     * @var Mutex
+     * @var hxstd.vm.Mutex
      */
     #if !js private var mutex:Mutex; #end
 

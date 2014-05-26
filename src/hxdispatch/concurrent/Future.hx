@@ -1,17 +1,9 @@
 package hxdispatch.concurrent;
 
-#if cpp
-    import cpp.vm.Mutex;
-#elseif java
-    import java.vm.Mutex;
-#elseif neko
-    import neko.vm.Mutex;
-#else
-    #error "Concurrent Future is not supported on target platform due to the lack of Lock/Mutex feature."
-#end
 import hxdispatch.State;
 import hxdispatch.WorkflowException;
 import hxstd.vm.MultiLock;
+import hxstd.vm.Mutex;
 
 /**
  * Thread-safe Future implementation.
@@ -26,7 +18,7 @@ class Future<T> extends hxdispatch.Future<T>
     /**
      * Stores the Mutex used to synchronize access to properties.
      *
-     * @var { state:Mutex, waiters:Mutex }
+     * @var { state:hxstd.vm.Mutex, waiters:hxstd.vm.Mutex }
      */
     private var mutex:{ state:Mutex, waiters:Mutex };
 
