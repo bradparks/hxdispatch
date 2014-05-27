@@ -6,10 +6,10 @@
     "description": "An optionally asynchronous dispatch library.",
     "classPath": "src",
     "dependencies": {
-        "hxstd": "2.1.0"
+        "hxstd": "2.2.0"
     },
-    "version": "2.1.0",
-    "releasenote": "Switched to hxstd.threading package",
+    "version": "2.2.0",
+    "releasenote": "C# compability; should fix Futures/Promises non unlocking waiters",
     "contributors": [
         "MaddinXx"
     ]
