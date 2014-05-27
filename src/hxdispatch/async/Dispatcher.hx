@@ -20,8 +20,6 @@ import hxstd.Nil;
  *
  * Each Callback is executed by the asynchronous Executor.
  *
- * TODO: bug on line 69 (upstream?)
- *
  * @{inherit}
  */
 class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>

@@ -30,7 +30,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      * @{inherit}
      */
-    public function new(resolves:Int = 1):Void // TODO: Cannot convert type `int' to `haxe.lang.Null<int>'
+    public function new(resolves:Int = 1):Void
     {
         super(resolves);
         #if !js this.mutex = new Mutex(); #end

@@ -10,7 +10,6 @@ import hxstd.threading.Executor;
 
 /**
  *
- * TODO: bug on line 153 (upstream?)
  */
 class Promise<T> extends hxdispatch.concurrent.Promise<T>
 {
