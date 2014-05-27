@@ -35,6 +35,13 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
      */
     #if !js private var lock:MultiLock; #end
 
+    /**
+     * Stores the number of waiters (having called await).
+     *
+     * @var Int
+     */
+    private var waiters:Int;
+
 
     /**
      * @param hxstd.threading.Executor<T> the Callback Executor to use
@@ -48,6 +55,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
         this.executing     = false;
         this.executor      = executor;
         #if !js this.lock  = new MultiLock(); #end
+        this.waiters       = 0;
     }
 
     /**
@@ -58,9 +66,11 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
         public function await():Void
         {
             this.mutex.acquire();
-            if (!this.isDone() || this.isExecuting()) { // TODO: because we release here, resolve() can finish before wait() is finalized
+            if (!this.isDone() || this.isExecuting()) {
+                ++this.waiters;
                 this.mutex.release();
                 this.lock.wait();
+                --this.waiters;
             } else {
                 this.mutex.release();
             }
@@ -126,7 +136,9 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
         private function unlock():Void
         {
             this.mutex.acquire();
-            this.lock.release();
+            while (this.waiters != 0) {
+                this.lock.release();
+            }
             this.mutex.release();
         }
     #end

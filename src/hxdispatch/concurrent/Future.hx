@@ -29,6 +29,13 @@ class Future<T> extends hxdispatch.Future<T>
      */
     private var lock:MultiLock;
 
+    /**
+     * Stores the number of waiters (having called await).
+     *
+     * @var Int
+     */
+    private var waiters:Int;
+
 
     /**
      * @{inherit}
@@ -39,6 +46,7 @@ class Future<T> extends hxdispatch.Future<T>
 
         this.mutex   = new Mutex();
         this.lock    = new MultiLock();
+        this.waiters = 0;
     }
 
     /**
@@ -49,8 +57,10 @@ class Future<T> extends hxdispatch.Future<T>
         this.mutex.acquire();
         if (this.state == State.NONE) {
             if (block) {
+                ++this.waiters;
                 this.mutex.release(); // TODO: because we release here, resolve() can finish before wait() is finalized
                 this.lock.wait();
+                --this.waiters;
 
                 return this.value;
             } else {
@@ -104,7 +114,9 @@ class Future<T> extends hxdispatch.Future<T>
     private function unlock():Void
     {
         this.mutex.acquire();
-        this.lock.release();
+        while (this.waiters != 0) {
+            this.lock.release();
+        }
         this.mutex.release();
     }
 
