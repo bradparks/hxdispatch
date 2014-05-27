@@ -116,8 +116,8 @@ class Future<T> extends hxdispatch.Future<T>
         this.mutex.acquire();
         if (this.state == State.NONE) {
             this.state = State.REJECTED;
-            this.mutex.release();
             this.unlock();
+            this.mutex.release();
         } else {
             this.mutex.release();
             throw new WorkflowException("Future has already been rejected or resolved");
@@ -133,8 +133,8 @@ class Future<T> extends hxdispatch.Future<T>
         if (this.state == State.NONE) {
             this.value = value;
             this.state = State.RESOLVED;
-            this.mutex.release();
             this.unlock();
+            this.mutex.release();
         } else {
             this.mutex.release();
             throw new WorkflowException("Future has already been rejected or resolved");

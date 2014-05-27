@@ -57,8 +57,12 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     #if !js
         public function await():Void
         {
-            if (!this.isDone() || this.isExecuting()) {
+            this.mutex.acquire();
+            if (!this.isDone() || this.isExecuting()) { // TODO: because we release here, resolve() can finish before wait() is finalized
+                this.mutex.release();
                 this.lock.wait();
+            } else {
+                this.mutex.release();
             }
         }
     #end
@@ -106,8 +110,8 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
                     if (--count == 0) {
                         this.mutex.acquire();
                         this.executing = false;
-                        this.mutex.release();
                         this.unlock();
+                        this.mutex.release();
                     }
                     mutex.release(); #end
                 }, arg);
