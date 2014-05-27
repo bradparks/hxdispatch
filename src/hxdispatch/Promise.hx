@@ -47,7 +47,7 @@ class Promise<T>
      *
      * @param Int resolves the number of required resolves before the Promise gets marked as done
      */
-    public function new(?resolves:Int = 1):Void
+    public function new(resolves:Int = 1):Void
     {
         this.callbacks = {
             done:     new List<Callback<T>>(),
@@ -85,9 +85,13 @@ class Promise<T>
     {
         var callback:Callback<T>;
         for (callback in callbacks) {
-            try {
+            #if HXDISPATCH_DEBUG
                 callback(arg);
-            } catch (ex:Dynamic) {}
+            #else
+                try {
+                    callback(arg);
+                } catch (ex:Dynamic) {}
+            #end
         }
     }
 

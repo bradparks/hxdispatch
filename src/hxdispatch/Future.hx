@@ -50,7 +50,7 @@ class Future<T>
      *
      * @throws hxdispatch.WorkflowException if the Future has not been resolved yet (since the non-threaded version can't wait)
      */
-    public function get(?block:Bool = true):Null<T>
+    public function get(block:Bool = true):Null<T>
     {
         if (this.isReady()) {
             return this.value;

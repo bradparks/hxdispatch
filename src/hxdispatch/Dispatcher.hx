@@ -83,9 +83,13 @@ class Dispatcher<T>
      */
     private function executeCallback(callback:Callback<T>, arg:T):Void
     {
-        try {
+        #if HXDISPATCH_DEBUG
             callback(arg);
-        } catch (ex:Dynamic) {}
+        #else
+            try {
+                callback(arg);
+            } catch (ex:Dynamic) {}
+        #end
     }
 
     /**

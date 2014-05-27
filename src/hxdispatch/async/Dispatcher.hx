@@ -1,18 +1,14 @@
 package hxdispatch.async;
 
-#if cpp
-    import cpp.vm.Mutex;
-#elseif java
-    import java.vm.Mutex;
-#elseif neko
-    import neko.vm.Mutex;
+#if (cpp || cs || flash || java || neko)
+    import hxstd.vm.Mutex;
 #elseif !js
     #error "Async Dispatcher is not supported on target platform due to the lack of Mutex feature."
 #end
-#if !js
-    import hxdispatch.async.Promise;
-#else
+#if (flash || js)
     import hxdispatch.concurrent.Promise;
+#else
+    import hxdispatch.async.Promise;
 #end
 import hxdispatch.Callback;
 import hxdispatch.Dispatcher.Status;
@@ -23,6 +19,8 @@ import hxstd.Nil;
  * This Dispatcher implementation is a thread-safe, asynchronous implementation.
  *
  * Each Callback is executed by the asynchronous Executor.
+ *
+ * TODO: bug on line 69 (upstream?)
  *
  * @{inherit}
  */
@@ -64,7 +62,7 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
             #if !js this.mutex.acquire(); #end
             var callbacks:Array<Callback<T>> = this.map.get(event).copy();
             #if !js
-                var promise:Promise<Nil> = new Promise<Nil>(new Executor.Sequential<Nil>(), callbacks.length);
+                var promise:Promise<Nil> = new Promise<Nil>(new hxstd.threading.Executor.Sequential<Nil>(), callbacks.length);
             #else
                 var promise:Promise<Nil> = new Promise<Nil>(callbacks.length);
             #end

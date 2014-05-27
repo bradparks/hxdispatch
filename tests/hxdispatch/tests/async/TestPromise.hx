@@ -4,6 +4,7 @@ package hxdispatch.tests.async;
  * TestSuite for the hxdispatch.async.Promise class.
  *
  * TODO: async specific tests
+ * TODO: mock ThreadExecutor
  */
 class TestPromise extends hxdispatch.tests.concurrent.TestPromise
 {
@@ -12,7 +13,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
      */
     override public function setup():Void
     {
-        this.promise = new hxdispatch.async.Promise<Int>(new hxdispatch.async.ThreadExecutor());
+        this.promise = new hxdispatch.async.Promise<Int>(new hxstd.threading.ThreadExecutor());
     }
 
     /**
@@ -20,7 +21,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
      */
     override private function getPromise(?resolves:Int = 1):hxdispatch.async.Promise<Dynamic>
     {
-        return new hxdispatch.async.Promise<Dynamic>(new hxdispatch.async.ThreadExecutor(), resolves);
+        return new hxdispatch.async.Promise<Dynamic>(new hxstd.threading.ThreadExecutor(), resolves);
     }
 
 
@@ -82,13 +83,14 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
     }
 
     /**
-     * Checks that when multiple resolves are required, Callback functions
-     * are not executed before all required resolves have been called.
+     * Overriden since async Promise will not wait until the Callback sets the executed Bool to true.
+     *
+     * @{inherit}
      */
     override public function testMultipleResolves():Void
     {
         var executed:Bool = false;
-        this.promise = new hxdispatch.async.Promise<Int>(new hxdispatch.async.ThreadExecutor(), 2);
+        this.promise = this.getPromise(2);
         this.promise.done(function(arg:Int):Void {
             executed = true;
         });
@@ -219,11 +221,11 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
         var p2 = this.getPromise();
         var executed:Bool = false;
 
-        hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
+        hxdispatch.Promise.when([p, p2]).done(function(arg:Dynamic):Void {
             executed = true;
         });
         p.reject(0);
-        Sys.sleep(0.2); // "wait" for async Promise
+        untyped p.await();
         assertTrue(executed);
     }
 }

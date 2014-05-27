@@ -1,11 +1,7 @@
 package hxdispatch.concurrent;
 
-#if cpp
-    import cpp.vm.Mutex;
-#elseif java
-    import java.vm.Mutex;
-#elseif neko
-    import neko.vm.Mutex;
+#if (cpp || cs || flash || java || neko)
+    import hxstd.vm.Mutex;
 #elseif !js
     #error "Concurrent Cascade is not supported on target platform due to the lack of Mutex feature."
 #end
@@ -21,7 +17,7 @@ class Cascade<T> extends hxdispatch.Cascade<T>
     /**
      * Stores the Mutex used to synchronize access to the Tier lists.
      *
-     * @var Mutex
+     * @var hxstd.vm.Mutex
      */
     #if !js private var mutex:Mutex; #end
 
