@@ -6,11 +6,11 @@ package hxdispatch.async;
 #elseif !js
     #error "Async Promise is not supported on target platform due to the lack of Lock/Mutex feature."
 #end
-import hxstd.threading.Executor;
+import hxstd.threading.ExecutionContext;
+import hxstd.threading.IExecutor;
 
 /**
  *
- * TODO: bug on line 153 (upstream?)
  */
 class Promise<T> extends hxdispatch.concurrent.Promise<T>
 {
@@ -24,9 +24,9 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     /**
      * Stores the Executor used to process Callbacks.
      *
-     * @var hxstd.threading.Executor<T>
+     * @var hxstd.threading.IExecutor
      */
-    private var executor:Executor<T>;
+    private var executor:IExecutor;
 
     /**
      * Stores the Lock used to block await() callers.
@@ -44,11 +44,11 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
 
 
     /**
-     * @param hxstd.threading.Executor<T> the Callback Executor to use
+     * @param hxstd.threading.IExecutor the Callback Executor to use
      *
      * @{inherit}
      */
-    public function new(executor:Executor<T>, resolves:Int = 1):Void
+    public function new(executor:IExecutor, resolves:Int = 1):Void
     {
         super(resolves);
 
@@ -146,10 +146,10 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     /**
      * @{inherit}
      */
-    public static function when<T>(promises:Array<Promise<T>>, ?executor:Executor<T>):Promise<T>
+    public static function when<T>(promises:Array<Promise<T>>, ?executor:IExecutor):Promise<T>
     {
         if (executor == null) {
-            executor = new hxstd.threading.Executor.Sequential<T>();
+            executor = ExecutionContext.getPreferedExecutor();
         }
 
         var promise:Promise<T> = new Promise<T>(executor, 1);

@@ -12,15 +12,14 @@ package hxdispatch.async;
 #end
 import hxdispatch.Callback;
 import hxdispatch.Dispatcher.Status;
-import hxstd.threading.Executor;
+import hxstd.threading.ExecutionContext;
+import hxstd.threading.IExecutor;
 import hxstd.Nil;
 
 /**
  * This Dispatcher implementation is a thread-safe, asynchronous implementation.
  *
  * Each Callback is executed by the asynchronous Executor.
- *
- * TODO: bug on line 69 (upstream?)
  *
  * @{inherit}
  */
@@ -29,17 +28,17 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
     /**
      * Stores the Executor used to process Callbacks.
      *
-     * @var hxstd.threading.Executor<T>
+     * @var hxstd.threading.IExecutor
      */
-    private var executor:Executor<T>;
+    private var executor:IExecutor;
 
 
     /**
-     * @param hxstd.threading.Executor<T> the Callback Executor to use
+     * Constructor to initialize a new asynchronous Dispatcher.
      *
-     * @{inherit}
+     * @param hxstd.threading.IExecutor the Callback Executor to use
      */
-    public function new(executor:Executor<T>):Void
+    public function new(executor:IExecutor):Void
     {
         super();
         this.executor = executor;
@@ -62,7 +61,7 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
             #if !js this.mutex.acquire(); #end
             var callbacks:Array<Callback<T>> = this.map.get(event).copy();
             #if !js
-                var promise:Promise<Nil> = new Promise<Nil>(new hxstd.threading.Executor.Sequential<Nil>(), callbacks.length);
+                var promise:Promise<Nil> = new Promise<Nil>(ExecutionContext.getPreferedExecutor(), callbacks.length);
             #else
                 var promise:Promise<Nil> = new Promise<Nil>(callbacks.length);
             #end
