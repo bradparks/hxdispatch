@@ -14,20 +14,4 @@ class TestFuture extends hxdispatch.tests.TestFuture
     {
         this.future = new Future<Int>();
     }
-
-
-    /**
-     * Overriden to prevent blocking.
-     *
-     * @{inherit}
-     */
-    override public function testGetThrowsWorkflowException():Void
-    {
-        try {
-            this.future.get(false);
-            assertFalse(true);
-        } catch (ex:hxdispatch.WorkflowException) {
-            assertTrue(true);
-        }
-    }
 }

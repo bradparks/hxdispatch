@@ -16,13 +16,13 @@
 -cmd  ./bin/cpp/Runner
 
 # C#
---next
--cp   src
--cp   tests
--main hxdispatch/tests/Runner.hx
--lib  hxstd
--cs   bin/cs
--cmd  mono bin/cs/bin/Runner.exe
+# --next
+# -cp   src
+# -cp   tests
+# -main hxdispatch/tests/Runner.hx
+# -lib  hxstd
+# -cs   bin/cs
+# -cmd  mono bin/cs/bin/Runner.exe
 
 # Java
 --next

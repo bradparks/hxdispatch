@@ -40,8 +40,9 @@ class Future<T> extends hxdispatch.Future<T>
         if (!this.isReady()) {
             this.mutex.release();
             throw new WorkflowException("Future has not been resolved yet");
+        } else {
+            this.mutex.release();
         }
-        this.mutex.acquire();
 
         return this.value;
     }

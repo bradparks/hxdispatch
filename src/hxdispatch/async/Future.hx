@@ -40,7 +40,8 @@ class Future<T> extends hxdispatch.concurrent.Future<T>
                 #if java
                     this.lock.wait();
                 #else
-                    while (!this.lock.wait(0.001) && !this.isReady()) {}
+                    // TODO: really ?
+                    while (!this.lock.wait(0.00075) && !this.isReady()) {}
                 #end
 
                 return this.value;
@@ -48,6 +49,8 @@ class Future<T> extends hxdispatch.concurrent.Future<T>
                 this.mutex.release();
                 throw new WorkflowException("Future has not been resolved yet");
             }
+        } else {
+            this.mutex.release();
         }
 
         return this.value;

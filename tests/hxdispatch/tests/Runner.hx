@@ -30,7 +30,7 @@ class Runner
                 r.add( new hxdispatch.tests.concurrent.TestFuture() );
                 r.add( new hxdispatch.tests.async.TestCascade() );
                 r.add( new hxdispatch.tests.async.TestDispatcher() );
-                //r.add( new hxdispatch.tests.async.TestFuture() );
+                r.add( new hxdispatch.tests.async.TestFuture() );
                 r.add( new hxdispatch.tests.async.TestPromise() );
             #end
         #end
