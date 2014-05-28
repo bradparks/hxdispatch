@@ -1,5 +1,7 @@
 package hxdispatch.tests.async;
 
+import hxdispatch.async.Dispatcher;
+
 /**
  * TestSuite for the hxdispatch.async.Dispatcher class.
  *
@@ -13,7 +15,7 @@ class TestDispatcher extends hxdispatch.tests.concurrent.TestDispatcher
      */
     override public function setup():Void
     {
-        this.dispatcher = new hxdispatch.async.Dispatcher<Int>(new hxstd.threading.ThreadExecutor());
+        this.dispatcher = new Dispatcher<Int>(new hxstd.threading.ThreadExecutor());
     }
 
 
@@ -31,8 +33,8 @@ class TestDispatcher extends hxdispatch.tests.concurrent.TestDispatcher
             assertEquals(input, arg);
             executed = true;
         }));
-        var feedback:hxdispatch.async.Dispatcher.Feedback = untyped this.dispatcher.trigger("event", input);
-        feedback.promise.await();
+        var feedback:Dispatcher.Feedback = untyped this.dispatcher.trigger("event", input);
+        untyped feedback.promise.await();
         assertTrue(executed);
     }
 

@@ -25,7 +25,7 @@ class Cascade<T>
      */
     public function new():Void
     {
-        this.tiers = new LinkedList<Tier<T>>();
+        this.tiers = cast new LinkedList<Tier<T>>();
     }
 
     /**

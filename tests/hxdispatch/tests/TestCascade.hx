@@ -1,5 +1,7 @@
 package hxdispatch.tests;
 
+import hxdispatch.Cascade;
+
 /**
  * TestSuite for the hxdispatch.Cascade class.
  */
@@ -10,7 +12,7 @@ class TestCascade extends haxe.unit.TestCase
      *
      * @var hxdispatch.Cascade<Int>
      */
-    private var cascade:hxdispatch.Cascade<Int>;
+    private var cascade:Cascade<Int>;
 
 
     /**
@@ -18,7 +20,7 @@ class TestCascade extends haxe.unit.TestCase
      */
     override public function setup():Void
     {
-        this.cascade = new hxdispatch.Cascade<Int>();
+        this.cascade = new Cascade<Int>();
     }
 
     /**

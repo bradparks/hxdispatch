@@ -1,5 +1,7 @@
 package hxdispatch.tests.async;
 
+import hxdispatch.async.Promise;
+
 /**
  * TestSuite for the hxdispatch.async.Promise class.
  *
@@ -13,7 +15,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
      */
     override public function setup():Void
     {
-        this.promise = new hxdispatch.async.Promise<Int>(new hxstd.threading.ThreadExecutor());
+        this.promise = new Promise<Int>(new hxstd.threading.ThreadExecutor());
     }
 
     /**
@@ -21,7 +23,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
      */
     override private function getPromise(?resolves:Int = 1):hxdispatch.async.Promise<Dynamic>
     {
-        return new hxdispatch.async.Promise<Dynamic>(new hxstd.threading.ThreadExecutor(), resolves);
+        return new Promise<Dynamic>(new hxstd.threading.ThreadExecutor(), resolves);
     }
 
 
@@ -182,7 +184,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
         var p2 = this.getPromise();
         var executed:Bool = false;
 
-        hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
+        Promise.when([p, p2]).done(function(arg:Int):Void {
             executed = true;
         });
         p.resolve(0); p2.resolve(0);
@@ -202,7 +204,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
         var input:Int = 5;
         var value:Int = 0;
 
-        hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
+        Promise.when([p, p2]).done(function(arg:Int):Void {
             value = arg;
         });
         p.resolve(0); p2.resolve(input);
@@ -221,7 +223,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
         var p2 = this.getPromise();
         var executed:Bool = false;
 
-        hxdispatch.Promise.when([p, p2]).done(function(arg:Dynamic):Void {
+        Promise.when([p, p2]).done(function(arg:Dynamic):Void {
             executed = true;
         });
         p.reject(0);

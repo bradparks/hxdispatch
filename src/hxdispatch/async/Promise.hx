@@ -68,7 +68,11 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
             this.mutex.acquire();
             if (!this.isDone() || this.isExecuting()) {
                 this.mutex.release();
-                while (!this.lock.wait(0.001) && (!this.isDone() || this.isExecuting())) {}
+                #if java
+                    this.lock.wait();
+                #else
+                    while (!this.lock.wait(0.001) && (!this.isDone() || this.isExecuting())) {}
+                #end
             } else {
                 this.mutex.release();
             }

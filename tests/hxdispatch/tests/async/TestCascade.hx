@@ -1,5 +1,7 @@
 package hxdispatch.tests.async;
 
+import hxdispatch.async.Cascade;
+
 /**
  * TestSuite for the hxdispatch.async.Cascade class.
  *
@@ -12,7 +14,7 @@ class TestCascade extends hxdispatch.tests.concurrent.TestCascade
      */
     override public function setup():Void
     {
-        this.cascade = new hxdispatch.async.Cascade<Int>(new hxstd.threading.ThreadExecutor());
+        this.cascade = new Cascade<Int>(new hxstd.threading.ThreadExecutor());
     }
 
 

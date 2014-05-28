@@ -1,5 +1,7 @@
 package hxdispatch.tests.concurrent;
 
+import hxdispatch.concurrent.Future;
+
 /**
  * TestSuite for the hxdispatch.concurrent.Future class.
  */
@@ -10,7 +12,7 @@ class TestFuture extends hxdispatch.tests.TestFuture
      */
     override public function setup():Void
     {
-        this.future = new hxdispatch.concurrent.Future<Int>();
+        this.future = new Future<Int>();
     }
 
 

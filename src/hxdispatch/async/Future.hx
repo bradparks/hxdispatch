@@ -31,13 +31,17 @@ class Future<T> extends hxdispatch.concurrent.Future<T>
     /**
      * @{inherit}
      */
-    override public function get(block:Bool = true):Null<T>
+    override public function get(block:Bool = true):T
     {
         this.mutex.acquire();
         if (!this.isReady()) {
             if (block) {
                 this.mutex.release();
-                while (!this.lock.wait(0.001) && !this.isReady()) {}
+                #if java
+                    this.lock.wait();
+                #else
+                    while (!this.lock.wait(0.001) && !this.isReady()) {}
+                #end
 
                 return this.value;
             } else {

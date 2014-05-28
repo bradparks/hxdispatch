@@ -1,5 +1,7 @@
 package hxdispatch.tests;
 
+import hxdispatch.Promise;
+
 /**
  * TestSuite for the hxdispatch.Promise class.
  */
@@ -10,7 +12,7 @@ class TestPromise extends haxe.unit.TestCase
      *
      * @var hxdispatch.Promise<Dynamic>
      */
-    private var promise:hxdispatch.Promise<Dynamic>;
+    private var promise:Promise<Dynamic>;
 
 
     /**
@@ -18,7 +20,7 @@ class TestPromise extends haxe.unit.TestCase
      */
     override public function setup():Void
     {
-        this.promise = new hxdispatch.Promise<Dynamic>();
+        this.promise = new Promise<Dynamic>();
     }
 
     /**
@@ -38,7 +40,7 @@ class TestPromise extends haxe.unit.TestCase
      */
     private function getPromise(?resolves:Int = 1):Promise<Dynamic>
     {
-        return new hxdispatch.Promise<Dynamic>(resolves);
+        return new Promise<Dynamic>(resolves);
     }
 
 
@@ -359,7 +361,7 @@ class TestPromise extends haxe.unit.TestCase
         var p2 = this.getPromise();
         var executed:Bool = false;
 
-        hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
+        Promise.when([p, p2]).done(function(arg:Int):Void {
             executed = true;
         });
         p.resolve(0); p2.resolve(0);
@@ -380,7 +382,7 @@ class TestPromise extends haxe.unit.TestCase
         var input:Int = 5;
         var value:Int = 0;
 
-        hxdispatch.Promise.when([p, p2]).done(function(arg:Int):Void {
+        Promise.when([p, p2]).done(function(arg:Int):Void {
             value = arg;
         });
         p.resolve(0); p2.resolve(input);
@@ -402,7 +404,7 @@ class TestPromise extends haxe.unit.TestCase
         var p2 = this.getPromise();
         var executed:Bool = false;
 
-        hxdispatch.Promise.when([p, p2]).done(function(arg:Dynamic):Void {
+        Promise.when([p, p2]).done(function(arg:Dynamic):Void {
             executed = true;
         });
         p.reject(0);
@@ -423,7 +425,7 @@ class TestPromise extends haxe.unit.TestCase
         p.resolve(0); p2.resolve(0);
 
         try {
-            hxdispatch.Promise.when([p, p2]);
+            Promise.when([p, p2]);
             assertFalse(true);
         } catch (ex:hxdispatch.WorkflowException) {
             assertTrue(true);

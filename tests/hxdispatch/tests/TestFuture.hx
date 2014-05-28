@@ -1,5 +1,7 @@
 package hxdispatch.tests;
 
+import hxdispatch.Future;
+
 /**
  * TestSuite for the hxdispatch.Future class.
  */
@@ -10,7 +12,7 @@ class TestFuture extends haxe.unit.TestCase
      *
      * @var hxdispatch.Future<Int>
      */
-    private var future:hxdispatch.Future<Int>;
+    private var future:Future<Int>;
 
 
     /**
@@ -18,7 +20,7 @@ class TestFuture extends haxe.unit.TestCase
      */
     override public function setup():Void
     {
-        this.future = new hxdispatch.Future<Int>();
+        this.future = new Future<Int>();
     }
 
     /**

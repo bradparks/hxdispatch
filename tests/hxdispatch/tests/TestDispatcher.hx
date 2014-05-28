@@ -1,5 +1,7 @@
 package hxdispatch.tests;
 
+import hxdispatch.Dispatcher;
+
 /**
  * TestSuite for the hxdispatch.Dispatcher class.
  */
@@ -10,7 +12,7 @@ class TestDispatcher extends haxe.unit.TestCase
      *
      * @var hxdispatch.Dispatcher<Int>
      */
-    private var dispatcher:hxdispatch.Dispatcher<Int>;
+    private var dispatcher:Dispatcher<Int>;
 
 
     /**
@@ -18,7 +20,7 @@ class TestDispatcher extends haxe.unit.TestCase
      */
     override public function setup():Void
     {
-        this.dispatcher = new hxdispatch.Dispatcher<Int>();
+        this.dispatcher = new Dispatcher<Int>();
     }
 
     /**
@@ -228,7 +230,7 @@ class TestDispatcher extends haxe.unit.TestCase
     public function testTriggerExistingEvent():Void
     {
         this.dispatcher.register("event");
-        assertEquals(this.dispatcher.trigger("event", 0).status, hxdispatch.Dispatcher.Status.OK);
+        assertEquals(this.dispatcher.trigger("event", 0).status, Dispatcher.Status.OK);
     }
 
     /**
@@ -237,7 +239,7 @@ class TestDispatcher extends haxe.unit.TestCase
      */
     public function testTriggerNonExistingEvent():Void
     {
-        assertEquals(this.dispatcher.trigger("event", 0).status, hxdispatch.Dispatcher.Status.NO_SUCH_EVENT);
+        assertEquals(this.dispatcher.trigger("event", 0).status, Dispatcher.Status.NO_SUCH_EVENT);
     }
 
     /**

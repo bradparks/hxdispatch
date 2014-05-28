@@ -1,5 +1,7 @@
 package hxdispatch.tests.concurrent;
 
+import hxdispatch.concurrent.Dispatcher;
+
 /**
  * TestSuite for the hxdispatch.concurrent.Dispatcher class.
  */
@@ -10,6 +12,6 @@ class TestDispatcher extends hxdispatch.tests.TestDispatcher
      */
     override public function setup():Void
     {
-        this.dispatcher = new hxdispatch.concurrent.Dispatcher<Int>();
+        this.dispatcher = new Dispatcher<Int>();
     }
 }
