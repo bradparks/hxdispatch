@@ -3,6 +3,8 @@ package hxdispatch;
 import Map;
 import hxdispatch.Callback;
 import hxdispatch.Event;
+import hxstd.ds.IList;
+import hxstd.ds.LinkedList;
 
 /**
  * The Dispatcher class can be used to have a central Event dispatching service/instance.
@@ -19,9 +21,9 @@ class Dispatcher<T>
     /**
      * Stores a map of Events and their Callbacks.
      *
-     * @var Map<Event, Array<hxdispatch.Callback<T>>>
+     * @var Map<Event, hxstd.ds.IList<hxdispatch.Callback<T>>>
      */
-    private var map:Map<Event, Array<Callback<T>>>;
+    private var map:Map<Event, IList<Callback<T>>>;
 
 
     /**
@@ -29,7 +31,7 @@ class Dispatcher<T>
      */
     public function new():Void
     {
-        this.map = new Map<Event, Array<Callback<T>>>();
+        this.map = cast new Map<Event, LinkedList<Callback<T>>>();
     }
 
     /**
@@ -43,11 +45,11 @@ class Dispatcher<T>
     public function attach(event:Event, callback:Callback<T>):Bool
     {
         if (this.hasEvent(event) && callback != null) {
-            var callbacks:Array<Callback<T>> = this.map.get(event);
+            var callbacks = this.map.get(event);
             if (!Lambda.exists(callbacks, function(fn:Callback<T>):Bool {
                 return Reflect.compareMethods(callback, fn);
             })) {
-                callbacks.push(callback);
+                callbacks.add(callback);
 
                 return true;
             }
@@ -76,20 +78,23 @@ class Dispatcher<T>
     }
 
     /**
-     * Executes the Callback with the provided argument.
+     * Executes the Callbacks with the provided argument.
      *
-     * @param hxdispatch.Callback<T> callback the Callback to execute
-     * @param T                      arg      the argument to pass to the Callback
+     * @param Iterable<hxdispatch.Callback<T>> callbacks the Callbacks to execute
+     * @param T                                arg      the argument to pass to the Callbacks
      */
-    private function executeCallback(callback:Callback<T>, arg:T):Void
+    private function executeCallbacks(callbacks:Iterable<Callback<T>>, arg:T):Void
     {
-        #if HXDISPATCH_DEBUG
-            callback(arg);
-        #else
-            try {
+        var callback:Callback<T>;
+        for (callback in callbacks) {
+            #if HXDISPATCH_DEBUG
                 callback(arg);
-            } catch (ex:Dynamic) {}
-        #end
+            #else
+                try {
+                    callback(arg);
+                } catch (ex:Dynamic) {}
+            #end
+        }
     }
 
     /**
@@ -114,7 +119,7 @@ class Dispatcher<T>
     public function register(event:Event):Bool
     {
         if (!this.hasEvent(event)) {
-            var callbacks:Array<Callback<T>> = new Array<Callback<T>>();
+            var callbacks:LinkedList<Callback<T>> = new LinkedList<Callback<T>>();
             this.map.set(event, callbacks);
 
             return true;
@@ -134,11 +139,7 @@ class Dispatcher<T>
     public function trigger(event:Event, arg:T):Feedback
     {
         if (this.hasEvent(event)) {
-            var callbacks:Array<Callback<T>> = this.map.get(event).copy();
-            var callback:Callback<T>;
-            for (callback in callbacks) {
-                this.executeCallback(callback, arg);
-            }
+            this.executeCallbacks(Lambda.array(this.map.get(event)), arg); // make sure we iterate over a copy
 
             return { status: Status.OK };
         }

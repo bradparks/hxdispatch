@@ -1,5 +1,8 @@
 package hxdispatch;
 
+import hxstd.ds.IList;
+import hxstd.ds.LinkedList;
+
 /**
  * The Cascade (waterfall) class can be used to execute functions
  * (so called Tiers) in order, passing the return value of each Tier
@@ -12,9 +15,9 @@ class Cascade<T>
     /**
      * Stores the Tiers.
      *
-     * @var List<hxdispatch.Cascade.Tier<T>>
+     * @var hxstd.ds.IList<hxdispatch.Cascade.Tier<T>>
      */
-    private var tiers:List<Tier<T>>;
+    private var tiers:IList<Tier<T>>;
 
 
     /**
@@ -22,7 +25,7 @@ class Cascade<T>
      */
     public function new():Void
     {
-        this.tiers  = new List<Tier<T>>();
+        this.tiers = new LinkedList<Tier<T>>();
     }
 
     /**
@@ -40,19 +43,6 @@ class Cascade<T>
         }
 
         return arg;
-    }
-
-    /**
-     * Adds the Tier to the start of the Cascade.
-     *
-     * @param hxdispatch.Cascade.Tier<T> callback the Tier to add
-     *
-     * @return hxdispatch.Cascade<T>
-     */
-    public function initially(callback:Tier<T>):Cascade<T>
-    {
-        this.tiers.push(callback);
-        return this;
     }
 
     /**

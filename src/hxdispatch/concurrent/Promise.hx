@@ -1,9 +1,7 @@
 package hxdispatch.concurrent;
 
-#if (cpp || cs || flash || java || neko)
+#if !js
     import hxstd.vm.Mutex;
-#elseif !js
-    #error "Concurrent Promise is not supported on target platform due to the lack of Mutex feature."
 #end
 import hxdispatch.Callback;
 import hxdispatch.State;
@@ -96,7 +94,7 @@ class Promise<T> extends hxdispatch.Promise<T>
         if (this.state == State.NONE) {
             this.state = State.REJECTED;
             #if !js this.mutex.release(); #end
-            this.executeCallbacks(Lambda.array(this.callbacks.rejected).concat(Lambda.array(this.callbacks.done)), arg);
+            this.executeCallbacks(Lambda.array(this.callbacks.rejected).concat(Lambda.array(this.callbacks.done)), arg); // make sure we iterate over copy
 
             this.callbacks.done     = null;
             this.callbacks.rejected = null;
@@ -132,7 +130,7 @@ class Promise<T> extends hxdispatch.Promise<T>
             if (--this.resolves == 0) {
                 this.state = State.RESOLVED;
                 #if !js this.mutex.release(); #end
-                this.executeCallbacks(Lambda.array(this.callbacks.resolved).concat(Lambda.array(this.callbacks.done)), arg);
+                this.executeCallbacks(Lambda.array(this.callbacks.resolved).concat(Lambda.array(this.callbacks.done)), arg); // make sure we iterate over copy
 
                 this.callbacks.done     = null;
                 this.callbacks.rejected = null;

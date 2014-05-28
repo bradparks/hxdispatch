@@ -91,37 +91,6 @@ class TestCascade extends haxe.unit.TestCase
     }
 
     /**
-     * Checks if the initially() method works correctly.
-     *
-     * Attn: This test depends on the descend() method - make sure all tests for that
-     * method work before looking for errors in initially() when this test fails.
-     */
-    public function testInitially():Void
-    {
-        this.cascade.initially(function(arg:Int):Int {
-            return arg * 2;
-        });
-        assertEquals(this.cascade.descend(2), 4);
-    }
-
-    /**
-     * Checks if initially() adds the Tiers in the correct order.
-     *
-     * Attn: This test depends on the descend() method - make sure all tests for that
-     * method work before looking for errors in initially() when this test fails.
-     */
-    public function testInitiallyOrder():Void
-    {
-        this.cascade.initially(function(arg:Int):Int {
-            return arg * 2;
-        });
-        this.cascade.initially(function(arg:Int):Int {
-            return arg + 2;
-        });
-        assertEquals(this.cascade.descend(2), 8);
-    }
-
-    /**
      * Checks if the then() method works correctly.
      *
      * Attn: This test depends on the descend() method - make sure all tests for that

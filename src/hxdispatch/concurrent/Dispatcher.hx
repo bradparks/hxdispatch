@@ -1,14 +1,13 @@
 package hxdispatch.concurrent;
 
-#if (cpp || cs || flash || java || neko)
+#if !js
     import hxstd.vm.Mutex;
-#elseif !js
-    #error "Concurrent Dispatcher is not supported on target platform due to the lack of Mutex feature."
 #end
 import hxdispatch.Callback;
 import hxdispatch.Dispatcher.Feedback;
 import hxdispatch.Dispatcher.Status;
 import hxdispatch.Event;
+import hxstd.ds.LinkedList;
 
 /**
  * Threads-safe Dispatcher implementation preventing register, listen and trigger
@@ -42,15 +41,7 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
     {
         var listening:Bool = false;
         #if !js this.mutex.acquire(); #end
-        if (this.map.exists(event) && callback != null) {
-            var callbacks:Array<Callback<T>> = this.map.get(event);
-            if (!Lambda.exists(callbacks, function(fn:Callback<T>):Bool {
-                return Reflect.compareMethods(callback, fn);
-            })) {
-                callbacks.push(callback);
-                listening = true;
-            }
-        }
+        listening = super.attach(event, callback);
         #if !js this.mutex.release(); #end
 
         return listening;
@@ -63,11 +54,7 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
     {
         var unlistened:Bool = false;
         #if !js this.mutex.acquire(); #end
-        if (this.map.exists(event) && callback != null) {
-            if (this.map.get(event).remove(callback)) {
-                unlistened = true;
-            }
-        }
+        unlistened = super.dettach(event, callback);
         #if !js this.mutex.release(); #end
 
         return unlistened;
@@ -92,11 +79,7 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
     {
         var registered:Bool = false;
         #if !js this.mutex.acquire(); #end
-        if (!this.map.exists(event)) {
-            var callbacks:Array<Callback<T>> = new Array<Callback<T>>();
-            this.map.set(event, callbacks);
-            registered = true;
-        }
+        registered = super.register(event);
         #if !js this.mutex.release(); #end
 
         return registered;
@@ -109,12 +92,9 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
     {
         if (this.hasEvent(event)) {
             #if !js this.mutex.acquire(); #end
-            var callbacks:Array<Callback<T>> = this.map.get(event).copy();
+            var callbacks = this.map.get(event);
             #if !js this.mutex.release(); #end
-            var callback:Callback<T>;
-            for (callback in callbacks) {
-                this.executeCallback(callback, arg);
-            }
+            this.executeCallbacks(Lambda.array(callbacks), arg); // make sure we iterate over a copy
 
             return { status: Status.OK };
         }
@@ -129,10 +109,7 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
     {
         var unregistered:Bool = false;
         #if !js this.mutex.acquire(); #end
-        if (this.map.exists(event)) {
-            this.map.remove(event);
-            unregistered = true;
-        }
+        unregistered = super.unregister(event);
         #if !js this.mutex.release(); #end
 
         return unregistered;

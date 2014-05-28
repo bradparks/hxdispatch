@@ -2,7 +2,6 @@ package hxdispatch.concurrent;
 
 import hxdispatch.State;
 import hxdispatch.WorkflowException;
-import hxstd.vm.MultiLock;
 import hxstd.vm.Mutex;
 
 /**
@@ -22,20 +21,6 @@ class Future<T> extends hxdispatch.Future<T>
      */
     private var mutex:Mutex;
 
-    /**
-     * Stores the Lock used to block get() callers.
-     *
-     * @var hxstd.vm.MultLock
-     */
-    private var lock:MultiLock;
-
-    /**
-     * Stores the number of waiters (having called await).
-     *
-     * @var Int
-     */
-    private var waiters:Int;
-
 
     /**
      * @{inherit}
@@ -43,31 +28,20 @@ class Future<T> extends hxdispatch.Future<T>
     public function new():Void
     {
         super();
-
-        this.mutex   = new Mutex();
-        this.lock    = new MultiLock();
-        this.waiters = 0;
+        this.mutex = new Mutex();
     }
 
     /**
      * @{inherit}
      */
-    override public function get(block:Bool = true):Null<T>
+    override public function get(block:Bool = true):T
     {
         this.mutex.acquire();
-        if (this.state == State.NONE) {
-            if (block) {
-                ++this.waiters;
-                this.mutex.release();
-                this.lock.wait();
-                --this.waiters;
-
-                return this.value;
-            } else {
-                this.mutex.release();
-                throw new WorkflowException("Future has not been resolved yet");
-            }
+        if (!this.isReady()) {
+            this.mutex.release();
+            throw new WorkflowException("Future has not been resolved yet");
         }
+        this.mutex.acquire();
 
         return this.value;
     }
@@ -109,18 +83,6 @@ class Future<T> extends hxdispatch.Future<T>
     }
 
     /**
-     * Unlocks the Lock that is used to block waiters in get() method.
-     */
-    private function unlock():Void
-    {
-        this.mutex.acquire();
-        while (this.waiters != 0) {
-            this.lock.release();
-        }
-        this.mutex.release();
-    }
-
-    /**
      * @{inherit}
      */
     override public function reject():Void
@@ -128,7 +90,6 @@ class Future<T> extends hxdispatch.Future<T>
         this.mutex.acquire();
         if (this.state == State.NONE) {
             this.state = State.REJECTED;
-            this.unlock();
             this.mutex.release();
         } else {
             this.mutex.release();
@@ -145,7 +106,6 @@ class Future<T> extends hxdispatch.Future<T>
         if (this.state == State.NONE) {
             this.value = value;
             this.state = State.RESOLVED;
-            this.unlock();
             this.mutex.release();
         } else {
             this.mutex.release();
