@@ -66,7 +66,7 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
     override public function hasEvent(event:Event):Bool
     {
         #if !js this.mutex.acquire(); #end
-        var ret:Bool = this.map.exists(event);
+        var ret:Bool = super.hasEvent(event);
         #if !js this.mutex.release(); #end
 
         return ret;

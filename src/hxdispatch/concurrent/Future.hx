@@ -37,14 +37,15 @@ class Future<T> extends hxdispatch.Future<T>
     override public function get(block:Bool = true):T
     {
         this.mutex.acquire();
-        if (!this.isReady()) {
+        try {
+            var value:T = super.get(block);
             this.mutex.release();
-            throw new WorkflowException("Future has not been resolved yet");
-        } else {
+            
+            return value;
+        } catch (ex:Dynamic) {
             this.mutex.release();
+            throw ex;
         }
-
-        return this.value;
     }
 
     /**
@@ -53,7 +54,7 @@ class Future<T> extends hxdispatch.Future<T>
     override public function isReady():Bool
     {
         this.mutex.acquire();
-        var ret:Bool = this.state != State.NONE;
+        var ret:Bool = super.isReady();
         this.mutex.release();
 
         return ret;
@@ -65,7 +66,7 @@ class Future<T> extends hxdispatch.Future<T>
     override public function isRejected():Bool
     {
         this.mutex.acquire();
-        var ret:Bool = this.state == State.REJECTED;
+        var ret:Bool = super.isRejected();
         this.mutex.release();
 
         return ret;
@@ -77,7 +78,7 @@ class Future<T> extends hxdispatch.Future<T>
     override public function isResolved():Bool
     {
         this.mutex.acquire();
-        var ret:Bool = this.state == State.RESOLVED;
+        var ret:Bool = super.isResolved();
         this.mutex.release();
 
         return ret;
@@ -89,13 +90,13 @@ class Future<T> extends hxdispatch.Future<T>
     override public function reject():Void
     {
         this.mutex.acquire();
-        if (this.state == State.NONE) {
-            this.state = State.REJECTED;
+        try {
+            super.reject();
+        } catch (ex:Dynamic) {
             this.mutex.release();
-        } else {
-            this.mutex.release();
-            throw new WorkflowException("Future has already been rejected or resolved");
+            throw ex;
         }
+        this.mutex.release();
     }
 
     /**
@@ -104,13 +105,12 @@ class Future<T> extends hxdispatch.Future<T>
     override public function resolve(value:T):Void
     {
         this.mutex.acquire();
-        if (this.state == State.NONE) {
-            this.value = value;
-            this.state = State.RESOLVED;
+        try {
+            super.resolve(value);
+        } catch (ex:Dynamic) {
             this.mutex.release();
-        } else {
-            this.mutex.release();
-            throw new WorkflowException("Future has already been rejected or resolved");
+            throw ex;
         }
+        this.mutex.release();
     }
 }
