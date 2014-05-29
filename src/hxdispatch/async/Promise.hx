@@ -54,8 +54,10 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
 
         this.executing     = false;
         this.executor      = executor;
-        #if !js this.lock  = new MultiLock(); #end
-        this.unlocks       = 0;
+        #if !js
+            this.lock      = new MultiLock();
+            this.unlocks   = 0;
+        #end
     }
 
     /**
@@ -103,9 +105,11 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
             #if !js this.unlock(); #end
         } else {
             #if !js this.mutex.acquire(); #end
-            this.unlocks   = (untyped callbacks).length;
             this.executing = true;
-            #if !js this.mutex.release(); #end
+            #if !js
+                this.unlocks = (untyped callbacks).length;
+                this.mutex.release();
+            #end
 
             var callback:Callback<T>;
             for (callback in callbacks) { // make sure we iterate over a copy
@@ -122,7 +126,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
                             callback(arg);
                         } catch (ex:Dynamic) {}
                     #end
-                    this.tryUnlock();
+                    #if !js this.tryUnlock(); #end
                 }, arg);
             }
         }

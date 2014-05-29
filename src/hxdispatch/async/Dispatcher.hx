@@ -3,7 +3,7 @@ package hxdispatch.async;
 #if !js
     import hxstd.vm.Mutex;
 #end
-#if (flash || js)
+#if flash
     import hxdispatch.concurrent.Promise;
 #else
     import hxdispatch.async.Promise;
@@ -50,11 +50,11 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
         #if !js this.mutex.acquire(); #end
         if (this.hasEvent(event)) {
             var callbacks = Lambda.array(this.map.get(event)); // make sure the list doesnt change anymore
-            #if !js
-                this.mutex.release();
+            #if !js this.mutex.release(); #end
+            #if !flash
                 var promise:Promise<Nil> = new Promise<Nil>(ExecutionContext.getPreferedExecutor(), callbacks.length);
             #else
-                var promise:Promise<Nil> = new Promise<Nil>(callbacks.length);
+                var promise:Promise<Nil> = new Promise<Nil>(ExecutionContext.getPreferedExecutor(), callbacks.length);
             #end
 
             var callback:Callback<T>;
