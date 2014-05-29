@@ -156,18 +156,16 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     /**
      * @{inherit}
      */
-    public static function when<T>(promises:Array<Promise<T>>, ?executor:IExecutor):Promise<T>
+    public static function when<T>(promises:Iterable<Promise<T>>, ?executor:IExecutor):Promise<T>
     {
         if (executor == null) {
             executor = ExecutionContext.getPreferedExecutor();
         }
 
         var promise:Promise<T> = new Promise<T>(executor, 1);
-        var done:Bool;
         for (p in promises) {
             #if !js p.mutex.acquire(); #end
-            done = p.state != State.NONE;
-            if (!done) {
+            if (!p.isDone() || p.isExecuting()) {
                 ++promise.resolves;
                 p.done(function(arg:T):Void {
                     if (p.isRejected()) {
@@ -179,9 +177,8 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
             }
             #if !js p.mutex.release(); #end
         }
-        --promise.resolves;
 
-        if (promise.resolves == 0) {
+        if (--promise.resolves == 0) {
             throw new WorkflowException("Promises have already been rejected or resolved");
         }
 

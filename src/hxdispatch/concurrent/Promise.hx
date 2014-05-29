@@ -93,8 +93,8 @@ class Promise<T> extends hxdispatch.Promise<T>
         #if !js this.mutex.acquire(); #end
         if (this.state == State.NONE) {
             this.state = State.REJECTED;
-            #if !js this.mutex.release(); #end
             this.executeCallbacks(Lambda.array(this.callbacks.rejected).concat(Lambda.array(this.callbacks.done)), arg); // make sure we iterate over copy
+            #if !js this.mutex.release(); #end
 
             this.callbacks.done     = null;
             this.callbacks.rejected = null;
@@ -129,8 +129,8 @@ class Promise<T> extends hxdispatch.Promise<T>
         if (this.state == State.NONE) {
             if (--this.resolves == 0) {
                 this.state = State.RESOLVED;
-                #if !js this.mutex.release(); #end
                 this.executeCallbacks(Lambda.array(this.callbacks.resolved).concat(Lambda.array(this.callbacks.done)), arg); // make sure we iterate over copy
+                #if !js this.mutex.release(); #end
 
                 this.callbacks.done     = null;
                 this.callbacks.rejected = null;
@@ -162,14 +162,12 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      * @{inherit}
      */
-    public static function when<T>(promises:Array<Promise<T>>):Promise<T>
+    public static function when<T>(promises:Iterable<Promise<T>>):Promise<T>
     {
         var promise:Promise<T> = new Promise<T>(1);
-        var done:Bool;
         for (p in promises) {
             #if !js p.mutex.acquire(); #end
-            done = p.state != State.NONE;
-            if (!done) {
+            if (!p.isDone()) {
                 ++promise.resolves;
                 p.done(function(arg:T):Void {
                     if (p.isRejected()) {
@@ -181,9 +179,8 @@ class Promise<T> extends hxdispatch.Promise<T>
             }
             #if !js p.mutex.release(); #end
         }
-        --promise.resolves;
 
-        if (promise.resolves == 0) {
+        if (--promise.resolves == 0) {
             throw new WorkflowException("Promises have already been rejected or resolved");
         }
 

@@ -93,8 +93,8 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
         if (this.hasEvent(event)) {
             #if !js this.mutex.acquire(); #end
             var callbacks = this.map.get(event);
-            #if !js this.mutex.release(); #end
             this.executeCallbacks(Lambda.array(callbacks), arg); // make sure we iterate over a copy
+            #if !js this.mutex.release(); #end
 
             return { status: Status.OK };
         }

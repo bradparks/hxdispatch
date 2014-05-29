@@ -235,9 +235,8 @@ class Promise<T>
                 });
             }
         }
-        --promise.resolves;
 
-        if (promise.resolves == 0) {
+        if (--promise.resolves == 0) {
             throw new WorkflowException("Promises have already been rejected or resolved");
         }
 
