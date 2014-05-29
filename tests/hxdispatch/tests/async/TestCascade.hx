@@ -25,7 +25,7 @@ class TestCascade extends hxdispatch.tests.concurrent.TestCascade
     public function testPlunge():Void
     {
         var input:Int = 5;
-        assertEquals(input, untyped this.cascade.plunge(input).get(true));
+        assertEquals(input, (untyped this.cascade.plunge(input)).get(true));
     }
 
     /**
@@ -46,7 +46,7 @@ class TestCascade extends hxdispatch.tests.concurrent.TestCascade
             });
             return arg;
         });
-        assertEquals(untyped this.cascade.plunge(2).get(true), 2);
-        assertEquals(untyped this.cascade.plunge(2).get(true), 4);
+        assertEquals((untyped this.cascade.plunge(2)).get(true), 2);
+        assertEquals((untyped this.cascade.plunge(2)).get(true), 4);
     }
 }
