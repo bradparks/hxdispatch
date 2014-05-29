@@ -72,7 +72,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
                     this.lock.wait();
                 #else
                     // TODO: really ?
-                    while (!this.lock.wait(0.00075) && (!this.isDone() || this.isExecuting())) {}
+                    while (!this.lock.wait(0.01) && (!this.isDone() || this.isExecuting())) {}
                 #end
             } else {
                 this.mutex.release();

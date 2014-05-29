@@ -41,7 +41,7 @@ class Future<T> extends hxdispatch.concurrent.Future<T>
                     this.lock.wait();
                 #else
                     // TODO: really ?
-                    while (!this.lock.wait(0.00075) && !this.isReady()) {}
+                    while (!this.lock.wait(0.01) && !this.isReady()) {}
                 #end
 
                 return this.value;
