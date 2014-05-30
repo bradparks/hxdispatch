@@ -75,8 +75,8 @@
 
         <exec executable="xsltproc">
             <arg value="/usr/share/cloc/cloc2sloccount.xsl" />
-            <arg value="${reports}/cloc.xml" />
             <arg value="-o ${reports}/sloccount.sc" />
+            <arg value="${reports}/cloc.xml" />
         </exec>
     </target>
 
