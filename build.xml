@@ -19,6 +19,11 @@
     <target name="dependencies" depends="init" description="Installs required dependencies">
         <echo>Installing required dependencies...</echo>
         <exec executable="haxelib">
+            <arg value="git" />
+            <arg value="hxstd" />
+            <arg value="git@git.rackster.ch:MaddinXx/hxstd.git" />
+        </exec>
+	<exec executable="haxelib">
             <arg value="install" />
             <arg value="mcover" />
         </exec>
