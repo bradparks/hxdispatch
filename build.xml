@@ -1,7 +1,6 @@
 <project name="hxdispatch" default="exit" basedir=".">
     <description>An optionally asynchronous (dispatch) library for Haxe.</description>
 
-    <property name="WORKSPACE" location="/Volumes/Macintosh HD2/workspace/Private/hxdispatch" />
     <property name="src" location="${WORKSPACE}/src" />
     <property name="bin"  location="${WORKSPACE}/bin" />
     <property name="build" location="${WORKSPACE}/build" />
@@ -36,6 +35,9 @@
     <target name="test" depends="build" unless="build.failed" description="Runs the unit tests">
         <echo>Running unit tests...</echo>
         <exec executable="${bin}/cpp/Runner" resultproperty="cpp.code" />
+        <exec executable="mono" resultproperty="cs.code">
+            <arg value="${bin}/cs/bin/Runner.exe" />
+        </exec>
         <java jar="${bin}/java/Runner.jar" fork="true" resultproperty="java.code" />
         <exec executable="node" resultproperty="node.code">
             <arg value="${bin}/Runner.js" />
@@ -49,6 +51,7 @@
         <condition property="test.failed">
             <or>
                 <isfailure code="${cpp.code}" />
+                <isfailure code="${cs.code}" />
                 <isfailure code="${java.code}" />
                 <isfailure code="${node.code}" />
                 <isfailure code="${neko.code}" />
