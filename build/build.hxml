@@ -11,12 +11,12 @@
 --macro mcover.MCover.coverage([''], ['src'])
 
 # C#
-# --next
-# -cp   src
-# -cp   tests
-# -main hxdispatch/tests/Runner.hx
-# -lib  hxstd
-# -cs   bin/cs
+--next
+-cp   src
+-cp   tests
+-main hxdispatch/tests/Runner.hx
+-lib  hxstd
+-cs   bin/cs
 
 # Java
 --next
