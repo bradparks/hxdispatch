@@ -39,13 +39,13 @@ class Future<T> extends hxdispatch.Future<T>
         this.mutex.acquire();
         try {
             var value:T = super.get(block);
-            this.mutex.release();
-            
-            return value;
         } catch (ex:Dynamic) {
             this.mutex.release();
             throw ex;
         }
+        this.mutex.release();
+
+        return value;
     }
 
     /**
