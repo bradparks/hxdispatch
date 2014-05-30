@@ -40,7 +40,6 @@ class Future<T> extends hxdispatch.concurrent.Future<T>
                 #if java
                     this.lock.wait();
                 #else
-                    // TODO: really ?
                     while (!this.lock.wait(0.01) && !this.isReady()) {}
                 #end
 

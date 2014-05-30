@@ -73,7 +73,6 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
                 #if java
                     this.lock.wait();
                 #else
-                    // TODO: really ?
                     while (!this.lock.wait(0.01) && (!this.isDone() || this.isExecuting())) {}
                 #end
             } else {
