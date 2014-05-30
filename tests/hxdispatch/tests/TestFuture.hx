@@ -1,5 +1,7 @@
 package hxdispatch.tests;
 
+import hxdispatch.Future;
+
 /**
  * TestSuite for the hxdispatch.Future class.
  */
@@ -10,7 +12,7 @@ class TestFuture extends haxe.unit.TestCase
      *
      * @var hxdispatch.Future<Int>
      */
-    private var future:hxdispatch.Future<Int>;
+    private var future:Future<Int>;
 
 
     /**
@@ -18,7 +20,7 @@ class TestFuture extends haxe.unit.TestCase
      */
     override public function setup():Void
     {
-        this.future = new hxdispatch.Future<Int>();
+        this.future = new Future<Int>();
     }
 
     /**
@@ -39,7 +41,7 @@ class TestFuture extends haxe.unit.TestCase
     {
         var value:Int = 5;
         this.future.resolve(5);
-        assertEquals(value, this.future.get(true));
+        assertEquals(value, this.future.get(false));
     }
 
     /**
@@ -48,7 +50,7 @@ class TestFuture extends haxe.unit.TestCase
     public function testGetThrowsWorkflowException():Void
     {
         try {
-            this.future.get();
+            this.future.get(false);
             assertFalse(true);
         } catch (ex:hxdispatch.WorkflowException) {
             assertTrue(true);

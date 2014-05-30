@@ -1,7 +1,7 @@
 package hxdispatch.async;
 
 #if !js
-    import hxdispatch.concurrent.Future;
+    import hxdispatch.async.Future;
 #end
 import hxdispatch.Cascade.Tier;
 import hxstd.threading.IExecutor;
@@ -41,34 +41,18 @@ class Cascade<T> extends hxdispatch.concurrent.Cascade<T>
      *
      * @return Future<T> a Future that will get resolved by the last Tier
      */
-    #if !js
-        public function plunge(arg:T):Future<T>
-        {
-            this.mutex.acquire();
-            var tiers:Array<Tier<T>> = Lambda.array(this.tiers);
-            this.mutex.release();
+    public function plunge(arg:T):#if js Void #else Future<T> #end
+    {
+        #if !js var future:Future<T> = new Future<T>(); #end
+        var tiers:Array<Tier<T>>     = Lambda.array(this.tiers); // make sure we iterate over a copy
+        this.executor.execute(function(arg:T):Void {
+            var tier:Tier<T>;
+            for (tier in tiers) {
+                arg = tier(arg);
+            }
+            #if !js future.resolve(arg); #end
+        }, arg);
 
-            var future:Future<T> = new Future<T>();
-            this.executor.execute(function(arg:T):Void {
-                var tier:Tier<T>;
-                for (tier in tiers) {
-                    arg = tier(arg);
-                }
-                future.resolve(arg);
-            }, arg);
-
-            return future;
-        }
-    #else
-        public function plunge(arg:T):Void
-        {
-            var tiers:Array<Tier<T>> = Lambda.array(this.tiers);
-            this.executor.execute(function(arg:T):Void {
-                var tier:Tier<T>;
-                for (tier in tiers) {
-                    arg = tier(arg);
-                }
-            }, arg);
-        }
-    #end
+        #if !js return future; #end
+    }
 }

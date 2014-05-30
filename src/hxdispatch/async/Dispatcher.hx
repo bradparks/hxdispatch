@@ -1,11 +1,9 @@
 package hxdispatch.async;
 
-#if (cpp || cs || flash || java || neko)
+#if !js
     import hxstd.vm.Mutex;
-#elseif !js
-    #error "Async Dispatcher is not supported on target platform due to the lack of Mutex feature."
 #end
-#if (flash || js)
+#if flash
     import hxdispatch.concurrent.Promise;
 #else
     import hxdispatch.async.Promise;
@@ -47,34 +45,40 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
     /**
      * @{inherit}
      */
-    override private function executeCallback(callback:Callback<T>, arg:T):Void
-    {
-        this.executor.execute(callback, arg);
-    }
-
-    /**
-     * @{inherit}
-     */
     override public function trigger(event:Event, arg:T):Feedback
     {
+        #if !js this.mutex.acquire(); #end
         if (this.hasEvent(event)) {
-            #if !js this.mutex.acquire(); #end
-            var callbacks:Array<Callback<T>> = this.map.get(event).copy();
-            #if !js
+            var callbacks = Lambda.array(this.map.get(event)); // make sure the list doesnt change anymore
+            #if !js this.mutex.release(); #end
+            #if !flash
                 var promise:Promise<Nil> = new Promise<Nil>(ExecutionContext.getPreferedExecutor(), callbacks.length);
             #else
-                var promise:Promise<Nil> = new Promise<Nil>(callbacks.length);
+                var promise:Promise<Nil> = new Promise<Nil>(ExecutionContext.getPreferedExecutor(), callbacks.length);
             #end
-            #if !js this.mutex.release(); #end
+
             var callback:Callback<T>;
             for (callback in callbacks) {
-                this.executeCallback(function(arg:T):Void {
-                    callback(arg);
+                this.executor.execute(function(arg:T):Void {
+                    #if HXDISPATCH_DEBUG
+                        try {
+                            callback(arg);
+                        } catch (ex:Dynamic) {
+                            promise.resolve(null);
+                            throw ex;
+                        }
+                    #else
+                        try {
+                            callback(arg);
+                        } catch (ex:Dynamic) {}
+                    #end
                     promise.resolve(null);
                 }, arg);
             }
 
             return { status: Status.TRIGGERED, promise: promise };
+        } else {
+            #if !js this.mutex.release(); #end
         }
 
         return { status: Status.NO_SUCH_EVENT };

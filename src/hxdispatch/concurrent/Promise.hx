@@ -1,9 +1,7 @@
 package hxdispatch.concurrent;
 
-#if (cpp || cs || flash || java || neko)
+#if !js
     import hxstd.vm.Mutex;
-#elseif !js
-    #error "Concurrent Promise is not supported on target platform due to the lack of Mutex feature."
 #end
 import hxdispatch.Callback;
 import hxdispatch.State;
@@ -42,13 +40,13 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function done(callback:Callback<T>):Void
     {
         #if !js this.mutex.acquire(); #end
-        if (this.state == State.NONE) {
-            this.callbacks.done.add(callback);
+        try {
+            super.done(callback);
+        } catch (ex:Dynamic) {
             #if !js this.mutex.release(); #end
-        } else {
-            #if !js this.mutex.release(); #end
-            throw new WorkflowException("Promise has already been rejected or resolved");
+            throw ex;
         }
+        #if !js this.mutex.release(); #end
     }
 
     /**
@@ -57,7 +55,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function isDone():Bool
     {
         #if !js this.mutex.acquire(); #end
-        var ret:Bool = this.state != State.NONE;
+        var ret:Bool = super.isDone();
         #if !js this.mutex.release(); #end
 
         return ret;
@@ -69,7 +67,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function isRejected():Bool
     {
         #if !js this.mutex.acquire(); #end
-        var ret:Bool = this.state == State.REJECTED;
+        var ret:Bool = super.isRejected();
         #if !js this.mutex.release(); #end
 
         return ret;
@@ -81,7 +79,7 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function isResolved():Bool
     {
         #if !js this.mutex.acquire(); #end
-        var ret:Bool = this.state == State.RESOLVED;
+        var ret:Bool = super.isResolved();
         #if !js this.mutex.release(); #end
 
         return ret;
@@ -95,8 +93,8 @@ class Promise<T> extends hxdispatch.Promise<T>
         #if !js this.mutex.acquire(); #end
         if (this.state == State.NONE) {
             this.state = State.REJECTED;
+            this.executeCallbacks(Lambda.array(this.callbacks.rejected).concat(Lambda.array(this.callbacks.done)), arg); // make sure we iterate over copy
             #if !js this.mutex.release(); #end
-            this.executeCallbacks(Lambda.array(this.callbacks.rejected).concat(Lambda.array(this.callbacks.done)), arg);
 
             this.callbacks.done     = null;
             this.callbacks.rejected = null;
@@ -113,13 +111,13 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function rejected(callback:Callback<T>):Void
     {
         #if !js this.mutex.acquire(); #end
-        if (this.state == State.NONE) {
-            this.callbacks.rejected.add(callback);
+        try {
+            super.rejected(callback);
+        } catch (ex:Dynamic) {
             #if !js this.mutex.release(); #end
-        } else {
-            #if !js this.mutex.release(); #end
-            throw new WorkflowException("Promise has already been rejected or resolved");
+            throw ex;
         }
+        #if !js this.mutex.release(); #end
     }
 
     /**
@@ -131,8 +129,8 @@ class Promise<T> extends hxdispatch.Promise<T>
         if (this.state == State.NONE) {
             if (--this.resolves == 0) {
                 this.state = State.RESOLVED;
+                this.executeCallbacks(Lambda.array(this.callbacks.resolved).concat(Lambda.array(this.callbacks.done)), arg); // make sure we iterate over copy
                 #if !js this.mutex.release(); #end
-                this.executeCallbacks(Lambda.array(this.callbacks.resolved).concat(Lambda.array(this.callbacks.done)), arg);
 
                 this.callbacks.done     = null;
                 this.callbacks.rejected = null;
@@ -152,26 +150,24 @@ class Promise<T> extends hxdispatch.Promise<T>
     override public function resolved(callback:Callback<T>):Void
     {
         #if !js this.mutex.acquire(); #end
-        if (this.state == State.NONE) {
-            this.callbacks.resolved.add(callback);
+        try {
+            super.resolved(callback);
+        } catch (ex:Dynamic) {
             #if !js this.mutex.release(); #end
-        } else {
-            #if !js this.mutex.release(); #end
-            throw new WorkflowException("Promise has already been rejected or resolved");
+            throw ex;
         }
+        #if !js this.mutex.release(); #end
     }
 
     /**
      * @{inherit}
      */
-    public static function when<T>(promises:Array<Promise<T>>):Promise<T>
+    public static function when<T>(promises:Iterable<Promise<T>>):Promise<T>
     {
         var promise:Promise<T> = new Promise<T>(1);
-        var done:Bool;
         for (p in promises) {
             #if !js p.mutex.acquire(); #end
-            done = p.state != State.NONE;
-            if (!done) {
+            if (!p.isDone()) {
                 ++promise.resolves;
                 p.done(function(arg:T):Void {
                     if (p.isRejected()) {
@@ -183,9 +179,8 @@ class Promise<T> extends hxdispatch.Promise<T>
             }
             #if !js p.mutex.release(); #end
         }
-        --promise.resolves;
 
-        if (promise.resolves == 0) {
+        if (--promise.resolves == 0) {
             throw new WorkflowException("Promises have already been rejected or resolved");
         }
 

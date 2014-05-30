@@ -1,5 +1,7 @@
 package hxdispatch.tests.concurrent;
 
+import hxdispatch.concurrent.Promise;
+
 /**
  * TestSuite for the hxdispatch.concurrent.Promise class.
  */
@@ -10,7 +12,7 @@ class TestPromise extends hxdispatch.tests.TestPromise
      */
     override public function setup():Void
     {
-        this.promise = new hxdispatch.concurrent.Promise<Int>();
+        this.promise = new Promise<Int>();
     }
 
     /**
@@ -18,6 +20,6 @@ class TestPromise extends hxdispatch.tests.TestPromise
      */
     override private function getPromise(?resolves:Int = 1):hxdispatch.concurrent.Promise<Dynamic>
     {
-        return new hxdispatch.concurrent.Promise<Dynamic>(resolves);
+        return new Promise<Dynamic>(resolves);
     }
 }
