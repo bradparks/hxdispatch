@@ -1,10 +1,12 @@
 <project name="hxdispatch" default="exit" basedir=".">
     <description>An optionally asynchronous (dispatch) library for Haxe.</description>
 
-    <property name="src" location="${WORKSPACE}/src" />
-    <property name="bin"  location="${WORKSPACE}/bin" />
-    <property name="build" location="${WORKSPACE}/build" />
-    <property name="reports"  location="${WORKSPACE}/reports" />
+    <property environment="env" />
+    <property name="workspace" location="${env.WORKSPACE}" />
+    <property name="src" location="${workspace}/src" />
+    <property name="bin"  location="${workspace}/bin" />
+    <property name="build" location="${workspace}/build" />
+    <property name="reports"  location="${workspace}/reports" />
 
     <target name="init" description="Creates the directories needed to store output">
         <echo>Creating all required directories...</echo>
