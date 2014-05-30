@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="5.7">
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/async/.DS_Store">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/async/Cascade.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/async/Dispatcher.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/async/Future.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/async/Promise.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/Callback.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/Cascade.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/concurrent/.DS_Store">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/concurrent/Cascade.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/concurrent/Dispatcher.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/concurrent/Future.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/concurrent/Promise.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/Dispatcher.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/Event.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/Future.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/Promise.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/State.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/WorkflowException.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/async/Cascade.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/async/Dispatcher.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/async/Future.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/async/Promise.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/Callback.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/Cascade.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/concurrent/Cascade.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/concurrent/Dispatcher.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/concurrent/Future.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/concurrent/Promise.hx">
+<error line="171" severity="error" message="19 gleiche Zeilen in /Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/async/Promise.hx, beginnend bei Zeile 173" source="com.puppycrawl.tools.checkstyle.checks.duplicates.StrictDuplicateCodeCheck"/>
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/Dispatcher.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/Event.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/Future.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/Promise.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/State.hx">
+</file>
+<file name="/Volumes/Macintosh HD2/workspace/Private/hxdispatch/src/hxdispatch/WorkflowException.hx">
+</file>
+</checkstyle>

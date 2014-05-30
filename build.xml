@@ -84,11 +84,14 @@
     <target name="checkstyle" depends="cloc" description="Runs the checkstyle analysis tool">
         <echo>Performing Checkstyle analysis...</echo>
         <exec executable="checkstyle">
-            <arg value="-c ${build}/checkstyle.xml" />
-            <arg value="-f xml" />
-            <arg value="-o ${reports}/checkstyle.xml" />
-            <arg value="-r ${src}" />
-            <arg value="|| true" />
+            <arg value="-c" />
+            <arg value="${build}/checkstyle.xml" />
+            <arg value="-f" />
+            <arg value="xml" />
+            <arg value="-o" />
+            <arg value="${reports}/checkstyle.xml" />
+            <arg value="-r" />
+            <arg value="${src}" />
         </exec>
     </target>
 
