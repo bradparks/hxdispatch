@@ -2,6 +2,10 @@
 
 > An optionally asynchronous dispatch library for Haxe.
 
+# Compilation Flags
+
+`-D HXDISPATCH_DEBUG` which enables debug mode. If compiled with this flag, exceptions thrown in Callback functions (e.g. in `Dispatcher` or `Promise`) are not catched.
+
 ## License
 
 The MIT License (MIT)
