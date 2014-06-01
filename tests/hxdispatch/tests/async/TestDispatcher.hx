@@ -33,8 +33,8 @@ class TestDispatcher extends hxdispatch.tests.concurrent.TestDispatcher
             assertEquals(input, arg);
             executed = true;
         }));
-        var feedback:Dispatcher.Feedback = untyped this.dispatcher.trigger("event", input);
-        (untyped feedback.promise).await();
+        this.dispatcher.trigger("event", input);
+        Sys.sleep(0.2); // await async Promise
         assertTrue(executed);
     }
 
@@ -53,7 +53,8 @@ class TestDispatcher extends hxdispatch.tests.concurrent.TestDispatcher
         assertTrue(this.dispatcher.attach("event", function(arg:Int):Void {
             ++executes;
         }));
-        (untyped this.dispatcher.trigger("event", 0)).promise.await();
+        this.dispatcher.trigger("event", 0);
+        Sys.sleep(0.2); // await async Promise
         assertEquals(executes, 2);
     }
 
@@ -71,7 +72,8 @@ class TestDispatcher extends hxdispatch.tests.concurrent.TestDispatcher
         };
         this.dispatcher.attach("event", callback);
         assertFalse(this.dispatcher.attach("event", callback));
-        (untyped this.dispatcher.trigger("event", 0)).promise.await();
+        this.dispatcher.trigger("event", 0);
+        Sys.sleep(0.2); // await async Promise
         assertEquals(executes, 1);
     }
 
@@ -90,7 +92,8 @@ class TestDispatcher extends hxdispatch.tests.concurrent.TestDispatcher
         assertFalse(this.dispatcher.dettach("event", function(arg:Int):Void {
             ++executes;
         }));
-        (untyped this.dispatcher.trigger("event", 0)).promise.await();
+        this.dispatcher.trigger("event", 0);
+        Sys.sleep(0.2); // await async Promise
         assertEquals(executes, 1);
     }
 
@@ -106,7 +109,8 @@ class TestDispatcher extends hxdispatch.tests.concurrent.TestDispatcher
         this.dispatcher.attach("event", function(arg:Int):Void {
             executed = true;
         });
-        (untyped this.dispatcher.trigger("event", 0)).promise.await();
+        this.dispatcher.trigger("event", 0);
+        Sys.sleep(0.2); // await async Promise
         assertTrue(executed);
     }
 
@@ -134,7 +138,8 @@ class TestDispatcher extends hxdispatch.tests.concurrent.TestDispatcher
         this.dispatcher.attach("event", function(arg:Int):Void {
             value = arg;
         });
-        (untyped this.dispatcher.trigger("event", input)).promise.await();
+        this.dispatcher.trigger("event", input);
+        Sys.sleep(0.2); // await async Promise
         assertEquals(input, value);
     }
 }

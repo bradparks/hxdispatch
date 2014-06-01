@@ -41,7 +41,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
             executed = true;
         });
         this.promise.reject(input);
-        (untyped this.promise).await();
+        Sys.sleep(0.2); // "wait" for async Promise
         assertTrue(executed);
     }
 
@@ -59,7 +59,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
             executed = true;
         });
         this.promise.resolve(input);
-        (untyped this.promise).await();
+        Sys.sleep(0.2); // "wait" for async Promise
         assertTrue(executed);
     }
 
@@ -80,7 +80,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
             executed = true;
         });
         this.promise.resolve(input);
-        (untyped this.promise).await();
+        Sys.sleep(0.2); // "wait" for async Promise
         assertTrue(executed);
     }
 
@@ -101,7 +101,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
         assertFalse(executed);
 
         this.promise.resolve(0);
-        (untyped this.promise).await();
+        Sys.sleep(0.2); // "wait" for async Promise
         assertTrue(executed);
     }
 
@@ -119,7 +119,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
             executed = true;
         });
         this.promise.reject(5);
-        (untyped this.promise).await();
+        Sys.sleep(0.2); // "wait" for async Promise
         assertTrue(executed);
     }
 
@@ -135,7 +135,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
             executed = true;
         });
         this.promise.resolve(0);
-        (untyped this.promise).await();
+        Sys.sleep(0.2); // "wait" for async Promise
         assertFalse(executed);
     }
 
@@ -153,7 +153,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
             executed = true;
         });
         this.promise.resolve(input);
-        (untyped this.promise).await();
+        Sys.sleep(0.2); // "wait" for async Promise
         assertTrue(executed);
     }
 
@@ -169,7 +169,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
             executed = true;
         });
         this.promise.reject(0);
-        (untyped this.promise).await();
+        Sys.sleep(0.2); // "wait" for async Promise
         assertFalse(executed);
     }
 
@@ -227,7 +227,7 @@ class TestPromise extends hxdispatch.tests.concurrent.TestPromise
             executed = true;
         });
         p.reject(0);
-        (untyped p).await();
+        Sys.sleep(0.2); // "wait" for async Promise
         assertTrue(executed);
     }
 }

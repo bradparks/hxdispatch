@@ -51,11 +51,7 @@ class Dispatcher<T> extends hxdispatch.concurrent.Dispatcher<T>
         if (this.hasEvent(event)) {
             var callbacks = Lambda.array(this.map.get(event)); // make sure the list doesnt change anymore
             #if !js this.mutex.release(); #end
-            #if !flash
-                var promise:Promise<Nil> = new Promise<Nil>(ExecutionContext.getPreferedExecutor(), callbacks.length);
-            #else
-                var promise:Promise<Nil> = new Promise<Nil>(ExecutionContext.getPreferedExecutor(), callbacks.length);
-            #end
+            var promise:Promise<Nil> = new Promise<Nil>(ExecutionContext.preferedExecutor, callbacks.length);
 
             var callback:Callback<T>;
             for (callback in callbacks) {

@@ -162,7 +162,7 @@ class Promise<T> extends hxdispatch.concurrent.Promise<T>
     public static function when<T>(promises:Iterable<Promise<T>>, ?executor:IExecutor):Promise<T>
     {
         if (executor == null) {
-            executor = ExecutionContext.getPreferedExecutor();
+            executor = ExecutionContext.preferedExecutor;
         }
 
         var promise:Promise<T> = new Promise<T>(executor, 1);
