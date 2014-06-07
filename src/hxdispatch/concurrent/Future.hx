@@ -2,7 +2,6 @@ package hxdispatch.concurrent;
 
 import hxdispatch.State;
 import hxdispatch.WorkflowException;
-import hxstd.vm.MultiLock;
 import hxstd.vm.Mutex;
 
 /**
@@ -22,20 +21,6 @@ class Future<T> extends hxdispatch.Future<T>
      */
     private var mutex:Mutex;
 
-    /**
-     * Stores the Lock used to block get() callers.
-     *
-     * @var hxstd.vm.MultLock
-     */
-    private var lock:MultiLock;
-
-    /**
-     * Stores the number of waiters (having called await).
-     *
-     * @var Int
-     */
-    private var waiters:Int;
-
 
     /**
      * @{inherit}
@@ -43,33 +28,24 @@ class Future<T> extends hxdispatch.Future<T>
     public function new():Void
     {
         super();
-
-        this.mutex   = new Mutex();
-        this.lock    = new MultiLock();
-        this.waiters = 0;
+        this.mutex = new Mutex();
     }
 
     /**
      * @{inherit}
      */
-    override public function get(block:Bool = true):Null<T>
+    override public function get(block:Bool = true):T
     {
         this.mutex.acquire();
-        if (this.state == State.NONE) {
-            if (block) {
-                ++this.waiters;
-                this.mutex.release();
-                this.lock.wait();
-                --this.waiters;
-
-                return this.value;
-            } else {
-                this.mutex.release();
-                throw new WorkflowException("Future has not been resolved yet");
-            }
+        try {
+            var value:T = super.get(block);
+        } catch (ex:Dynamic) {
+            this.mutex.release();
+            throw ex;
         }
+        this.mutex.release();
 
-        return this.value;
+        return value;
     }
 
     /**
@@ -78,7 +54,7 @@ class Future<T> extends hxdispatch.Future<T>
     override public function isReady():Bool
     {
         this.mutex.acquire();
-        var ret:Bool = this.state != State.NONE;
+        var ret:Bool = super.isReady();
         this.mutex.release();
 
         return ret;
@@ -90,7 +66,7 @@ class Future<T> extends hxdispatch.Future<T>
     override public function isRejected():Bool
     {
         this.mutex.acquire();
-        var ret:Bool = this.state == State.REJECTED;
+        var ret:Bool = super.isRejected();
         this.mutex.release();
 
         return ret;
@@ -102,22 +78,10 @@ class Future<T> extends hxdispatch.Future<T>
     override public function isResolved():Bool
     {
         this.mutex.acquire();
-        var ret:Bool = this.state == State.RESOLVED;
+        var ret:Bool = super.isResolved();
         this.mutex.release();
 
         return ret;
-    }
-
-    /**
-     * Unlocks the Lock that is used to block waiters in get() method.
-     */
-    private function unlock():Void
-    {
-        this.mutex.acquire();
-        while (this.waiters != 0) {
-            this.lock.release();
-        }
-        this.mutex.release();
     }
 
     /**
@@ -126,14 +90,13 @@ class Future<T> extends hxdispatch.Future<T>
     override public function reject():Void
     {
         this.mutex.acquire();
-        if (this.state == State.NONE) {
-            this.state = State.REJECTED;
-            this.unlock();
+        try {
+            super.reject();
+        } catch (ex:Dynamic) {
             this.mutex.release();
-        } else {
-            this.mutex.release();
-            throw new WorkflowException("Future has already been rejected or resolved");
+            throw ex;
         }
+        this.mutex.release();
     }
 
     /**
@@ -142,14 +105,12 @@ class Future<T> extends hxdispatch.Future<T>
     override public function resolve(value:T):Void
     {
         this.mutex.acquire();
-        if (this.state == State.NONE) {
-            this.value = value;
-            this.state = State.RESOLVED;
-            this.unlock();
+        try {
+            super.resolve(value);
+        } catch (ex:Dynamic) {
             this.mutex.release();
-        } else {
-            this.mutex.release();
-            throw new WorkflowException("Future has already been rejected or resolved");
+            throw ex;
         }
+        this.mutex.release();
     }
 }

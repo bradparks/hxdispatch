@@ -4,6 +4,8 @@ import hxdispatch.Callback;
 import hxdispatch.State;
 import hxdispatch.WorkflowException;
 import hxstd.Exception;
+import hxstd.ds.IList;
+import hxstd.ds.LinkedList;
 
 /**
  * A Promise can be used to execute registered callbacks as soon as
@@ -26,12 +28,12 @@ class Promise<T>
     /**
      * Stores the callbacks to be executed for the various state events.
      *
-     * @var { done:List<Callback<T>>, rejected:List<Callback<T>>, resolved:List<Callback<T>> }
+     * @var { done:hxstd.ds.IList<Callback<T>>, rejected:hxstd.ds.IList<Callback<T>>, resolved:hxstd.ds.IList<Callback<T>> }
      */
     private var callbacks:{
-        done:List<Callback<T>>,
-        rejected:List<Callback<T>>,
-        resolved:List<Callback<T>>
+        done:IList<Callback<T>>,
+        rejected:IList<Callback<T>>,
+        resolved:IList<Callback<T>>
     };
 
     /**
@@ -50,9 +52,9 @@ class Promise<T>
     public function new(resolves:Int = 1):Void
     {
         this.callbacks = {
-            done:     new List<Callback<T>>(),
-            rejected: new List<Callback<T>>(),
-            resolved: new List<Callback<T>>()
+            done:     new LinkedList<Callback<T>>(),
+            rejected: new LinkedList<Callback<T>>(),
+            resolved: new LinkedList<Callback<T>>()
         };
         this.resolves  = resolves;
         this.state     = State.NONE;
@@ -84,7 +86,7 @@ class Promise<T>
     private function executeCallbacks(callbacks:Iterable<Callback<T>>, arg:T):Void
     {
         var callback:Callback<T>;
-        for (callback in callbacks) {
+        for (callback in callbacks) { // make sure we iterate over a copy
             #if HXDISPATCH_DEBUG
                 callback(arg);
             #else
@@ -136,7 +138,7 @@ class Promise<T>
     {
         if (!this.isDone()) {
             this.state = State.REJECTED;
-            this.executeCallbacks(Lambda.array(this.callbacks.rejected).concat(Lambda.array(this.callbacks.done)), arg);
+            this.executeCallbacks(Lambda.array(this.callbacks.rejected).concat(Lambda.array(this.callbacks.done)), arg); // make sure we iterate over copy
 
             this.callbacks.done     = null;
             this.callbacks.rejected = null;
@@ -178,7 +180,7 @@ class Promise<T>
         if (!this.isDone()) {
             if (--this.resolves == 0) {
                 this.state = State.RESOLVED;
-                this.executeCallbacks(Lambda.array(this.callbacks.resolved).concat(Lambda.array(this.callbacks.done)), arg);
+                this.executeCallbacks(Lambda.array(this.callbacks.resolved).concat(Lambda.array(this.callbacks.done)), arg); // make sure we iterate over copy
 
                 this.callbacks.done     = null;
                 this.callbacks.rejected = null;
@@ -233,9 +235,8 @@ class Promise<T>
                 });
             }
         }
-        --promise.resolves;
 
-        if (promise.resolves == 0) {
+        if (--promise.resolves == 0) {
             throw new WorkflowException("Promises have already been rejected or resolved");
         }
 

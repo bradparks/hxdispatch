@@ -1,5 +1,7 @@
 package hxdispatch.tests.async;
 
+import hxdispatch.async.Cascade;
+
 /**
  * TestSuite for the hxdispatch.async.Cascade class.
  *
@@ -12,7 +14,7 @@ class TestCascade extends hxdispatch.tests.concurrent.TestCascade
      */
     override public function setup():Void
     {
-        this.cascade = new hxdispatch.async.Cascade<Int>(new hxstd.threading.ThreadExecutor());
+        this.cascade = new Cascade<Int>(new hxstd.threading.ThreadExecutor());
     }
 
 
@@ -23,7 +25,9 @@ class TestCascade extends hxdispatch.tests.concurrent.TestCascade
     public function testPlunge():Void
     {
         var input:Int = 5;
-        assertEquals(input, untyped this.cascade.plunge(input).get(true));
+        var f = untyped this.cascade.plunge(input);
+        Sys.sleep(0.2); // await async Future
+        assertEquals(input, f.get(true));
     }
 
     /**
@@ -44,7 +48,13 @@ class TestCascade extends hxdispatch.tests.concurrent.TestCascade
             });
             return arg;
         });
-        assertEquals(untyped this.cascade.plunge(2).get(true), 2);
-        assertEquals(untyped this.cascade.plunge(2).get(true), 4);
+
+        var f = untyped this.cascade.plunge(2);
+        Sys.sleep(0.2); // await async Future
+        assertEquals(f.get(true), 2);
+
+        f = untyped this.cascade.plunge(2);
+        Sys.sleep(0.2); // await async Future
+        assertEquals(f.get(true), 4);
     }
 }
