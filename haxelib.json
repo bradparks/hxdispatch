@@ -8,8 +8,8 @@
     "dependencies": {
         "hxstd": "3.0.0"
     },
-    "version": "2.2.1",
-    "releasenote": "Use new hxstd.threading.ExecutionContext to get Executors",
+    "version": "2.3.0",
+    "releasenote": "Use new hxstd.threading.ExecutionContext to get Executors; fixed C# target",
     "contributors": [
         "MaddinXx"
     ]
