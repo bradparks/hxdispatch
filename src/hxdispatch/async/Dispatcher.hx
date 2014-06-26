@@ -1,8 +1,5 @@
 package hxdispatch.async;
 
-#if !js
-    import hxstd.vm.Mutex;
-#end
 #if flash
     import hxdispatch.concurrent.Promise;
 #else

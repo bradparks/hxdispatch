@@ -6,10 +6,10 @@
     "description": "An optionally asynchronous dispatch library.",
     "classPath": "src",
     "dependencies": {
-        "hxstd": "3.0.0"
+        "hxstd": "4.0.0"
     },
-    "version": "2.3.0",
-    "releasenote": "Use new hxstd.threading.ExecutionContext to get Executors; fixed C# target",
+    "version": "2.3.1",
+    "releasenote": "Switched to hxstd interfaces",
     "contributors": [
         "MaddinXx"
     ]

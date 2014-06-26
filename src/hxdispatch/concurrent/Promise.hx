@@ -1,6 +1,7 @@
 package hxdispatch.concurrent;
 
 #if !js
+    import hxstd.vm.IMutex;
     import hxstd.vm.Mutex;
 #end
 import hxdispatch.Callback;
@@ -20,9 +21,9 @@ class Promise<T> extends hxdispatch.Promise<T>
     /**
      * Stores the Mutex used to synchronize access to properties.
      *
-     * @var hxstd.vm.Mutex
+     * @var hxstd.vm.IMutex
      */
-    #if !js private var mutex:Mutex; #end
+    #if !js private var mutex:IMutex; #end
 
 
     /**
