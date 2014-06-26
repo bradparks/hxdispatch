@@ -1,6 +1,7 @@
 package hxdispatch.concurrent;
 
 #if !js
+    import hxstd.vm.IMutex;
     import hxstd.vm.Mutex;
 #end
 import hxdispatch.Callback;
@@ -20,9 +21,9 @@ class Dispatcher<T> extends hxdispatch.Dispatcher<T>
     /**
      * Stores the Mutex used to synchronize access.
      *
-     * @var hxstd.vm.Mutex
+     * @var hxstd.vm.IMutex
      */
-    #if !js private var mutex:Mutex; #end
+    #if !js private var mutex:IMutex; #end
 
 
     /**

@@ -23,7 +23,7 @@
             <arg value="hxstd" />
             <arg value="git@git.rackster.ch:MaddinXx/hxstd.git" />
         </exec>
-	<exec executable="haxelib">
+        <exec executable="haxelib">
             <arg value="install" />
             <arg value="mcover" />
         </exec>

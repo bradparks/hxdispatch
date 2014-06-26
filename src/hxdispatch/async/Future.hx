@@ -42,8 +42,6 @@ class Future<T> extends hxdispatch.concurrent.Future<T>
                 #else
                     while (!this.lock.wait(0.01) && !this.isReady()) {}
                 #end
-
-                return this.value;
             } else {
                 this.mutex.release();
                 throw new WorkflowException("Future has not been resolved yet");
