@@ -2,7 +2,6 @@ package hxdispatch.async;
 
 #if !js
     import hxstd.vm.MultiLock;
-    import hxstd.vm.Mutex;
 #end
 import hxstd.threading.ExecutionContext;
 import hxstd.threading.IExecutor;

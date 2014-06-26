@@ -2,6 +2,7 @@ package hxdispatch.concurrent;
 
 import hxdispatch.State;
 import hxdispatch.WorkflowException;
+import hxstd.vm.IMutex;
 import hxstd.vm.Mutex;
 
 /**
@@ -17,9 +18,9 @@ class Future<T> extends hxdispatch.Future<T>
     /**
      * Stores the Mutex used to synchronize access to properties.
      *
-     * @var hxstd.vm.Mutex
+     * @var hxstd.vm.IMutex
      */
-    private var mutex:Mutex;
+    private var mutex:IMutex;
 
 
     /**
